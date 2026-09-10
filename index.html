@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP 展会大屏 · 四个方案</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --bg:#08090B; --panel:#101216; --hair:#1C1F25;
+    --text:#F7F8F8; --sub:#9CA3AF; --mute:#4B5563;
+    --crawl:#00D3A7; --order:#FFB86B; --accent2:#D97757; --green:#00C46A;
+    --font-display:'Bahnschrift','Segoe UI Variable Display','Segoe UI',Inter,system-ui,sans-serif;
+    --font-mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+    --font-cn:'Microsoft YaHei','Segoe UI',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:var(--font-cn); font-size:15px; line-height:1.7;
+    min-height:100vh; padding:64px 40px 96px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header{border-bottom:1px solid var(--hair);padding-bottom:32px;margin-bottom:48px}
+  .eyebrow{
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;
+    color:var(--mute);text-transform:uppercase;margin-bottom:14px
+  }
+  h1{
+    font-family:var(--font-display);font-weight:600;
+    font-size:46px;line-height:1.1;letter-spacing:-.01em;margin-bottom:12px
+  }
+  h1 em{font-style:normal;color:var(--crawl)}
+  .lede{color:var(--sub);max-width:64ch;font-size:16px}
+
+  .howto{
+    margin:36px 0 48px;background:var(--panel);border:1px solid var(--hair);
+    border-radius:10px;padding:22px 26px
+  }
+  .howto b{color:var(--text)}
+  .howto p{color:var(--sub);font-size:14px}
+  .howto p+p{margin-top:8px}
+  code{
+    font-family:var(--font-mono);font-size:13px;background:#04050700;
+    color:var(--crawl);border:1px solid var(--hair);border-radius:4px;padding:1px 7px
+  }
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+    padding:26px 28px 24px;position:relative;overflow:hidden;
+    transition:border-color .28s cubic-bezier(.16,1,.3,1),transform .28s cubic-bezier(.16,1,.3,1);
+    text-decoration:none;color:inherit;display:block
+  }
+  .card:hover{border-color:var(--mute);transform:translateY(-2px)}
+  .card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--tone)
+  }
+  .card .tag{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
+    color:var(--tone);text-transform:uppercase
+  }
+  .card h2{
+    font-family:var(--font-display);font-weight:600;font-size:27px;
+    letter-spacing:-.005em;margin:8px 0 4px
+  }
+  .card .en{font-family:var(--font-mono);font-size:12px;color:var(--mute);margin-bottom:14px}
+  .card .pitch{color:var(--text);font-size:15px;margin-bottom:16px}
+  .card dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+  .card dt{color:var(--mute);white-space:nowrap}
+  .card dd{color:var(--sub)}
+  .card .cta{
+    margin-top:20px;padding-top:16px;border-top:1px solid var(--hair);
+    font-family:var(--font-mono);font-size:12.5px;color:var(--tone);
+    display:flex;justify-content:space-between;align-items:center
+  }
+  .flag{
+    position:absolute;right:0;top:0;background:var(--tone);color:#08090B;
+    font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+    padding:4px 10px;border-bottom-left-radius:8px;font-weight:700
+  }
+
+  .c-a{--tone:var(--crawl)}
+  .c-b{--tone:var(--order)}
+  .c-c{--tone:var(--accent2)}
+  .c-d{--tone:var(--green)}
+  .c-e{--tone:#7FA8FF}
+
+  .meta{
+    margin-top:56px;padding-top:28px;border-top:1px solid var(--hair);
+    display:grid;grid-template-columns:repeat(3,1fr);gap:28px
+  }
+  @media (max-width:900px){.meta{grid-template-columns:1fr}}
+  .meta h3{
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;
+    color:var(--mute);text-transform:uppercase;margin-bottom:12px;font-weight:400
+  }
+  .meta li{color:var(--sub);font-size:13.5px;list-style:none;margin-bottom:7px;padding-left:14px;position:relative}
+  .meta li::before{content:'';position:absolute;left:0;top:.72em;width:5px;height:1px;background:var(--mute)}
+  .meta .num{font-family:var(--font-display);font-variant-numeric:tabular-nums;color:var(--text)}
+
+  footer{margin-top:56px;color:var(--mute);font-size:12px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">AP · Agent Page　/　展会大屏与声音播报　/　方案评审</div>
+    <h1>四个方案，一块屏<em>。</em></h1>
+    <p class="lede">
+      同一套数据引擎和音效引擎，四种截然不同的呈现方式。数字、声音、合规口径完全一致，
+      所以你只需要比较视觉与叙事，选出上会的那一个。
+    </p>
+  </header>
+
+  <div class="howto">
+    <p><b>怎么看</b>　推荐先双击根目录的 <code>启动预览.bat</code>（用本地服务器打开，最接近现场部署方式）；
+       也可以直接双击各方案里的 <code>index.html</code>，一样能跑。</p>
+    <p><b>进去之后</b>　先点一下屏幕解锁声音（浏览器规定必须有一次用户手势）。然后重点按这几个键：
+       <code>B</code> 人工触发一个大单（这是 BD 现场配合话术用的，最重要）、
+       <code>空格</code> 暂停、<code>M</code> 静音、<code>3</code> 三倍速（快速看完一轮节奏）、
+       <code>K</code> 里程碑庆祝、<code>G</code> 调试网格、<code>?</code> 全部快捷键。
+       方案 D 另有 <code>S</code> 键 = 模拟一位观众扫码进来，那是它的核心动作。</p>
+    <p><b>方案 B 有个口径开关要比一比</b>　默认主数字是「累计 4.2 亿次抓取」，绝对量级最震撼但位数多、字号必然小。
+       在网址后加 <code>?hero=session</code> 会切成「本场新增」口径（7 位数，字号能大将近一倍，还能看出"今天涨了这么多"），
+       代价是开幕那一刻从 0 开始。这个选哪个建议你两边都开一下再定。</p>
+    <p><b>别急着看数字准不准</b>　三个数字已经过自洽校验：24 小时理论订单 1,489 vs 实际 1,520（差 2%），
+       客单价中位 $74 / 均值 $139，订单间隔中位 57 秒、最长 117 秒。数据本身不用怀疑，看呈现。</p>
+  </div>
+
+  <div class="grid">
+
+    <a class="card c-e" href="E-后台-可操作版/index.html">
+      <div class="flag">最新 · 可操作后台</div>
+      <div class="tag">方案 E</div>
+      <h2>AI 渠道后台</h2>
+      <div class="en">Merchant Back Office</div>
+      <p class="pitch">走近发现，这不是大屏，是他自己的后台。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>侧栏 + 顶栏 + 可筛选排序的密表，尺寸照中文后台实测（侧栏 232 / 顶栏 57 / 内边距 24）；两套主题：深色科技风与纯白简洁科技风</dd>
+        <dt>真的能操作</dt><dd>按 AI 助手 / 国家 / 订单规模筛选、表头排序、搜索、导出 CSV、点行出详情抽屉、日志暂停滚动</dd>
+        <dt>动效</dt><dd>订单入场是方案 C 原版的字符级 split-flap（94 格逐格翻，波长约 2 秒）；新订单在地图对应点位弹播报卡</dd>
+        <dt>适合</dt><dd>展台内侧、可让商家上手点的那块屏；也是「模拟商家自己后台」的认知锚点</dd>
+        <dt>代价</dt><dd>不是远距离方案，1~3 米内看；浅色主题在 3 米外会反光</dd>
+      </dl>
+      <div class="cta"><span>打开可操作后台</span><span>→</span></div>
+    </a>
+
+    <a class="card c-e" href="E-监控台-V1版式/index.html">
+      <div class="tag">方案 E</div>
+      <h2>实时看板 · V1 版式</h2>
+      <div class="en">Live Board</div>
+      <p class="pitch">展会大屏画面，屏上一个内部术语都没有。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>远距离层 1 主角 + 3 配角，中段三块，无页脚；五套主题按 <code>T</code> 循环</dd>
+        <dt>与后台版的区别</dt><dd>这一版是「画面」，没有侧栏与操作入口，文案全按商家口径重写过</dd>
+        <dt>适合</dt><dd>朝外的主屏，3~5 米</dd>
+      </dl>
+      <div class="cta"><span>打开 V1 版式</span><span>→</span></div>
+    </a>
+
+    <a class="card c-e" href="E-运营监控台/index.html">
+      <div class="tag">方案 E</div>
+      <h2>运营监控台</h2>
+      <div class="en">Ops Console</div>
+      <p class="pitch">同一套引擎的另一种版面：地图占两卡宽、两个大指标。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>两个并列大指标 + 宽地图，比 V1 版式更偏「驾驶舱」</dd>
+        <dt>适合</dt><dd>与 V1 版式 A/B 对比用，两版都保留</dd>
+      </dl>
+      <div class="cta"><span>打开运营监控台</span><span>→</span></div>
+    </a>
+
+    <a class="card c-b" href="B-引力井/index.html">
+      <div class="flag">旗舰 · 优先看这个</div>
+      <div class="tag">方案 B</div>
+      <h2>引力井</h2>
+      <div class="en">Gravity Well</div>
+      <p class="pitch">全世界的 AI 正在往你的店里落。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>一颗由真实城市点云构成的巨型地球；爬虫从外太空向内坠落，订单从店铺向外发射 —— 方向相反，不用图例就能分清</dd>
+        <dt>参照系</dt><dd>Shopify BFCM Globe（连续三年上拉斯维加斯 Sphere）</dd>
+        <dt>适合</dt><dd>宽幅 LED 主屏，需要压过邻摊、需要媒体和社媒传播</dd>
+        <dt>代价</dt><dd>工程量最大；一旦不够克制就会滑向"国产大屏飞线图"</dd>
+      </dl>
+      <div class="cta"><span>打开方案 B</span><span>→</span></div>
+    </a>
+
+    <a class="card c-a" href="A-任务控制台/index.html">
+      <div class="tag">方案 A</div>
+      <h2>任务控制台</h2>
+      <div class="en">Mission Control</div>
+      <p class="pitch">这不是宣传片，这是一个正在运行的系统。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>右侧一条真实的 HTTP 访问日志流（真实 UA 名 + 真实 ASN + 真实数据中心），左侧巨型数字，背景是极暗的世界点阵图</dd>
+        <dt>参照系</dt><dd>Datadog / Grafana 的 NOC 墙、彭博终端、发射直播叠加层</dd>
+        <dt>适合</dt><dd>暗环境主展位；观众里有技术背景的人时最加分</dd>
+        <dt>代价</dt><dd>纯播放，留不下线索</dd>
+      </dl>
+      <div class="cta"><span>打开方案 A</span><span>→</span></div>
+    </a>
+
+    <a class="card c-c" href="C-交易大厅-LED版-中文版/index.html">
+      <div class="flag">最新 · 第四版（中文 · 分区）</div>
+      <div class="tag">方案 C-LED · 中文版</div>
+      <h2>交易大厅 · 点阵报价墙（中文分区版）</h2>
+      <div class="en">The Ticker — LED Wall, CN</div>
+      <p class="pitch">给国内展会的版本：全中文标签 + 区块面板化 + 点阵世界地图。</p>
+      <dl>
+        <dt>比第三版改了什么</dt><dd>每个区块给<b>面板</b>（底衬＋描边＋标题条），版面从 5 条通栏横条改成<b>主栏＋右栏</b>；标签/表头<b>全中文</b>（代码类数据 US／USD／GPT 保留，靠图例解释）；右栏加<b>点阵世界地图</b>——3 米外能看到的形状与运动</dd>
+        <dt>配色</dt><dd>在「按字段分工」上再加一刀「按<b>层</b>分工」：琥珀＝事件层（成交）／青＝环境层（累计）／绿＝通道层（来源）／暗绿＝噪音层（爬虫日志，压暗一档）</dd>
+        <dt>顺手修掉</dt><dd>成交流<b>重复行</b>（预铺用了未来单，真实时间到达时又打印一遍）、页眉标语被跑马灯压掉、<b>B 键约一半时间出的不是大单</b></dd>
+      </dl>
+      <div class="cta"><span>打开中文分区版</span><span>→</span></div>
+    </a>
+
+    <a class="card c-c" href="C-交易大厅-LED版/index.html">
+      <div class="flag">第三版 · 对照用</div>
+      <div class="tag">方案 C-LED</div>
+      <h2>交易大厅 · 点阵报价墙</h2>
+      <div class="en">The Ticker — LED Wall</div>
+      <p class="pitch">AI 引荐订单 · 实时报价板。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>纯黑 + 点阵 LED（<b>未点亮的灯珠也看得见</b>，这是"一眼认出交易大厅"的最强信号）+ 6 格市场墙 + 顶部爬虫日志跑马灯</dd>
+        <dt>参照系</dt><dd>东京站前证券电子报价墙、菲律宾交易所 LED 报价板、彭博终端</dd>
+        <dt>配色</dt><dd>按<b>字段</b>分工不按涨跌：代码白 / 金额琥珀 / 币种与来源绿 / 本场最高红 —— 刻意绕开"红涨绿跌"的语义争议</dd>
+        <dt>高潮</dt><dd>常规更新是点阵闪变；<b>split-flap 全屏齐翻只留给里程碑</b>，6 格一起乱翻、按列扫过一波</dd>
+      </dl>
+      <div class="cta"><span>打开 C-LED 版</span><span>→</span></div>
+    </a>
+
+    <a class="card c-c" href="C-交易大厅/index.html">
+      <div class="tag">方案 C（原版）</div>
+      <h2>交易大厅 · 暖墨陶土</h2>
+      <div class="en">The Ticker — Editorial</div>
+      <p class="pitch">同一个概念的另一种气质：出版物 / 研究机构。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>暖墨陶土色，巨型数字 + split-flap 机械翻页的 10 行长表，列对齐做到像素级（日/荷/西语商品名混排也对齐）</dd>
+        <dt>参照系</dt><dd>机场航班信息牌、出版物排版</dd>
+        <dt>留着它干什么</dt><dd>和 LED 版对照用。气质完全不同，如果觉得 LED 版太"硬"可以回到这一版</dd>
+        <dt>代价</dt><dd>不像"真实券商大厅"，这是它被 LED 版取代的原因</dd>
+      </dl>
+      <div class="cta"><span>打开方案 C</span><span>→</span></div>
+    </a>
+
+    <a class="card c-d" href="D-诊断墙/index.html">
+      <div class="tag">方案 D</div>
+      <h2>诊断墙</h2>
+      <div class="en">Your Store, Scored</div>
+      <p class="pitch">输入你的域名，看看 AI 现在读到了你店里的多少。</p>
+      <dl>
+        <dt>关键视觉</dt><dd>观众扫码后大屏当场出他的店铺体检分；顶部挂 Adobe 的 66% 做参照系，让每个分数立刻有对照</dd>
+        <dt>打通</dt><dd>已定稿的现场活动：扫码 → 问卷分流 → 大转盘 100% 中奖</dd>
+        <dt>适合</dt><dd>唯一能把路过者变成销售线索的方案；也把造假比重压到最低</dd>
+        <dt>代价</dt><dd>依赖网络；需要一个真能跑的检测服务；误诊和脏话上墙是最大隐患</dd>
+      </dl>
+      <div class="cta"><span>打开方案 D</span><span>→</span></div>
+    </a>
+
+  </div>
+
+  <div class="meta">
+    <div>
+      <h3>共享引擎已经保证的事</h3>
+      <ul>
+        <li>三个数字同源于一条漏斗，<span class="num">24</span> 小时理论 <span class="num">1,489</span> 单 vs 实际 <span class="num">1,520</span> 单</li>
+        <li>订单间隔中位 <span class="num">57</span> 秒、最长 <span class="num">117</span> 秒 —— 不会冷场</li>
+        <li>每 <span class="num">10</span> 分钟一次 <span class="num">3~5</span> 单齐发的大高潮，不靠运气</li>
+        <li>计数器是时间的纯函数：断电重启不倒退、不归零，第二天接着涨</li>
+        <li>地域一致：荷兰店出欧元 + 荷兰语商品名 + 荷兰城市买家</li>
+        <li>音效纯代码合成，零素材、零版权风险</li>
+      </ul>
+    </div>
+    <div>
+      <h3>已经替你避掉的坑</h3>
+      <ul>
+        <li>「GPT 订单」改成「AI 引荐订单」—— OpenAI 条款禁止暗示合作或背书</li>
+        <li>全屏无任何第三方 logo，只用纯文字指代</li>
+        <li>模拟数据角标 + 商标声明常驻，任何一帧截图都带得上</li>
+        <li>店名全部虚构 + <code>-demo.myshopify.com</code>，不用真实品牌也不打码</li>
+        <li>只有大单才播人声 —— 展馆有 <span class="num">85</span>dB 硬上限，且播报太密观众会屏蔽</li>
+        <li>客单价压回 <span class="num">$139</span>（第一版帕累托尾太重，被算到 <span class="num">$320</span>，DTC 品类一眼假）</li>
+      </ul>
+    </div>
+    <div>
+      <h3>上会前还要做的</h3>
+      <ul>
+        <li>人声换成预先离线合成的音频文件（浏览器 TTS 的中文音色在展会机上可能不存在）</li>
+        <li>确认现场屏幕真实分辨率与宽高比，用 <code>?debug=grid</code> 校准</li>
+        <li>确认展馆音量上限条款、音箱朝展位内侧下倾</li>
+        <li>产品确认页面总量口径，别超过对外公开数字</li>
+        <li>在目标机器上连跑 10 小时压测（出发前一天，不是到场）</li>
+        <li>录一段 20 分钟 4K 循环视频做终极兜底</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    本目录内所有数据均为产品能力演示用的模拟数据，非真实交易记录。<br>
+    OpenAI、ChatGPT、Anthropic、Claude、Perplexity、Google 均为其各自所有者的商标；
+    AP 与上述公司无隶属、赞助或合作关系。
+  </footer>
+
+</div>
+</body>
+</html>

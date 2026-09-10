@@ -1,0 +1,212 @@
+(function (root) {
+  'use strict';
+
+  var doc = root.document;
+  var canvas = doc.getElementById('auroraBg');
+  if (!canvas) return;
+
+  var ctx = canvas.getContext('2d');
+  var buffer = doc.createElement('canvas');
+  var bctx = buffer.getContext('2d');
+  if (!ctx || !bctx) return;
+
+  /* 两套主题共用一张铺满浏览器视口的射线场，只换配方。分歧首先在合成方式上：
+   *
+   *   深色 —— 射线用 lighter 往深底上「发光」，细而亮才有极光那种丝感。
+   *   浅色 —— 底接近白，往白里加光等于什么都没画：buffer 里继续用 lighter，
+   *           重叠处会被一路推向纯白，在浅底上正好消失。所以浅色这一路 buffer
+   *           内换成 source-over，让射线保住自己那档中明度的色，靠色差而不是
+   *           靠亮度压出色带。
+   *
+   * 浅色射线保持中明度，再由 canvas 的整体透明度压到白底上。更密集的细长射线
+   * 经过模糊后会连成 Tympanus Aurora 那种有峰谷的竖向光幕，而不是一层平雾。 */
+  var PALETTES = {
+    dark: {
+      count: 500, center: 0.53, noise: 100,
+      length: [200, 200], speed: [0.05, 0.10], width: [10, 20],
+      ttl: [50, 100], hue: [120, 60], sat: 100, lum: 65,
+      stack: 'lighter', blur: 12
+    },
+    light: {
+      /* center 0.60 而不是深色的 0.53：射线是从 centerY 往上长的，0.53 会让大半条
+       * 光带落在舞台上方那条留白里 —— 在留白里再亮也没用，得压到内容区那一段。
+       * sat/lum 66/50 比先前的 72/46 更淡更亮：面板压到 .78 之后透光量涨了近四成，
+       * 原来那档色会把内容区整片染绿。两个值是配套的，改一个要回头看另一个。 */
+      count: 420, center: 0.60, noise: 140,
+      length: [260, 320], speed: [0.04, 0.09], width: [18, 34],
+      /* 色相段 132..216：绿 → 青 → 蓝。上界 216 不是随手取的 —— 原先那层被删掉的
+       * ambientFlow 光场里第一条就是 rgba(83,156,246)，换算色相约 213°，
+       * 蓝色接到那个基准上，和这套浅色原本的冷色调是同一支。
+       * 深色仍是 120..180（纯绿→青），两套不必强行一致。 */
+      ttl: [70, 130], hue: [132, 84], sat: 66, lum: 50,
+      stack: 'source-over', blur: 24
+    }
+  };
+
+  var MAX_RAYS = 500;
+  var STRIDE = 8;
+
+  var props = new Float32Array(MAX_RAYS * STRIDE);
+  var P = PALETTES.dark;
+  var live = P.count * STRIDE;          /* 当前配方实际用到的 props 长度 */
+  var width = 0, height = 0, centerY = 0, tick = 0;
+  var running = false, raf = 0, seeded = 0x5A17B9D3;
+  var reduced = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function random() {
+    seeded |= 0;
+    seeded = seeded + 0x6D2B79F5 | 0;
+    var t = Math.imul(seeded ^ seeded >>> 15, 1 | seeded);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+
+  function rand(n) { return random() * n; }
+  function smooth(t) { return t * t * (3 - 2 * t); }
+
+  function hash3(x, y, z) {
+    var n = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)
+      + Math.imul(z | 0, 2147483647);
+    n = Math.imul(n ^ n >>> 13, 1274126177);
+    return ((n ^ n >>> 16) >>> 0) / 4294967295;
+  }
+
+  function noise3(x, y, z) {
+    var x0 = Math.floor(x), y0 = Math.floor(y), z0 = Math.floor(z);
+    var fx = smooth(x - x0), fy = smooth(y - y0), fz = smooth(z - z0);
+    function mix(a, b, t) { return a + (b - a) * t; }
+    var x00 = mix(hash3(x0, y0, z0), hash3(x0 + 1, y0, z0), fx);
+    var x10 = mix(hash3(x0, y0 + 1, z0), hash3(x0 + 1, y0 + 1, z0), fx);
+    var x01 = mix(hash3(x0, y0, z0 + 1), hash3(x0 + 1, y0, z0 + 1), fx);
+    var x11 = mix(hash3(x0, y0 + 1, z0 + 1), hash3(x0 + 1, y0 + 1, z0 + 1), fx);
+    return mix(mix(x00, x10, fy), mix(x01, x11, fy), fz) * 2 - 1;
+  }
+
+  function fadeInOut(life, ttl) {
+    var half = ttl * 0.5;
+    return Math.abs((life + half) % ttl - half) / half;
+  }
+
+  function initRay(i) {
+    var length = P.length[0] + rand(P.length[1]);
+    var x = rand(width);
+    var y1 = centerY + P.noise;
+    var y2 = y1 - length;
+    var n = noise3(x * 0.0015, y1 * 0.0015, tick * 0.0015) * P.noise;
+    var ttl = P.ttl[0] + rand(P.ttl[1]);
+    var speed = P.speed[0] + rand(P.speed[1]);
+    if (random() < 0.5) speed *= -1;
+    props.set([
+      x, y1 + n, y2 + n, 0, ttl,
+      P.width[0] + rand(P.width[1]), speed, P.hue[0] + rand(P.hue[1])
+    ], i);
+  }
+
+  function initRays() {
+    tick = 0;
+    /* 必须夹到 props 的容量。配方里 count 写超过 MAX_RAYS 时，这里不夹的话
+     * props.set() 会在播种途中抛 "offset is out of bounds" —— 而 live 此时
+     * 已经被写成越界值了，之后每一帧 drawRay() 都读到 undefined 再抛一次，
+     * rAF 循环当场死掉：画面冻在最后一帧，APAurora.active 却仍是 true。
+     * 症状是「极光没效果」，很难往越界这个方向想（调参时真踩了一次）。 */
+    live = Math.min(P.count, MAX_RAYS) * STRIDE;
+    for (var i = 0; i < live; i += STRIDE) initRay(i);
+  }
+
+  function resize(force) {
+    var w = Math.max(1, Math.round(canvas.clientWidth));
+    var h = Math.max(1, Math.round(canvas.clientHeight));
+    if (!force && w === width && h === height) return;
+    width = w; height = h; centerY = height * P.center;
+    canvas.width = buffer.width = width;
+    canvas.height = buffer.height = height;
+    initRays();
+  }
+
+  function drawRay(i) {
+    var x = props[i], y1 = props[i + 1], y2 = props[i + 2];
+    var life = props[i + 3], ttl = props[i + 4], lineWidth = props[i + 5];
+    var speed = props[i + 6], hue = props[i + 7];
+    var alpha = fadeInOut(life, ttl);
+    var gradient = bctx.createLinearGradient(x, y1, x, y2);
+    var tone = 'hsla(' + hue + ',' + P.sat + '%,' + P.lum + '%,';
+    gradient.addColorStop(0, tone + '0)');
+    gradient.addColorStop(0.5, tone + alpha + ')');
+    gradient.addColorStop(1, tone + '0)');
+
+    bctx.beginPath();
+    bctx.strokeStyle = gradient;
+    bctx.lineWidth = lineWidth;
+    bctx.moveTo(x, y1);
+    bctx.lineTo(x, y2);
+    bctx.stroke();
+
+    x += speed;
+    life += 1;
+    props[i] = x;
+    props[i + 3] = life;
+    if (x < 0 || x > width || life > ttl) initRay(i);
+  }
+
+  function renderFrame() {
+    tick += 1;
+    bctx.clearRect(0, 0, width, height);
+    bctx.globalCompositeOperation = P.stack;
+    for (var i = 0; i < live; i += STRIDE) drawRay(i);
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    ctx.filter = 'blur(' + P.blur + 'px)';
+    /* 画到空画布上这一步 lighter 与 source-over 等价（背景 alpha=0），
+     * 跟着配方走只是别让两处再各写一个字面量。 */
+    ctx.globalCompositeOperation = P.stack;
+    ctx.drawImage(buffer, 0, 0);
+    ctx.restore();
+  }
+
+  function frame() {
+    if (!running) { raf = 0; return; }
+    resize(false);
+    renderFrame();
+    raf = root.requestAnimationFrame(frame);
+  }
+
+  function setActive(theme) {
+    /* 兼容旧签名：这个函数原来只收 boolean（那时只有深色一套）。 */
+    if (theme === true) theme = 'dark';
+    var next = PALETTES[theme] ? theme : '';
+    canvas.classList.toggle('on', !!next);
+    if (!next) {
+      running = false;
+      if (raf) root.cancelAnimationFrame(raf);
+      raf = 0;
+      return;
+    }
+    canvas.setAttribute('data-theme', next);   /* CSS 靠它切混合模式与强度 */
+    var swapped = P !== PALETTES[next];
+    P = PALETTES[next];
+    resize(swapped);          /* 换了配方就得重新播种：射线数与形态全变了 */
+    if (reduced) { renderFrame(); return; }
+    if (running) return;
+    running = true;
+    frame();
+  }
+
+  if (root.ResizeObserver) {
+    new root.ResizeObserver(function () {
+      if (canvas.clientWidth && canvas.clientHeight) resize(true);
+    }).observe(canvas.parentNode);
+  }
+
+  root.APAurora = {
+    setActive: setActive,
+    resize: function () { resize(true); },
+    /* 调参钩子：改完 PALETTES 里的值后调一次 setActive(当前主题) 重新播种即可看到效果。
+     * 留着它是因为这两套配方是纯视觉参数，只能靠眼睛在真页面上对，改一版重载一次太慢。 */
+    palettes: PALETTES,
+    get active() { return running || (reduced && canvas.classList.contains('on')); },
+    get theme() { return canvas.getAttribute('data-theme') || ''; },
+    get rayCount() { return live / STRIDE; },
+    get size() { return width + 'x' + height; }
+  };
+})(window);

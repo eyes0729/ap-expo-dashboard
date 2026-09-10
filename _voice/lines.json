@@ -1,0 +1,44 @@
+{
+  "_note": "文案候选。中文放 JSON（UTF-8 无 BOM），PowerShell 脚本保持纯 ASCII 后用 -Encoding UTF8 读——PS 5.1 读 .ps1 默认按 ANSI，中文直接写进 .ps1 会乱码。",
+  "lines": [
+    { "file": "line-0-current.wav",
+      "text": "Des**ora 收获一笔 A I 引荐订单，1280 美元",
+      "desc": "现在线上的模板（含脱敏店名）——用来听「为什么店名必须拿掉」" },
+
+    { "file": "line-A-agenticpage.wav",
+      "text": "Agentic Page 到账，1280美元",
+      "desc": "A 品牌名前置，直接借用「到账」这个心智框架" },
+
+    { "file": "line-B-store.wav",
+      "text": "店铺 A I 订单到账，1280美元",
+      "desc": "B 保留「店铺」这个词但不念具体名字（你提的框架）" },
+
+    { "file": "line-C-deeplumen.wav",
+      "text": "deeplumen 到账，1280美元",
+      "desc": "C 公司名前置" },
+
+    { "file": "line-D-aiorder.wav",
+      "text": "A I 订单到账，1280美元",
+      "desc": "D 最短的一条，不带品牌" },
+
+    { "file": "line-E-full.wav",
+      "text": "Agentic Page 店铺到账，1280美元",
+      "desc": "E 品牌 + 店铺都要（你原话最接近的一条）" },
+
+    { "file": "num-small.wav",
+      "text": "店铺 A I 订单到账，86美元",
+      "desc": "小额：听数字节奏" },
+
+    { "file": "num-mid.wav",
+      "text": "店铺 A I 订单到账，1280美元",
+      "desc": "中额" },
+
+    { "file": "num-big.wav",
+      "text": "店铺 A I 订单到账，4520美元",
+      "desc": "大额：听长数字会不会拖沓" },
+
+    { "file": "line-F-doubao.wav",
+      "text": "我用最直白最不饶弯子的方式，稳稳接了这笔新的 A I 订单，1280美元",
+      "desc": "F 豆包那种长句——录出来是为了让你听时长有多离谱" }
+  ]
+}

@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · Agent Page — 引力井</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 零网络依赖：无 CDN、无远程字体、无远程图片。断网照跑。 -->
+<style>
+:root{
+  /* P1 深空石墨。本方案以 --order 暖金为主导气质（方案 A 同色板但青绿主导） */
+  --bg:#08090B;  --panel:#101216; --hair:#1C1F25;
+  --text:#F7F8F8; --sub:#9CA3AF;  --mute:#4B5563;
+  --crawl:#00D3A7;               /* 爬虫，唯一冷强调 */
+  --order:#FFB86B;               /* 订单，唯一暖强调 */
+  --grid:#7DD3FC;                /* 经纬线，opacity .06 */
+  --font-display:'Bahnschrift','Segoe UI Variable Display','Segoe UI',Inter,system-ui,sans-serif;
+  --font-mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --font-cn:'Microsoft YaHei','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{font-family:var(--font-cn);color:var(--text);
+  -webkit-font-smoothing:antialiased;cursor:default}
+
+/* 舞台：固定设计稿 1920x1080，只用 transform scale 适配 */
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  transform-origin:50% 50%;background:var(--bg);overflow:hidden;
+  transition:filter .5s cubic-bezier(.22,1,.36,1),opacity .5s cubic-bezier(.22,1,.36,1)}
+#stage.dimmed #globe,#stage.dimmed #panel,#stage.dimmed #scrim{opacity:.18}
+#globe,#panel,#scrim{transition:opacity .55s cubic-bezier(.22,1,.36,1)}
+
+#globe{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:1}
+
+/* 暗角：屏缘衰减是结构不是装饰；LED 上能把注意力钉回主角。稀有单时短暂加深 */
+#vig{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.40;
+  background:radial-gradient(ellipse 74% 76% at 63% 51%,
+    rgba(8,9,11,0) 46%,rgba(8,9,11,.42) 80%,rgba(8,9,11,.88) 100%)}
+
+/* 主数字背后的一处体积光，强度 <= 8%，只在 epic/legendary 时亮一下 */
+#ray{position:absolute;left:36px;top:52px;width:1040px;height:430px;z-index:3;
+  pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 54% 50% at 50% 47%,
+    rgba(255,184,107,.85) 0%,rgba(255,184,107,.22) 42%,rgba(255,184,107,0) 72%)}
+
+/* 左侧压暗：越界的爬虫弧线沉进黑里，同时保住文字对比度 >= 10:1 */
+#scrim{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(8,9,11,.97) 0%,rgba(8,9,11,.94) 24%,
+    rgba(8,9,11,.50) 40%,rgba(8,9,11,0) 52%)}
+
+#panel{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:10}
+
+/* ---------- 顶部品牌 ---------- */
+.brand{position:absolute;left:116px;top:50px;font-family:var(--font-display);
+  font-size:26px;font-weight:600;letter-spacing:.26em;color:var(--text)}
+.hair{position:absolute;left:116px;width:848px;height:1px;background:var(--hair)}
+.h1{top:96px}
+.h2{top:500px}
+.h3{top:772px}
+.tag{position:absolute;left:116px;top:112px;font-size:27px;font-weight:500;
+  color:var(--sub);letter-spacing:.04em}
+.tag b{color:var(--text);font-family:var(--font-display);font-weight:600;
+  letter-spacing:.06em;padding:0 .15em}
+
+/* ---------- 主角：AI 爬虫累计访问 ---------- */
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+.hero{position:absolute;left:116px;top:160px;width:880px}
+.odo{display:flex;justify-content:flex-end;align-items:flex-start;
+  font-family:var(--font-display);font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+  contain:layout paint;overflow:hidden;color:var(--text)}
+.odo-slot{position:relative;flex:0 0 auto;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 11%,#000 89%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 11%,#000 89%,transparent 100%)}
+.odo-strip{position:absolute;left:0;top:0;width:100%;text-align:center;
+  transform:translate3d(0,0,0)}
+.odo-sep{flex:0 0 auto;text-align:center;color:rgba(247,248,248,.48)}
+.hero-lb{margin-top:16px;font-family:var(--font-display);font-size:23px;
+  font-weight:600;letter-spacing:.2em;color:var(--sub)}
+.hero-rt{margin-top:10px;font-size:30px;font-weight:500;color:var(--text);
+  letter-spacing:.03em}
+.hero-rt span{font-family:var(--font-display);font-weight:600;padding:0 .12em}
+
+/* ---------- 配角 1：AP 翻译页面 + 里程碑进度 ---------- */
+.sub{position:absolute;left:116px;top:524px;width:848px;display:flex;
+  align-items:flex-start}
+#pagesBlock{flex:0 0 auto}
+.sub-r{margin-left:40px;padding-top:14px;flex:1 1 auto}
+.sub-lb{font-family:var(--font-display);font-size:21px;font-weight:600;
+  letter-spacing:.18em;color:var(--sub)}
+.bar{margin-top:18px;width:100%;height:2px;background:var(--hair);
+  position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;width:100%;height:2px;
+  background:var(--order);transform:scaleX(0);transform-origin:0 50%}
+.sub-ms{margin-top:10px;font-family:var(--font-display);font-size:20px;
+  font-weight:600;letter-spacing:.1em;color:var(--mute)}
+.sub-ms span{color:var(--sub)}
+
+/* ---------- 配角 2：平台占比（极细堆叠条，不做饼图） ---------- */
+.pf{position:absolute;left:116px;top:636px;width:848px}
+.pf-bar{position:relative;height:8px;width:848px}
+.pf-seg{position:absolute;top:0;height:8px}
+/* 换算行。这一栏是绝对定位布局，所以它也必须绝对定位：
+   平台占比图例结束于约 686px，分隔线 h3 在 772px，正好嵌进这段空隙。 */
+.conv{position:absolute;left:116px;top:704px;width:848px;
+  display:flex;gap:36px;white-space:nowrap;
+  font-size:19px;color:var(--sub);letter-spacing:.01em}
+.conv b{color:var(--text);font-weight:600;font-family:var(--font-display);
+  font-size:22px;font-variant-numeric:tabular-nums}
+.pf-leg{margin-top:16px;display:flex;justify-content:space-between;
+  white-space:nowrap}
+.pf-it{font-family:var(--font-display);font-size:21px;font-weight:600;
+  letter-spacing:.08em}
+.pf-it b{font-weight:600;color:var(--sub)}
+.pf-it em{font-style:normal;padding-left:.5em}
+
+/* ---------- 订单事件区（左下，靠动效抓眼不靠尺寸） ---------- */
+.ev{position:absolute;left:116px;top:792px;width:848px}
+.ev-lb{font-family:var(--font-display);font-size:21px;font-weight:600;
+  letter-spacing:.18em;color:var(--sub)}
+.ev-zone{position:relative;margin-top:12px;height:176px;overflow:hidden}
+.card{position:absolute;left:0;top:0;width:848px;height:70px;opacity:0;
+  background:rgba(16,18,22,.92);border-top:1px solid var(--hair);
+  padding:8px 22px 0 20px;contain:layout paint;
+  transform:translate3d(0,0,0)}
+.cbar{position:absolute;left:0;top:0;width:2px;height:100%;background:var(--hair)}
+.crow1{display:flex;justify-content:space-between;align-items:baseline;line-height:34px}
+.cname{font-family:var(--font-display);font-size:26px;font-weight:600;
+  letter-spacing:.03em;color:var(--text)}
+.camt{font-family:var(--font-display);font-size:30px;font-weight:600;
+  color:var(--order);letter-spacing:.01em}
+.crow2{display:flex;justify-content:space-between;align-items:baseline;
+  line-height:22px;margin-top:2px}
+.cmeta{font-family:var(--font-mono);font-size:17px;color:var(--sub);opacity:.72;
+  letter-spacing:.02em}
+.cprod{font-size:19px;color:var(--sub);max-width:430px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.card.t-rare .cbar{background:rgba(255,184,107,.34)}
+.card.t-epic .cbar{background:var(--order)}
+.card.t-epic .crow1{line-height:46px}
+.card.t-epic .camt{font-size:40px}
+.card.t-epic .cname{font-size:28px}
+.card.t-epic .crow2{margin-top:4px}
+.card.t-legendary .cbar{background:var(--order);width:3px}
+.card.t-legendary .crow1{line-height:46px}
+.card.t-legendary .camt{font-size:40px}
+.card.t-legendary .cname{font-size:28px;color:var(--order)}
+.card.t-legendary .crow2{margin-top:4px}
+
+/* ---------- 常驻合规元素（任何一帧截图都必须带上） ---------- */
+#badge{position:absolute;right:116px;top:56px;z-index:60;
+  font-family:var(--font-display);font-size:24px;font-weight:600;
+  letter-spacing:.2em;color:var(--sub);opacity:.78;text-align:right}
+#footer{position:absolute;left:116px;right:116px;top:1040px;z-index:60;
+  font-size:13px;line-height:18px;color:var(--mute);letter-spacing:.01em}
+#hint{position:absolute;right:116px;top:1004px;z-index:60;
+  font-family:var(--font-mono);font-size:16px;color:var(--mute);opacity:.7}
+#status{position:absolute;right:116px;top:976px;z-index:60;
+  font-family:var(--font-mono);font-size:16px;letter-spacing:.16em;
+  color:var(--order);opacity:.8}
+
+/* ---------- 里程碑庆祝 3~5 秒后必须回到主画面 ---------- */
+#ms{position:absolute;inset:0;z-index:40;background:rgba(8,9,11,.74);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;opacity:0;pointer-events:none;
+  transition:opacity .5s cubic-bezier(.22,1,.36,1)}
+#ms.on{opacity:1}
+#msKey{font-family:var(--font-display);font-size:28px;font-weight:600;
+  letter-spacing:.24em;color:var(--sub);margin-bottom:26px}
+#msVal{font-family:var(--font-display);font-size:280px;line-height:280px;
+  font-weight:600;color:var(--order);letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+
+/* ---------- 调试网格（?debug=grid 或 G 键） ---------- */
+#grid{position:absolute;inset:0;z-index:70;display:none;pointer-events:none}
+#grid .g12{position:absolute;left:116px;top:0;width:1688px;height:1080px;
+  background:repeating-linear-gradient(90deg,
+    rgba(0,211,167,.13) 0 111.33px,rgba(0,0,0,0) 111.33px 143.33px)}
+#grid .g8{position:absolute;inset:0;background:repeating-linear-gradient(180deg,
+  rgba(247,248,248,.035) 0 1px,rgba(0,0,0,0) 1px 8px)}
+#grid .safe{position:absolute;left:116px;top:54px;right:116px;bottom:54px;
+  outline:1px dashed rgba(255,184,107,.5)}
+#grid .l{position:absolute;background:rgba(255,184,107,.35)}
+#grid .lv{top:0;bottom:0;width:1px}
+#grid .lh{left:0;right:0;height:1px}
+#grid .lc{background:rgba(0,211,167,.75)}
+#grid .tick{position:absolute;font-family:var(--font-mono);font-size:14px;
+  color:rgba(255,184,107,.8)}
+
+/* ---------- 启动遮罩 ---------- */
+#boot{position:absolute;inset:0;z-index:90;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:opacity .6s cubic-bezier(.22,1,.36,1)}
+#boot.gone{opacity:0}
+.b-in{width:1100px;text-align:left}
+.b-brand{font-family:var(--font-display);font-size:26px;font-weight:600;
+  letter-spacing:.28em;color:var(--sub)}
+.b-h{margin-top:34px;font-size:64px;font-weight:500;color:var(--text);
+  letter-spacing:.04em}
+.b-h b{font-family:var(--font-display);font-weight:600;padding:0 .16em;
+  color:var(--order)}
+.b-p{margin-top:16px;font-family:var(--font-display);font-size:24px;
+  font-weight:600;letter-spacing:.3em;color:var(--mute)}
+.b-cta{margin-top:64px;display:inline-block;font-family:var(--font-display);
+  font-size:22px;font-weight:600;letter-spacing:.24em;color:var(--order);
+  border-bottom:1px solid rgba(255,184,107,.4);padding-bottom:8px}
+.b-keys{margin-top:56px;display:flex;flex-wrap:wrap;gap:10px 40px;
+  font-family:var(--font-mono);font-size:16px;color:var(--mute);
+  max-width:1100px}
+.b-keys i{font-style:normal;color:var(--sub)}
+.b-note{margin-top:52px;font-size:15px;color:var(--mute);letter-spacing:.06em}
+
+/* ---------- 快捷键图例（? 键） ---------- */
+#legend{position:absolute;right:116px;bottom:96px;z-index:65;width:400px;
+  background:rgba(16,18,22,.96);border-top:1px solid var(--hair);
+  padding:20px 24px 22px;opacity:0;pointer-events:none;
+  transition:opacity .3s cubic-bezier(.22,1,.36,1)}
+#legend.on{opacity:1}
+#legend h4{font-family:var(--font-display);font-size:17px;font-weight:600;
+  letter-spacing:.2em;color:var(--sub);margin-bottom:14px}
+#legend div{font-family:var(--font-mono);font-size:15px;color:var(--mute);
+  line-height:23px}
+#legend b{color:var(--sub);display:inline-block;width:74px}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <canvas id="globe"></canvas>
+  <div id="vig"></div>
+  <div id="ray"></div>
+  <div id="scrim"></div>
+
+  <div id="panel">
+    <div class="brand">AP · AGENT PAGE</div>
+    <div class="hair h1"></div>
+    <div class="tag">让<b>AI</b>把顾客带进你的店</div>
+
+    <div class="hero">
+      <div class="odo num" id="odoMain"></div>
+      <div class="hero-lb" id="heroLb">AI 爬虫访问 · TOTAL AI VISITS</div>
+      <div class="hero-rt">当前 <span id="rateVal" class="num">—</span> 次/秒</div>
+    </div>
+
+    <div class="hair h2"></div>
+
+    <div class="sub">
+      <div id="pagesBlock"><div class="odo num" id="odoPages"></div></div>
+      <div class="sub-r">
+        <div class="sub-lb">AP 翻译页面 · TRANSLATED PAGES</div>
+        <div class="bar"><i id="barFill"></i></div>
+        <div class="sub-ms">→ <span id="msRemain" class="num">—</span></div>
+      </div>
+    </div>
+
+    <div class="pf">
+      <div class="pf-bar" id="pfBar"></div>
+      <div class="pf-leg" id="pfLeg"></div>
+    </div>
+
+    <!-- 换算行：巨型数字没有参照系就是视觉噪音。这行把抽象数字换成人能感知的节奏，
+         同时填掉平台占比条与订单区之间原本约 80px 的死空间。 -->
+    <div class="conv">
+      <span>≈ 每 <b class="num" id="cvSec">—</b> 秒一笔 AI 引荐订单</span>
+      <span>≈ 每分钟 <b class="num" id="cvPg">—</b> 个新 AP 页面</span>
+    </div>
+
+    <div class="hair h3"></div>
+
+    <div class="ev">
+      <div class="ev-lb">AI 引荐订单 · AI-REFERRED ORDERS</div>
+      <div class="ev-zone" id="cards"></div>
+    </div>
+  </div>
+
+  <div id="ms">
+    <div id="msKey"></div>
+    <div id="msVal" class="num">0</div>
+  </div>
+
+  <div id="badge">模拟演示数据 · SIMULATED DEMO DATA</div>
+  <div id="status"></div>
+  <div id="hint">? 快捷键</div>
+  <div id="footer">本屏数据为产品能力演示，非真实交易记录。OpenAI、ChatGPT、Anthropic、Claude、Perplexity、Google 均为其各自所有者的商标；AP 与上述公司无隶属、赞助或合作关系。</div>
+
+  <div id="legend">
+    <h4>SHORTCUTS</h4>
+    <div><b>空格</b>暂停 / 继续</div>
+    <div><b>B</b>人工触发大单</div>
+    <div><b>N</b>触发普通单</div>
+    <div><b>K</b>里程碑庆祝</div>
+    <div><b>M</b>静音</div>
+    <div><b>A</b>环境音床</div>
+    <div><b>H</b>展馆音频模式</div>
+    <div><b>1 2 3</b>速率 x0.5 / x1 / x3</div>
+    <div><b>G</b>调试网格</div>
+    <div><b>F</b>全屏</div>
+    <div><b>R</b>重置</div>
+    <div><b>?</b>显示 / 隐藏本图例</div>
+  </div>
+
+  <div id="grid">
+    <div class="g8"></div>
+    <div class="g12"></div>
+    <div class="safe"></div>
+    <div class="l lv" style="left:640px"></div>
+    <div class="l lv" style="left:1280px"></div>
+    <div class="l lh" style="top:360px"></div>
+    <div class="l lh" style="top:720px"></div>
+    <div class="l lv lc" style="left:960px"></div>
+    <div class="l lh lc" style="top:540px"></div>
+    <div class="tick" style="left:124px;top:32px">SAFE 116px · GRID 12col/32px · BASE 8px</div>
+    <div class="tick" style="left:968px;top:32px">CENTER 960</div>
+  </div>
+
+  <div id="boot">
+    <div class="b-in">
+      <div class="b-brand">AP · AGENT PAGE</div>
+      <div class="b-h">让<b>AI</b>把顾客带进你的店</div>
+      <div class="b-p">引力井 · GRAVITY WELL</div>
+      <div class="b-cta">点击进入</div>
+      <div class="b-keys">
+        <span><i>空格</i> 暂停</span><span><i>B</i> 大单</span><span><i>N</i> 普通单</span>
+        <span><i>K</i> 里程碑</span><span><i>M</i> 静音</span><span><i>A</i> 环境音</span>
+        <span><i>H</i> 展馆音频</span><span><i>1/2/3</i> 速率</span><span><i>G</i> 网格</span>
+        <span><i>F</i> 全屏</span><span><i>R</i> 重置</span><span><i>?</i> 图例</span>
+      </div>
+      <div class="b-note">本屏数据为模拟演示数据</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="globe.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

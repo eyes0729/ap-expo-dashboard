@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP 展会 · 声音试听</title>
+<style>
+/* 试听页。不是交付物，只为选型服务，所以样式从简、信息优先。 */
+:root{--bg:#0B0D10;--panel:#14171C;--hair:#232830;--tx:#F2F4F6;--tx2:#9AA3AE;
+  --mute:#6A737D;--ac:#00D3A7;--warn:#FFB86B;--red:#FF6B60;
+  --mono:Consolas,ui-monospace,monospace;--cn:'Microsoft YaHei',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:var(--cn);padding:40px 48px 80px;
+  line-height:1.6}
+h1{font-size:26px;font-weight:600;margin-bottom:6px}
+.sub{color:var(--tx2);font-size:14px;margin-bottom:28px}
+h2{font-size:17px;font-weight:600;margin:34px 0 4px;color:var(--ac)}
+.h2note{font-size:13px;color:var(--tx2);margin-bottom:14px;max-width:900px}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:8px;
+  padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px}
+.card.on{border-color:var(--ac)}
+.play{width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--hair);
+  background:#1B1F26;color:var(--tx);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.play:hover{border-color:var(--ac);color:var(--ac)}
+.play.playing{background:var(--ac);color:#04231D;border-color:var(--ac)}
+.meta{flex:1;min-width:0}
+.nm{font-size:15px;font-weight:600;margin-bottom:2px}
+.ds{font-size:13px;color:var(--tx2)}
+.tx{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:3px}
+.dur{flex:none;font-family:var(--mono);font-size:13px;color:var(--tx2);min-width:64px;
+  text-align:right}
+.dur b{color:var(--tx);font-weight:600}
+.dur.bad b{color:var(--red)}
+.dur.ok b{color:var(--ac)}
+.bar{flex:none;width:150px;height:6px;border-radius:3px;background:#0A0C0F;overflow:hidden}
+.bar u{display:block;height:100%;background:var(--ac);width:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+select,button.mini{background:#1B1F26;color:var(--tx);border:1px solid var(--hair);
+  border-radius:6px;padding:8px 12px;font-family:var(--cn);font-size:13px;cursor:pointer}
+select:hover,button.mini:hover{border-color:var(--ac)}
+.tip{background:#141A18;border-left:3px solid var(--ac);padding:12px 16px;
+  border-radius:0 6px 6px 0;font-size:13px;color:var(--tx2);margin:14px 0 20px;max-width:1000px}
+.tip b{color:var(--tx)}
+.warn{background:#1B1512;border-left-color:var(--warn)}
+table{border-collapse:collapse;font-size:13px;margin-top:8px}
+td,th{border:1px solid var(--hair);padding:7px 12px;text-align:left}
+th{background:#171B21;color:var(--tx2);font-weight:500}
+td.n{font-family:var(--mono)}
+</style>
+</head>
+<body>
+
+<h1>AP 展会 · 声音试听</h1>
+<div class="sub">选型用，不是交付物。目的：定下<b>声音标识</b>、<b>句式</b>、<b>节奏</b>三件事。</div>
+
+<div class="tip">
+  <b>页面里有两套人声，别混着听：</b>
+  <br>· <b>第二节 = CosyVoice 2</b>（本地 GPU 跑出来的，Apache-2.0 可商用、离线）——
+  <b>音色看这一节</b>。
+  <br>· <b>第三、四节 = Windows 自带的 Microsoft Huihui</b>（2013 年那代拼接式合成）——
+  它只用来对比<b>句式和长度</b>，音色请忽略。留着是因为它跑得快，改文案时先用它过一遍节奏，
+  定了再用 CosyVoice 出正式版。
+</div>
+
+<h2>一、声音标识候选（这部分是最终品质，可直接用）</h2>
+<div class="h2note">
+  纯数学合成，零依赖、可商用、可无限微调。约束来自调研：时长 ≤1.2s、
+  主要能量放在 500–1600Hz（嘈杂展馆穿透力最好的一段）、避开 2–4kHz 刺耳区、收尾不拖泥带水。
+  <b>「起音」这一列很关键</b>：展馆里人声嘈杂，起音越快越"扎"得出来。
+</div>
+<div id="stings"></div>
+
+<h2>二、CosyVoice 2 正式音色（GPU 本地跑，选定的 E 式）</h2>
+<div class="h2note">
+  <b>这一组才是音色的真实水平。</b>模型 CosyVoice2-0.5B，本地 RTX 5060 跑，
+  离线、Apache-2.0 可商用。文案是你选的 E：<b>「Agentic Page 店铺到账，&lt;金额&gt;美元」</b>。
+  已做两件后处理：<b>切掉首尾静音</b>（原始输出前面挂 120~570ms 静音，播报要"一响就到"）、
+  <b>统一归一到 -3dBFS</b>（拼接时电平才一致）。
+</div>
+<div class="tip warn">
+  <b>参考音色是临时的，不能就这么上展会。</b>CosyVoice2-0.5B 没有内置说话人
+  （模型目录里没有 <code>spk2info.pt</code>），只能零样本克隆 —— 每次生成都要给一段参考音频。
+  这里用的是 CosyVoice 仓库自带的 <code>asset/zero_shot_prompt.wav</code>，
+  <b>那是某个真人的声音</b>。仓库的 Apache-2.0 覆盖代码与权重，但<b>声音人格权是独立的</b>
+  （北京互联网法院 2024 年那起案子的要害正是：拿到录音的著作权 ≠ 拿到把该声音 AI 化的授权）。
+  <br>还有一个连带后果：<b>零样本会继承参考音频的语速</b>。那句参考是「希望你以后能够做的比我还好呦」，
+  慢而柔，所以 1.0 倍速生成出来是 4.29s —— 比 Windows 那个老合成还长。下面的 1.2 倍速才像播报。
+</div>
+<div class="row">
+  <span style="color:var(--tx2);font-size:13px">语速</span>
+  <select id="rate">
+    <option value="">慢（Rate 1）</option>
+    <option value="-r2" selected>中（Rate 2）</option>
+    <option value="-r3">快（Rate 3）</option>
+  </select>
+  <span style="color:var(--tx2);font-size:13px;margin-left:14px">前面加声音标识</span>
+  <select id="withSting">
+    <option value="">不加</option>
+    <option value="sting-1-rise.wav">1 跃升</option>
+    <option value="sting-2-pulse.wav">2 脉冲</option>
+    <option value="sting-3-crystal.wav" selected>3 水晶</option>
+    <option value="sting-4-gravity.wav">4 引力</option>
+    <option value="sting-5-twotap.wav">5 双击</option>
+  </select>
+  <button class="mini" id="gap">标识与人声间隔：<b>140ms</b></button>
+</div>
+<div id="cosy"></div>
+
+<h2>三、拼接试听 —— 这一节最关键</h2>
+<div class="h2note">
+  运行时的金额是连续的，不可能给每个金额预录一句，所以走支付宝那套：<b>预录零件、运行时拼</b>。
+  已生成 <b>291 个片段</b>（固定句 + 290 个数字块），覆盖 $1–99,999，每段 ≥2 字。
+  <b>下面这一组 A/B 是要判断的核心问题：拼出来的和整句生成的，差多少？</b>
+  左边「拼接」是 291 个零件拼的，右边「整句」是一次生成的 —— 同一个金额，直接对比。
+</div>
+<div class="tip warn">
+  为什么每段必须 ≥2 字：第一版按「单字 + 双字块」出了 42 个零件，
+  结果 <code>一 / 七 / 八 / 九 / 零</code> 五个单字片段全是废的 ——
+  时长 0.06s、过零重心 4300Hz，那是噪声不是元音。
+  原因写在 CosyVoice 自己代码里：目标文本短于参考文本一半时会警告
+  <code>synthesis text too short than prompt text</code>，参考句 14 个字，单字远低于门槛。
+  改成「单字粘到后一段、末段带美元」之后，291 段<b>每字最短 136ms、中位 220ms，全部合格</b>。
+</div>
+<div class="row">
+  <span style="color:var(--tx2);font-size:13px">金额</span>
+  <input id="amt" type="text" value="1280" style="width:110px;background:#1B1F26;
+    color:var(--tx);border:1px solid var(--hair);border-radius:6px;padding:8px 12px;
+    font-family:var(--mono);font-size:13px">
+  <button class="mini" id="amtGo">拼接播放</button>
+  <span style="color:var(--mute);font-size:12px" id="amtSeq"></span>
+</div>
+<div class="row">
+  <span style="color:var(--tx2);font-size:13px">交叉淡化</span>
+  <select id="xf">
+    <option value="0">0ms（直接相接，听接缝）</option>
+    <option value="0.018">18ms</option>
+    <option value="0.028" selected>28ms</option>
+    <option value="0.045">45ms</option>
+    <option value="0.070">70ms（过长，音节会互相吃）</option>
+  </select>
+</div>
+<div id="stitch"></div>
+
+<h2>四、文案候选（老合成音，只听句式和长度，别听音色）</h2>
+<div id="lines"></div>
+
+<h2>五、数字节奏（同一句、三个金额）</h2>
+<div class="h2note">要确认两件事：金额是不是被读成完整的中文数（「一千二百八十」而不是「一二八零」）；
+长数字会不会把整句拖垮。</div>
+<div id="nums"></div>
+
+<h2>六、时长账（全部实测，$1,280 为例）</h2>
+<table>
+  <tr><th>构成</th><th>时长</th><th>说明</th></tr>
+  <tr><td>支付宝「支付宝到账十二元五角」</td><td class="n">约 2.2s</td><td>公认的听觉锚点</td></tr>
+  <tr><td>固定句「Agentic Page 店铺到账」</td><td class="n">1.67s</td><td><b>单项最大头</b>，想压总长先压这里</td></tr>
+  <tr><td>整句一次生成</td><td class="n">3.27s</td><td>基准</td></tr>
+  <tr><td>291 片段拼接</td><td class="n">3.74s</td><td><b>拼接代价 +0.47s（+14%）</b>：每片段首尾各留 20ms，且没有连读压缩</td></tr>
+  <tr><td>＋双击标识（0.55s）</td><td class="n">4.36s</td><td>gap 80ms</td></tr>
+  <tr><td>＋水晶标识（1.20s）</td><td class="n">5.02s</td><td>gap 80ms</td></tr>
+  <tr><td>你提的豆包长句（老合成）</td><td class="n" id="tF">—</td><td>参照</td></tr>
+  <tr><td>现在线上的模板（含脱敏店名）</td><td class="n" id="t0">—</td><td>店名念成「Des 星 星 ora」</td></tr>
+</table>
+<div class="tip" style="margin-top:18px">
+  <b>4.4s 长不长，取决于多久响一次 —— 而这一点已经改了。</b>
+  播报门槛已经从 <code>rare</code>（约 36% 的订单、每分钟都在说话）提到
+  <code>epic</code>（大额+特大约 <b>10%</b>，约 <b>9 分钟一次</b>）。
+  九分钟才响一次的话，4.4s 不是噪音，是**事件**。
+  <br><br>如果还想更接近支付宝那种紧凑感，最有效的一刀是<b>砍固定句</b>：
+  「Agentic Page 店铺到账」1.67s → 换成「AP 店铺到账」或「Agentic Page 到账」
+  能省 0.4~0.5s。要的话说一声，我重生成固定句就行（只有 1 个片段，30 秒的事）。
+</div>
+
+<script src="stitch.js"></script>
+<script>
+/* 播放器：Web Audio 解码，保证 sting → 间隔 → 人声的拼接是精确的，
+   不靠 <audio> 的 onended（那个有几十毫秒的抖动，正好会毁掉节奏判断）。 */
+var AC = null, buffers = {}, curBtn = null, gapMs = 140;
+
+var STINGS = [
+  ['sting-1-rise.wav',    '1 · 跃升 Rise',    '三音上行，最通用的「成功」语汇。稳妥，但也最不独特', 87],
+  ['sting-2-pulse.wav',   '2 · 脉冲 Pulse',   '低频落点 + 瞬态 + 上滑扫频。最「科技」，但没有旋律、不好哼', 1],
+  ['sting-3-crystal.wav', '3 · 水晶 Crystal', '非整数倍泛音的铃。最「贵」、最耐听，重复几百次也不烦', 2],
+  ['sting-4-gravity.wav', '4 · 引力 Gravity', '大气 pad + 落点 + 星光泛音。有世界感，呼应全屏地球；偏长', 61],
+  ['sting-5-twotap.wav',  '5 · 双击 Two-tap', '0.55s，五条里最短。专给高频触发：大额只响它，不出人声', 1]
+];
+
+var LINES = [
+  ['line-A-agenticpage', 'A · 品牌前置',      'Agentic Page 到账，1280 美元'],
+  ['line-B-store',       'B · 保留「店铺」',  '店铺 AI 订单到账，1280 美元'],
+  ['line-E-full',        'E · 品牌 + 店铺',   'Agentic Page 店铺到账，1280 美元'],
+  ['line-C-deeplumen',   'C · 公司名前置',    'deeplumen 到账，1280 美元'],
+  ['line-D-aiorder',     'D · 最短、无品牌',  'AI 订单到账，1280 美元'],
+  ['line-0-current',     '0 · 现在线上的',    'Des**ora 收获一笔 AI 引荐订单，1280 美元'],
+  ['line-F-doubao',      'F · 豆包长句',      '我用最直白最不饶弯子的方式，稳稳接了这笔新的 AI 订单，1280 美元']
+];
+
+var NUMS = [
+  ['num-small', '小额', '店铺 AI 订单到账，86 美元'],
+  ['num-mid',   '中额', '店铺 AI 订单到账，1280 美元'],
+  ['num-big',   '大额', '店铺 AI 订单到账，4520 美元']
+];
+
+function ctx() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); return AC; }
+
+function load(url) {
+  if (buffers[url]) return Promise.resolve(buffers[url]);
+  return fetch(url).then(function (r) { return r.arrayBuffer(); })
+    .then(function (a) { return ctx().decodeAudioData(a); })
+    .then(function (b) { buffers[url] = b; return b; });
+}
+
+/** 播放一组 url，按给定间隔依次拼接。返回总时长（秒）。 */
+function playSeq(urls, gap, btn) {
+  return Promise.all(urls.map(load)).then(function (bs) {
+    var t = ctx().currentTime + 0.05, total = 0;
+    bs.forEach(function (b, i) {
+      var s = ctx().createBufferSource();
+      s.buffer = b; s.connect(ctx().destination); s.start(t);
+      t += b.duration + (i < bs.length - 1 ? gap / 1000 : 0);
+      total += b.duration + (i < bs.length - 1 ? gap / 1000 : 0);
+    });
+    if (curBtn) { curBtn.classList.remove('playing'); curBtn.textContent = '▶'; }
+    curBtn = btn;
+    btn.classList.add('playing'); btn.textContent = '‖';
+    setTimeout(function () {
+      btn.classList.remove('playing'); btn.textContent = '▶';
+      if (curBtn === btn) curBtn = null;
+    }, total * 1000 + 120);
+    return total;
+  });
+}
+
+function durOf(url, el, target) {
+  load(url).then(function (b) {
+    var d = b.duration;
+    el.innerHTML = '<b>' + d.toFixed(2) + '</b>s';
+    if (target) el.className = 'dur ' + (d <= target ? 'ok' : 'bad');
+  }).catch(function () { el.textContent = '—'; });
+}
+
+function card(host, name, desc, text, urlFn, target, extra) {
+  var d = document.createElement('div'); d.className = 'card';
+  var b = document.createElement('button'); b.className = 'play'; b.textContent = '▶';
+  var m = document.createElement('div'); m.className = 'meta';
+  m.innerHTML = '<div class="nm">' + name + '</div><div class="ds">' + desc + '</div>'
+    + (text ? '<div class="tx">「' + text + '」</div>' : '')
+    + (extra || '');
+  var du = document.createElement('div'); du.className = 'dur'; du.textContent = '…';
+  d.appendChild(b); d.appendChild(m); d.appendChild(du);
+  host.appendChild(d);
+  b.addEventListener('click', function () {
+    var urls = urlFn();
+    playSeq(urls, gapMs, b).then(function (t) {
+      du.innerHTML = '<b>' + t.toFixed(2) + '</b>s';
+      du.className = 'dur ' + (target && t <= target ? 'ok' : (target ? 'bad' : ''));
+    });
+  });
+  return { dur: du, urlFn: urlFn, target: target };
+}
+
+/* 二、CosyVoice 正式音色。前面同样可以挂声音标识（用顶上那个下拉） */
+var COSY = [
+  ['cosy/demo-E-1280-s12.wav', 'E · 1.2 倍速  ← 推荐这档',
+   'Agentic Page 店铺到账，一千二百八十美元'],
+  ['cosy/demo-E-1280.wav',     'E · 1.0 倍速（原速，偏慢）',
+   'Agentic Page 店铺到账，一千二百八十美元'],
+  ['cosy/demo-E-1280-s14.wav', 'E · 1.4 倍速（注意：反而比 1.2 长，见下）',
+   'Agentic Page 店铺到账，一千二百八十美元'],
+  ['cosy/demo-E-86.wav',       'E · 小额 86',   'Agentic Page 店铺到账，八十六美元'],
+  ['cosy/demo-E-4520.wav',     'E · 大额 4520', 'Agentic Page 店铺到账，四千五百二十美元'],
+  ['cosy/demo-E-12800.wav',    'E · 五位数 12800', 'Agentic Page 店铺到账，一万两千八百美元'],
+  ['cosy/demo-E2-1280.wav',    '兜底 · 品牌念「AP」而不是 Agentic Page',
+   'AP 店铺到账，一千二百八十美元'],
+  ['cosy/demo-D-1280.wav',     '对照 · 不带品牌的最短版',
+   'AI 订单到账，一千二百八十美元']
+];
+var ch = document.getElementById('cosy');
+COSY.forEach(function (c) {
+  var card2 = card(ch, c[1], '', c[2], function () {
+    var st = document.getElementById('withSting').value;
+    return st ? [st, c[0]] : [c[0]];
+  }, 3.4);
+  durOf(c[0], card2.dur, 3.4);
+});
+
+/* 三、拼接 A/B。有整句版的四个金额直接并排对比。 */
+APVoice.setBase('');
+var AB = [
+  [1280,  'cosy/demo-E-1280-s12.wav'],
+  [86,    'cosy/demo-E-86.wav'],
+  [4520,  'cosy/demo-E-4520.wav'],
+  [12800, 'cosy/demo-E-12800.wav'],
+  [1005,  null],   /* 零的压缩：一千零五 */
+  [1050,  null],   /* 一千零五十 */
+  [1286,  null],   /* 四段：一千+二百+八十六美元 */
+  [300,   null]    /* 单段：三百美元 */
+];
+var sh2 = document.getElementById('stitch');
+AB.forEach(function (pair) {
+  var usd = pair[0], whole = pair[1];
+  var d = document.createElement('div'); d.className = 'card';
+  var b1 = document.createElement('button'); b1.className = 'play'; b1.textContent = '▶';
+  var m = document.createElement('div'); m.className = 'meta';
+  var seq = APVoice.chunks(usd);
+  m.innerHTML = '<div class="nm">$' + usd.toLocaleString()
+    + (whole ? '　<span style="color:var(--ac);font-size:12px">有整句版可对比</span>' : '')
+    + '</div><div class="tx">固定句 + ' + seq.join(' + ') + '</div>';
+  var lbl1 = document.createElement('div');
+  lbl1.style.cssText = 'flex:none;font-size:12px;color:var(--tx2);width:40px';
+  lbl1.textContent = '拼接';
+  var du = document.createElement('div'); du.className = 'dur'; du.textContent = '—';
+  d.appendChild(b1); d.appendChild(lbl1); d.appendChild(m);
+  if (whole) {
+    var b2 = document.createElement('button'); b2.className = 'play'; b2.textContent = '▶';
+    var lbl2 = document.createElement('div');
+    lbl2.style.cssText = 'flex:none;font-size:12px;color:var(--tx2);width:40px';
+    lbl2.textContent = '整句';
+    d.appendChild(lbl2); d.appendChild(b2);
+    b2.addEventListener('click', function () {
+      var st = document.getElementById('withSting').value;
+      playSeq(st ? [st, whole] : [whole], gapMs, b2);
+    });
+  }
+  d.appendChild(du);
+  sh2.appendChild(d);
+  b1.addEventListener('click', function () {
+    var st = document.getElementById('withSting').value;
+    var xf = parseFloat(document.getElementById('xf').value);
+    if (curBtn) { curBtn.classList.remove('playing'); curBtn.textContent = '▶'; }
+    curBtn = b1; b1.classList.add('playing'); b1.textContent = '‖';
+    APVoice.play(usd, st || null, { crossfade: xf, gap: gapMs }).then(function (t) {
+      du.innerHTML = '<b>' + t.toFixed(2) + '</b>s';
+      du.className = 'dur ' + (t <= 3.4 ? 'ok' : 'bad');
+      setTimeout(function () {
+        b1.classList.remove('playing'); b1.textContent = '▶';
+        if (curBtn === b1) curBtn = null;
+      }, t * 1000 + 120);
+    }).catch(function (e) {
+      du.textContent = '缺片段'; du.className = 'dur bad';
+      console.error(e);
+    });
+  });
+});
+
+/* 任意金额 */
+document.getElementById('amtGo').addEventListener('click', function () {
+  var v = parseInt(document.getElementById('amt').value, 10);
+  if (!isFinite(v) || v < 1 || v > 99999) {
+    document.getElementById('amtSeq').textContent = '请输入 1–99999'; return;
+  }
+  var st = document.getElementById('withSting').value;
+  var xf = parseFloat(document.getElementById('xf').value);
+  document.getElementById('amtSeq').textContent =
+    '固定句 + ' + APVoice.chunks(v).join(' + ');
+  APVoice.play(v, st || null, { crossfade: xf, gap: gapMs })
+    .then(function (t) {
+      document.getElementById('amtSeq').textContent += '   → ' + t.toFixed(2) + 's';
+    })
+    .catch(function (e) {
+      document.getElementById('amtSeq').textContent += '   ✗ ' + e.message;
+    });
+});
+
+/* 一、声音标识 */
+var sh = document.getElementById('stings');
+STINGS.forEach(function (s) {
+  var c = card(sh, s[1], s[2], '', function () { return [s[0]]; }, 1.2,
+    '<div class="tx">起音 ' + s[3] + 'ms' + (s[3] <= 5 ? '（瞬态清晰，嘈杂环境扎得出来）'
+      : '（起音较软，嘈杂环境里会吃亏）') + '</div>');
+  durOf(s[0], c.dur, 1.2);
+});
+
+/* 二、文案 */
+var lh = document.getElementById('lines');
+var lineCards = [];
+LINES.forEach(function (l) {
+  var c = card(lh, l[1], '', l[2], function () {
+    var st = document.getElementById('withSting').value;
+    var r = document.getElementById('rate').value;
+    var u = l[0] + r + '.wav';
+    return st ? [st, u] : [u];
+  }, 3.0);
+  lineCards.push({ base: l[0], dur: c.dur });
+});
+
+/* 三、数字 */
+var nh = document.getElementById('nums');
+NUMS.forEach(function (nu) {
+  var c = card(nh, nu[1], '', nu[2], function () {
+    var r = document.getElementById('rate').value;
+    return [nu[0] + r + '.wav'];
+  }, 3.0);
+  durOf(nu[0] + '-r2.wav', c.dur, 3.0);
+});
+
+function refreshLineDurs() {
+  var r = document.getElementById('rate').value;
+  lineCards.forEach(function (c) { durOf(c.base + r + '.wav', c.dur, 3.0); });
+}
+document.getElementById('rate').addEventListener('change', refreshLineDurs);
+refreshLineDurs();
+
+/* 间隔可调 —— 节奏感很大程度由这个数字决定 */
+var GAPS = [0, 80, 140, 220, 320];
+var gi = 2;
+document.getElementById('gap').addEventListener('click', function () {
+  gi = (gi + 1) % GAPS.length; gapMs = GAPS[gi];
+  this.innerHTML = '标识与人声间隔：<b>' + gapMs + 'ms</b>';
+});
+
+/* 四、对照表里的三个数字 */
+[['line-C-deeplumen-r3.wav', 'tC'], ['line-F-doubao-r3.wav', 'tF'],
+ ['line-0-current-r2.wav', 't0']].forEach(function (p) {
+  load(p[0]).then(function (b) {
+    document.getElementById(p[1]).textContent = b.duration.toFixed(2) + 's';
+  }).catch(function () {});
+});
+</script>
+</body>
+</html>

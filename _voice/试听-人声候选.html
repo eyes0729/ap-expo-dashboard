@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>AP 展会 · 人声候选试听</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --bg:#0B0D10; --panel:#14171C; --panel2:#1B1F26; --line:#252A33;
+    --ink:#E8EAED; --dim:#9AA3AF; --faint:#5F6875;
+    --hot:#FF7A45; --good:#3DD68C; --cool:#4C9AFF; --warn:#FFC53D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);
+    font:15px/1.65 "Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    padding:32px 20px 90px}
+  .wrap{max-width:1000px;margin:0 auto}
+
+  h1{font-size:23px;font-weight:650;letter-spacing:.01em}
+  .sub{color:var(--dim);font-size:14px;margin-top:7px}
+  .gate{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+    border-radius:7px;padding:13px 17px;margin:20px 0 26px;font-size:14px;color:var(--dim)}
+
+  h2{font-size:16px;font-weight:650;margin:34px 0 6px;padding-left:11px;
+    border-left:3px solid var(--hot)}
+  h2 .n{color:var(--faint);font-weight:400;margin-right:8px}
+  .why{color:var(--dim);font-size:13.5px;margin:0 0 15px 14px;max-width:80ch}
+  .why b{color:var(--ink);font-weight:600}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:16px 18px;margin-bottom:11px}
+  .card.hero{border-color:#3A2A22;background:linear-gradient(180deg,#181310,#14171C)}
+  .card.base{border-color:#33262B}
+  .hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .nm{font-weight:650;font-size:14.5px}
+  .tag{font-size:11.5px;padding:1px 8px;border-radius:20px;font-weight:600;
+    border:1px solid transparent;white-space:nowrap}
+  .t-now{background:#331F24;color:#FF7C93;border-color:#4A2A31}
+  .t-rec{background:#12301F;color:var(--good);border-color:#1E4530}
+  .t-off{background:#122437;color:var(--cool);border-color:#1C3550}
+  .meta{color:var(--faint);font-size:12.5px;margin-bottom:11px}
+  .desc{color:var(--dim);font-size:13.5px;margin-bottom:12px}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  button{font:inherit;font-size:13.5px;cursor:pointer;border-radius:6px;
+    border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    padding:7px 14px;transition:.13s}
+  button:hover{border-color:var(--faint);background:#232832}
+  button:active{transform:translateY(1px)}
+  button.p{background:#2A1B14;border-color:#4A2E1F;color:#FFB899}
+  button.p:hover{background:#38241A;border-color:var(--hot)}
+  button.on{background:var(--hot);border-color:var(--hot);color:#1A0E08;font-weight:650}
+  button .amt{color:var(--faint);font-size:12px;margin-left:5px}
+  button.on .amt{color:#5A3520}
+
+  .lbl{color:var(--faint);font-size:12.5px;margin-right:2px;min-width:52px}
+  .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+
+  table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:13.5px}
+  th,td{text-align:left;padding:7px 11px;border-bottom:1px solid var(--line)}
+  th{color:var(--faint);font-weight:600;font-size:12.5px}
+  td.num{font-variant-numeric:tabular-nums;color:var(--dim)}
+  tr.me td{color:var(--ink)}
+
+  .note{background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+    padding:13px 16px;margin:14px 0;font-size:13.5px;color:var(--dim)}
+  .note b{color:var(--ink)}
+  .note.warn{border-left:3px solid var(--warn)}
+  .note.bad{border-left:3px solid #FF7C93}
+
+  .bar{position:fixed;left:0;right:0;bottom:0;background:rgba(11,13,16,.96);
+    border-top:1px solid var(--line);padding:11px 20px;backdrop-filter:blur(8px)}
+  .bar .in{max-width:1000px;margin:0 auto;display:flex;gap:14px;align-items:center;
+    font-size:13px;color:var(--dim);flex-wrap:wrap}
+  #np{color:var(--hot);font-weight:600}
+  code{background:#1E2229;padding:1.5px 6px;border-radius:4px;font-size:12.5px;
+    color:#B9C2CF;font-family:Consolas,monospace}
+</style>
+<div class="wrap">
+
+<h1>AP 展会 · 人声候选试听</h1>
+<div class="sub">同一句话「Agentic Page 店铺到账，◯◯美元」，三条技术路线并排对比。</div>
+
+<div class="gate" id="fileGate" hidden></div>
+<div class="gate">先点任意一个播放键解锁音频（浏览器规定音频必须由用户手势触发）。<b>建议戴耳机或用外放音箱</b>——笔记本内置喇叭听不出低频差别。</div>
+
+<h2><span class="n">NEW</span>钱到账的声音（你这次要的）</h2>
+<p class="why">先说清一件事：<b>支付宝那个声音本身不是硬币</b>，是一个干净的双音提示音。你说的「钱袋入金感」其实来自<b>提示音 + 人声</b>这个组合，不是音色里真的有钱币。所以下面四条里，<b>「到账」那条最接近支付宝</b>，而「哗啦 / 入袋」是真的硬币声——更直白，但每 2.4 分钟响一次会不会烦，要你听了定。</p>
+<div class="card hero">
+  <div class="hd"><span class="nm">四条候选 · 纯合成，零素材</span><span class="tag t-off">可商用</span></div>
+  <div class="meta">都 ≤1.15 秒 · 刺耳的 3~4kHz 只占 4.8~6.6%（展馆 85dB 下最扎耳的一段，已用陷波压过）</div>
+  <div class="row">
+    <button class="p" data-one="coin-1-shower.wav">▶ 哗啦 <span class="amt">46 枚硬币倒出来</span></button>
+    <button class="p" data-one="coin-2-bag.wav">▶ 入袋 <span class="amt">硬币 + 布袋闷响</span></button>
+    <button class="p" data-one="coin-3-register.wav">▶ 收银 <span class="amt">收银铃 + 硬币</span></button>
+    <button class="p" data-one="coin-4-chime.wav">▶ 到账 <span class="amt">双音 + 轻硬币 · 最像支付宝</span></button>
+  </div>
+  <div class="note" style="margin-bottom:0">
+    <b>硬币声是怎么合成的：</b>不是"叮"一声正弦波。一枚硬币是
+    <b>极快的撞击瞬态</b> + 薄圆盘的<b>非谐</b>振动模式（频率比约 1 : 1.73 : 2.41 : 3.17）。
+    这一条是关键——用整数泛音会立刻听成"钟"，不是硬币。
+    一把硬币则靠<b>密度曲线</b>：前 120ms 冲到最高再指数拖尾；
+    匀速散布听起来像下雨，不像倒钱。
+    每枚的音高/时刻/声像都由固定种子的伪随机给出，所以可复现，
+    换个种子就是新的一把——不会像采样库那样两次播放一模一样、很快被听出是循环。
+  </div>
+</div>
+
+<h2><span class="n">NEW</span>组合起来听：这才是现场的「到账」</h2>
+<p class="why">钱币音 + 人声，中间留 140ms。<b>这是观众实际听到的东西</b>，单独听音效意义不大。</p>
+<div class="card hero">
+  <div class="grp"><span class="lbl">钱币音</span>
+    <button data-coin="coin-4-chime.wav" class="on">到账</button>
+    <button data-coin="coin-1-shower.wav">哗啦</button>
+    <button data-coin="coin-2-bag.wav">入袋</button>
+    <button data-coin="coin-3-register.wav">收银</button>
+    <button data-coin="sting-1-rise.wav">原提示音</button>
+    <button data-coin="">不加</button>
+  </div>
+  <div class="grp"><span class="lbl">人声</span>
+    <button data-vc2="compare/neural-xiaoxiao-1280.mp3" class="on">Xiaoxiao（现在用的）</button>
+    <button data-vc2="compare/expr-1-excited.wav">兴奋</button>
+    <button data-vc2="compare/expr-2-happy.wav">开心</button>
+    <button data-vc2="compare/expr-5-surprise.wav">惊喜</button>
+    <button data-vc2="compare/expr-6-fast.wav">轻快</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button class="p" id="playCoin" style="font-size:14.5px;padding:9px 20px">▶ 播放这个组合</button>
+  </div>
+</div>
+
+<h2><span class="n">NEW</span>更像真人：用一句中文指令控制情绪</h2>
+<p class="why">你说的「太机械化」，我先确认过<b>不是退回旧音色</b>——大屏现在播的确实是神经语音（<code>voiceSource="pack"</code>）。所以问题不在音质，在<b>Xiaoxiao 是新闻播音腔：平、稳、没有情绪起伏</b>。而「到账」要的是一点惊喜和确认感，那是情绪。</p>
+<p class="why">2026 年的中文 TTS 已经从「念文本」走到「理解后表达」。下面是本机 CosyVoice2 用<b>自然语言指令</b>生成的——免费、离线、一句中文就能换语气。</p>
+<div class="card">
+  <div class="row">
+    <button class="p" data-one="compare/expr-1-excited.wav">▶ 「用兴奋的语气说」</button>
+    <button class="p" data-one="compare/expr-2-happy.wav">▶ 「用开心愉悦的语气说」</button>
+    <button class="p" data-one="compare/expr-3-warm.wav">▶ 「用温柔亲切的语气说」</button>
+    <button class="p" data-one="compare/expr-4-anchor.wav">▶ 「用专业播报的语气说」</button>
+    <button class="p" data-one="compare/expr-5-surprise.wav">▶ 「用惊喜的语气说，像收到一笔意外的钱」</button>
+    <button class="p" data-one="compare/expr-6-fast.wav">▶ 「用轻快的语气快速地说」</button>
+  </div>
+  <div class="note bad" style="margin-bottom:0">
+    <b>⚠ 这些样本有一个硬伤，必须先说：时长 5.8~7.9 秒</b>，而现在用的 Xiaoxiao 是 3.1 秒。
+    播报平均 2.4 分钟一条，6 秒本身不算长；但<b>宏节拍那 10 分钟一次的齐发</b>会有 3~5 单挤在一起，
+    6 秒的播报会互相盖住。指令模式让模型"演"，它就会拖长——这是取舍，不是 bug。
+    <br><br>
+    真要用，两条路：① 生成时给 <code>speed=1.3</code>（会损失一点自然度）
+    ② 把句子改短（去掉「Agentic Page 店铺」只留「到账，一千二百八十美元」）。
+    <b>建议先只听语气、别管长度</b>——先定要不要这个方向，定了我再压时长。
+  </div>
+</div>
+
+<h2><span class="n">00</span>先听结果：大屏现在实际会播的</h2>
+<p class="why">381 句已经全量渲染好接上大屏了（<code>_voice/pack-edge/</code>）。下面直接放正式包里的文件，<b>带提示音</b>，就是现场 3 米外听到的东西。<b>注意：这一版是 edge 试听音色，不能对外用</b> —— 换成 Azure 只需要一个 key 重渲一遍，音色完全一样（同一批模型）。</p>
+<div class="card hero">
+  <div class="hd"><span class="nm">正式包 · 提示音 + 整句</span><span class="tag t-rec">已接入大屏</span></div>
+  <div class="meta">Xiaoxiao · +8% · 381 句 100% 覆盖 · 中位 3.14 秒</div>
+  <div class="row">
+    <button class="p" data-combo="pack-edge/line-110.wav">▶ <span class="amt">$110 最小额</span></button>
+    <button class="p" data-combo="pack-edge/line-527.wav">▶ <span class="amt">$527</span></button>
+    <button class="p" data-combo="pack-edge/line-1280.wav">▶ <span class="amt">$1,280 · B 键第 1 档</span></button>
+    <button class="p" data-combo="pack-edge/line-2460.wav">▶ <span class="amt">$2,460 · B 键第 3 档</span></button>
+    <button class="p" data-combo="pack-edge/line-4260.wav">▶ <span class="amt">$4,260 · B 键封顶</span></button>
+  </div>
+  <div class="note" style="margin-bottom:0">
+    <b>连着放三条听节奏</b>（现场平均 2.4 分钟一条，这里压缩成连播，
+    主要是听<b>句子之间音色和电平是否一致</b>——不一致就会露出"这是拼的"）：
+    <div class="row" style="margin-top:9px">
+      <button class="p" id="playRun">▶ 连播 5 条</button>
+    </div>
+  </div>
+</div>
+
+<h2><span class="n">01</span>再听现状对照：这就是「机械/电子」的来源</h2>
+<p class="why">大屏现在走的是浏览器 <code>speechSynthesis</code>。这台机器上装的中文音色<b>只有一个</b>：Microsoft Huihui Desktop——2013 年那代<b>拼接式合成</b>（SAPI5）。不是参数调坏了，是引擎本身老了 13 年。</p>
+
+<div class="card base">
+  <div class="hd"><span class="nm">Windows SAPI · Microsoft Huihui</span><span class="tag t-now">大屏现在播的就是这个</span></div>
+  <div class="meta">唯一已装中文音色 · 平均 4.20 秒</div>
+  <div class="row" data-set="baseline-huihui" data-ext="wav"></div>
+</div>
+
+<h2><span class="n">02</span>候选 A：微软神经语音（四个音色）</h2>
+<p class="why">和 Azure Neural TTS 是<b>同一批模型</b>。你要的「支付宝到账那种感觉」——支付宝用的是<b>暖调女声</b>，所以 <b>Xiaoxiao</b> 是最接近的一条；<b>Yunyang</b> 是新闻播音男声，权威感更强。</p>
+
+<div class="card hero">
+  <div class="hd"><span class="nm">Xiaoxiao · 暖女声 / 新闻</span><span class="tag t-rec">最接近「到账」音色</span></div>
+  <div class="meta">zh-CN-XiaoxiaoNeural · 语速 +8% · 平均 3.86 秒</div>
+  <div class="row" data-set="neural-xiaoxiao" data-ext="mp3"></div>
+</div>
+<div class="card">
+  <div class="hd"><span class="nm">Yunyang · 男声 / 新闻播音</span></div>
+  <div class="meta">zh-CN-YunyangNeural · 语速 +8% · 平均 3.50 秒（<b>最短</b>）</div>
+  <div class="row" data-set="neural-yunyang" data-ext="mp3"></div>
+</div>
+<div class="card">
+  <div class="hd"><span class="nm">Xiaoyi · 活泼女声</span></div>
+  <div class="meta">zh-CN-XiaoyiNeural · 语速 +0%</div>
+  <div class="row" data-set="neural-xiaoyi" data-ext="mp3"></div>
+</div>
+<div class="card">
+  <div class="hd"><span class="nm">Yunxi · 阳光男声</span></div>
+  <div class="meta">zh-CN-YunxiNeural · 语速 +8%</div>
+  <div class="row" data-set="neural-yunxi" data-ext="mp3"></div>
+</div>
+
+<h2><span class="n">03</span>候选 B：CosyVoice2 本机离线</h2>
+<p class="why">本机已装好（5.3GB 模型 + RTX 5060，生成一句约 3 秒）。<b>完全离线、零调用成本</b>。代价是当前用的参考音色是 CosyVoice 仓库自带的某个真人声音——<b>只能内部评估，不能对外用</b>（声音人格权和代码授权是两回事）。要正式用得换成自己录的参考音。</p>
+<div class="card">
+  <div class="hd"><span class="nm">CosyVoice2-0.5B · 整句零样本</span><span class="tag t-off">离线 / 免费</span></div>
+  <div class="meta">整句一次生成（不是拼接）· 平均 3.64 秒</div>
+  <div class="row" data-set="cosy-whole" data-ext="wav"></div>
+</div>
+
+<h2><span class="n">04</span>关键对比：拼接 vs 整句</h2>
+<p class="why">这一条和音色<b>无关</b>，是<b>做法</b>的问题——而且它是现在这套素材真正的隐患。<code>_voice/stitch.js</code> 把金额切成「一千」「二百」「八十美元」分别合成、运行时拼起来。每个片段单独合成时模型都会给它一个<b>句尾降调</b>，三个降调连着出现就是「报电话号码」的听感。项目自己的 README 早就写了「<b>不要做数字拼接</b>」，但 stitch.js 做的正是拼接。</p>
+<div class="card">
+  <div class="row" style="gap:14px">
+    <button class="p" data-one="compare/_stitched-1280.wav">▶ 拼接（stitch.js 现在的做法）</button>
+    <button class="p" data-one="compare/cosy-whole-1280.wav">▶ 整句（同一个音色，一次生成）</button>
+  </div>
+  <div class="note" style="margin-bottom:0">
+    <b>顺带说清一件事：</b>我试过用基频范围/跳变率去客观量化「机械 vs 自然」，<b>量不出来</b>——
+    Huihui 的基频范围 13.3 半音、跳变率 4.0%，四组数字互相咬在一起，分不出高下。
+    原因是 Huihui 属于<b>单元挑选式</b>拼接，用的是真人录音片段，所以基频本身是真人的；
+    它难听在<b>单元接缝处的频谱突变</b>和<b>整句韵律错</b>，这两样我那两个指标都测不到。
+    所以这一页不给你看分数，<b>只能靠耳朵定</b>。唯一有参考价值的客观数是时长（见各卡片）。
+  </div>
+</div>
+
+<h2><span class="n">05</span>「到账感」= 提示音 + 人声</h2>
+<p class="why">支付宝那种感觉<b>不只是音色</b>，是一个固定组合：先一声短提示音把注意力抓过来，停约 140ms，再上人声。项目里已经有 5 个提示音。下面把它们和主推人声拼起来听——这才是现场实际会听到的东西。</p>
+<div class="card hero">
+  <div class="grp"><span class="lbl">提示音</span>
+    <button data-sting="">不加</button>
+    <button data-sting="sting-1-rise.wav" class="on">1 rise</button>
+    <button data-sting="sting-2-pulse.wav">2 pulse</button>
+    <button data-sting="sting-3-crystal.wav">3 crystal</button>
+    <button data-sting="sting-4-gravity.wav">4 gravity</button>
+    <button data-sting="sting-5-twotap.wav">5 twotap</button>
+  </div>
+  <div class="grp"><span class="lbl">人声</span>
+    <button data-vc="compare/neural-xiaoxiao-1280.mp3" class="on">Xiaoxiao</button>
+    <button data-vc="compare/neural-yunyang-1280.mp3">Yunyang</button>
+    <button data-vc="compare/cosy-whole-1280.wav">CosyVoice</button>
+    <button data-vc="compare/baseline-huihui-1280.wav">Huihui（现状）</button>
+  </div>
+  <div class="grp"><span class="lbl">间隔</span>
+    <button data-gap="0">0ms</button>
+    <button data-gap="140" class="on">140ms</button>
+    <button data-gap="260">260ms</button>
+    <button data-gap="420">420ms</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button class="p" id="playCombo" style="font-size:14.5px;padding:9px 20px">▶ 播放这个组合</button>
+  </div>
+</div>
+
+<h2><span class="n">06</span>语速该定哪一档</h2>
+<p class="why">播报要比朗读稍快，但过了 +20% 就开始有「赶」的电子感。Xiaoxiao / $1,280 扫四档。</p>
+<div class="card">
+  <div class="row">
+    <button class="p" data-one="compare/rate-xiaoxiao-1280-p0.mp3">▶ +0%</button>
+    <button class="p" data-one="compare/rate-xiaoxiao-1280-p8.mp3">▶ +8%</button>
+    <button class="p" data-one="compare/rate-xiaoxiao-1280-p15.mp3">▶ +15%</button>
+    <button class="p" data-one="compare/rate-xiaoxiao-1280-p25.mp3">▶ +25%</button>
+  </div>
+</div>
+
+<h2><span class="n">07</span>两个文案细节</h2>
+<div class="card">
+  <div class="desc"><b>金额写法</b>：文本里写阿拉伯数字还是中文数字，听前端归一化有没有差别（有差别就必须写中文，把读法握在自己手里）。</div>
+  <div class="row">
+    <button class="p" data-one="compare/numstyle-arabic.mp3">▶ 写「1280美元」</button>
+    <button class="p" data-one="compare/numstyle-chinese.mp3">▶ 写「一千二百八十美元」</button>
+  </div>
+</div>
+<div class="card">
+  <div class="desc"><b>品牌读法</b>：「Agentic Page」是中文句子里的英文品牌名，念不好就用「A P」兜底。</div>
+  <div class="row">
+    <button class="p" data-one="compare/neural-xiaoxiao-1280.mp3">▶ Agentic Page</button>
+    <button class="p" data-one="compare/brand-ap.mp3">▶ A P</button>
+  </div>
+</div>
+
+<h2><span class="n">08</span>不管选哪个音色，这件事都要改</h2>
+<div class="note warn">
+  <b>整句预渲染，别再拼接。</b>我把引擎跑了一遍数出来了——引擎是时间的纯函数，所以一场展会会播哪些金额是<b>可以提前算出来的</b>：
+  <table>
+    <tr><th>口径</th><th>数量</th><th>说明</th></tr>
+    <tr><td>一天(9h) 订单总数</td><td class="num">575 单</td><td>—</td></tr>
+    <tr><td>达到播报门槛(≥$110)</td><td class="num">228 条</td><td>平均 2.4 分钟一条，和 README 写的一致</td></tr>
+    <tr class="me"><td><b>不同金额（去重）</b></td><td class="num"><b>166 个</b></td><td>一天</td></tr>
+    <tr class="me"><td><b>不同金额（去重）</b></td><td class="num"><b>375 个</b></td><td>4 天展期累计</td></tr>
+    <tr><td>整句预渲染体积</td><td class="num">45MB</td><td>WAV；压成 mp3/opus 约 <b>4.5MB</b></td></tr>
+  </table>
+  也就是说：<b>整个展期只要 375 条整句音频，4.5MB</b>。拼接省下来的那点体积毫无意义，
+  却换来了「三个句尾降调连着出现」这个听感缺陷。
+  <br><br>
+  唯一的例外是 <code>B</code> 键（BD 手动触发大单）——它是全代码里唯一用 <code>Math.random()</code> 的地方，
+  金额不可预知。建议把它改成在一组预先渲染好的漂亮大额里轮换（$1,280 / $2,460 / $3,880 …）：
+  既能全量预渲染，<b>BD 也不会再抽到一个不好看的数字</b>。
+</div>
+
+<h2><span class="n">09</span>选完之后的授权问题（必须先过这一关）</h2>
+<div class="note bad">
+  三条路线的<b>可商用性完全不同</b>，展会是公开商业场合，这一条不能跳：
+  <table>
+    <tr><th>路线</th><th>能不能直接对外用</th><th>怎么走正规</th></tr>
+    <tr><td>SAPI Huihui</td><td>可以（随 Windows 授权）</td><td>—，但音质就是现在这样</td></tr>
+    <tr><td>本页的神经语音样本</td><td><b>不能</b>——这些是用 <code>edge-tts</code> 生成的，走的是 Edge 朗读接口，不是商用授权渠道</td><td>选定音色后用 <b>Azure 语音服务</b>正式生成同一个音色（<code>zh-CN-XiaoxiaoNeural</code> 就是同一个模型），免费额度每月 50 万字符，375 句约 8 千字符，<b>额度内</b></td></tr>
+    <tr><td>CosyVoice2</td><td><b>不能</b>——代码和权重是 Apache-2.0，但当前参考音是仓库自带的某个真人声音，声音人格权不在授权范围里</td><td>换成<b>自己录的 10 秒参考音</b>（同事口头同意 + 留个书面记录）。换完就完全干净，且离线免费</td></tr>
+    <tr><td>直接请人录</td><td>可以</td><td>375 句念不完，但如果改成「整句 = 固定句 + 金额」并把金额收敛到几十档，真人录是最像「支付宝」的——因为支付宝本来就是真人录的</td></tr>
+  </table>
+</div>
+
+</div>
+
+<div class="bar"><div class="in">
+  <span>正在播放：<span id="np">—</span></span>
+  <span id="st" style="color:var(--faint)"></span>
+</div></div>
+
+<script>
+'use strict';
+/* Web Audio 精确排期。用 <audio> 顺序播放的话 onended 有几十毫秒抖动，
+   而「提示音 + 停顿 + 人声」这个组合的说服力全在节奏上，抖 50ms 就从
+   「播报」变成「卡带」。start(t) 是采样级精确的。 */
+var AC = null, cache = {}, cur = [];
+function ctx(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+function np(t){ document.getElementById('np').textContent = t; }
+function st(t){ document.getElementById('st').textContent = t || ''; }
+
+function load(url){
+  if(cache[url]) return Promise.resolve(cache[url]);
+  return fetch(url).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.arrayBuffer();
+  }).then(function(a){
+    return new Promise(function(res,rej){ ctx().decodeAudioData(a,res,rej); });
+  }).then(function(b){ cache[url]=b; return b; });
+}
+function stopAll(){ cur.forEach(function(s){ try{s.stop();}catch(e){} }); cur = []; }
+
+/* ── file:// 兜底 ──────────────────────────────────────────────────────
+ * 双击打开时 location.protocol === 'file:'，此时 fetch 被 CORS 拦死
+ * （报 "Failed to fetch"）。<audio> 元素不受这条限制，所以退回用它顺序播放。
+ * 代价：时序精度从采样级掉到几十毫秒 —— 对「提示音 + 人声」的节奏演示有影响，
+ * 所以顶部会明确提示走服务器才准。 */
+var FILE_MODE = (location.protocol === 'file:');
+if (FILE_MODE) {
+  var g = document.getElementById('fileGate');
+  if (g) {
+    g.hidden = false;
+    g.style.borderLeftColor = '#FF7C93';
+    g.innerHTML = '<b>你是双击打开的（file://）。</b>能听，但<b>节奏不准</b>——'
+      + '浏览器在 file:// 下禁止 fetch，只能退回 &lt;audio&gt; 串播，'
+      + '「提示音 + 人声」之间会有几十毫秒抖动。<br>'
+      + '要听准确的节奏，先跑 <code>启动预览.bat</code>，然后开 '
+      + '<code>http://localhost:8099/_voice/试听-人声候选.html</code>';
+  }
+}
+
+var curAudio = [];
+function stopAudioEls(){ curAudio.forEach(function(a){ try{a.pause();}catch(e){} }); curAudio = []; }
+
+/** file:// 下的顺序播放：靠 onended 串起来 */
+function playSeqEl(seq, label){
+  stopAll(); stopAudioEls();
+  np(label); st('（file:// 模式，节奏有抖动）');
+  var i = 0, total = 0;
+  function next(){
+    if (i >= seq.length) { st('总长约 ' + total.toFixed(2) + ' 秒（含抖动）'); return; }
+    var item = seq[i++];
+    var a = new Audio(item.url);
+    curAudio.push(a);
+    a.onended = function(){
+      total += a.duration || 0;
+      if (item.gap) setTimeout(next, item.gap); else next();
+    };
+    a.onerror = function(){ np('✗ ' + label); st('读不到 ' + item.url); };
+    a.play().catch(function(e){ np('✗ ' + label); st(e.message); });
+  }
+  next();
+  return Promise.resolve();
+}
+
+/** 按序播放多个 url，seq[i].gap = 播完这段后停多少毫秒 */
+function playSeq(seq, label){
+  if (FILE_MODE) return playSeqEl(seq, label);
+  stopAll();
+  np(label); st('加载…');
+  return Promise.all(seq.map(function(x){ return load(x.url); }))
+    .then(function(bufs){
+      var c = ctx(), t = c.currentTime + 0.05, total = 0;
+      bufs.forEach(function(b,i){
+        var s = c.createBufferSource();
+        s.buffer = b; s.connect(c.destination); s.start(t);
+        cur.push(s);
+        t += b.duration + (seq[i].gap||0)/1000;
+        total += b.duration + (seq[i].gap||0)/1000;
+      });
+      st('总长 ' + total.toFixed(2) + ' 秒');
+    })
+    .catch(function(e){ np('✗ ' + label); st(e.message + '（文件缺失？）'); });
+}
+
+/* ── 三个金额一组的卡片，按 data-set 自动铺按钮 ───────────────────────── */
+var AMTS = [['86','$86'],['1280','$1,280'],['4520','$4,520']];
+document.querySelectorAll('[data-set]').forEach(function(row){
+  var set = row.getAttribute('data-set'), ext = row.getAttribute('data-ext');
+  AMTS.forEach(function(a){
+    var b = document.createElement('button');
+    b.className = 'p';
+    b.innerHTML = '▶ <span class="amt">' + a[1] + '</span>';
+    var url = 'compare/' + set + '-' + a[0] + '.' + ext;
+    b.onclick = function(){ playSeq([{url:url,gap:0}], set + ' · ' + a[1]); };
+    row.appendChild(b);
+  });
+});
+
+/* ── 钱币音 + 人声 组合 ─────────────────────────────────────────────── */
+var sel2 = { coin: 'coin-4-chime.wav', vc2: 'compare/neural-xiaoxiao-1280.mp3' };
+['coin','vc2'].forEach(function (k) {
+  document.querySelectorAll('[data-' + k + ']').forEach(function (b) {
+    b.onclick = function () {
+      b.parentNode.querySelectorAll('[data-' + k + ']').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      sel2[k] = b.getAttribute('data-' + k);
+    };
+  });
+});
+document.getElementById('playCoin').onclick = function () {
+  var seq = [];
+  if (sel2.coin) seq.push({url: sel2.coin, gap: 140});
+  seq.push({url: sel2.vc2, gap: 0});
+  playSeq(seq, (sel2.coin ? sel2.coin.replace('.wav','') + ' + ' : '')
+             + sel2.vc2.split('/').pop().replace(/\.(mp3|wav)$/,''));
+};
+
+/* ── 正式包：提示音 + 整句（现场实际听到的组合）──────────────────────── */
+var RUN = ['pack-edge/line-110.wav','pack-edge/line-527.wav','pack-edge/line-1280.wav',
+           'pack-edge/line-2460.wav','pack-edge/line-4260.wav'];
+document.querySelectorAll('[data-combo]').forEach(function (b) {
+  b.onclick = function () {
+    var u = b.getAttribute('data-combo');
+    playSeq([{url:'sting-1-rise.wav', gap:140}, {url:u, gap:0}],
+            '提示音 + ' + u.split('/').pop().replace('.wav',''));
+  };
+});
+document.getElementById('playRun').onclick = function () {
+  /* 每条之间留 700ms —— 只是为了听清边界，现场是 2.4 分钟一条 */
+  var seq = [];
+  RUN.forEach(function (u, i) {
+    seq.push({url:'sting-1-rise.wav', gap:140});
+    seq.push({url:u, gap: i < RUN.length - 1 ? 700 : 0});
+  });
+  playSeq(seq, '连播 5 条（正式包）');
+};
+
+/* ── 单条播放 ─────────────────────────────────────────────────────────── */
+document.querySelectorAll('[data-one]').forEach(function(b){
+  b.onclick = function(){
+    var u = b.getAttribute('data-one');
+    playSeq([{url:u,gap:0}], b.textContent.replace(/^▶\s*/,''));
+  };
+});
+
+/* ── 提示音 + 人声 组合 ───────────────────────────────────────────────── */
+function pickGroup(attr, el){
+  el.parentNode.querySelectorAll('[' + attr + ']').forEach(function(x){ x.classList.remove('on'); });
+  el.classList.add('on');
+}
+var sel = { sting:'sting-1-rise.wav', vc:'compare/neural-xiaoxiao-1280.mp3', gap:140 };
+['sting','vc','gap'].forEach(function(k){
+  document.querySelectorAll('[data-'+k+']').forEach(function(b){
+    b.onclick = function(){
+      pickGroup('data-'+k, b);
+      sel[k] = (k==='gap') ? +b.getAttribute('data-gap') : b.getAttribute('data-'+k);
+    };
+  });
+});
+document.getElementById('playCombo').onclick = function(){
+  var seq = [];
+  if(sel.sting) seq.push({url:sel.sting, gap:sel.gap});
+  seq.push({url:sel.vc, gap:0});
+  var vn = (sel.vc.split('/').pop() || '').replace(/\.(mp3|wav)$/,'');
+  playSeq(seq, (sel.sting ? sel.sting.replace('.wav','') + ' + ' : '') + vn
+               + (sel.sting ? '（间隔 ' + sel.gap + 'ms）' : ''));
+};
+</script>
+</html>

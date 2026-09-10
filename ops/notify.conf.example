@@ -1,0 +1,4 @@
+# Copy this file to notify.conf and set a private Feishu recipient ID.
+# Credentials are loaded from ../.feishu.env.
+ALERT_OPEN_ID=your_feishu_open_id
+# ALERT_CHAT_ID=your_feishu_chat_id

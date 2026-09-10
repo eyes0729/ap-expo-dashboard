@@ -1,0 +1,2063 @@
+{
+ "_note": "由 build-lines.js 生成，不要手改。整句预渲染清单，禁止回退到数字拼接。",
+ "generatedFor": {
+  "days": 4,
+  "showHours": 9,
+  "threshold": "tier>=rare (usd>=110)",
+  "extra": "AR exhibition orders"
+ },
+ "prefix": "Agentic Page 店铺到账，",
+ "manualLadder": [
+  28,
+  46,
+  65,
+  88,
+  97,
+  128,
+  165,
+  210,
+  258,
+  288,
+  325,
+  430,
+  545,
+  680,
+  765,
+  1280,
+  1860,
+  2460,
+  3180,
+  3880,
+  4260
+ ],
+ "stats": {
+  "ordersTotal": 2283,
+  "spokenTotal": 916,
+  "distinctAmounts": 400,
+  "min": 22,
+  "max": 4260
+ },
+ "lines": [
+  {
+   "usd": 22,
+   "file": "line-22",
+   "text": "Agentic Page 店铺到账，二十二美元"
+  },
+  {
+   "usd": 23,
+   "file": "line-23",
+   "text": "Agentic Page 店铺到账，二十三美元"
+  },
+  {
+   "usd": 28,
+   "file": "line-28",
+   "text": "Agentic Page 店铺到账，二十八美元",
+   "manual": true
+  },
+  {
+   "usd": 35,
+   "file": "line-35",
+   "text": "Agentic Page 店铺到账，三十五美元"
+  },
+  {
+   "usd": 46,
+   "file": "line-46",
+   "text": "Agentic Page 店铺到账，四十六美元",
+   "manual": true
+  },
+  {
+   "usd": 49,
+   "file": "line-49",
+   "text": "Agentic Page 店铺到账，四十九美元"
+  },
+  {
+   "usd": 57,
+   "file": "line-57",
+   "text": "Agentic Page 店铺到账，五十七美元"
+  },
+  {
+   "usd": 65,
+   "file": "line-65",
+   "text": "Agentic Page 店铺到账，六十五美元",
+   "manual": true
+  },
+  {
+   "usd": 66,
+   "file": "line-66",
+   "text": "Agentic Page 店铺到账，六十六美元"
+  },
+  {
+   "usd": 82,
+   "file": "line-82",
+   "text": "Agentic Page 店铺到账，八十二美元"
+  },
+  {
+   "usd": 88,
+   "file": "line-88",
+   "text": "Agentic Page 店铺到账，八十八美元",
+   "manual": true
+  },
+  {
+   "usd": 89,
+   "file": "line-89",
+   "text": "Agentic Page 店铺到账，八十九美元"
+  },
+  {
+   "usd": 97,
+   "file": "line-97",
+   "text": "Agentic Page 店铺到账，九十七美元",
+   "manual": true
+  },
+  {
+   "usd": 110,
+   "file": "line-110",
+   "text": "Agentic Page 店铺到账，一百一十美元"
+  },
+  {
+   "usd": 111,
+   "file": "line-111",
+   "text": "Agentic Page 店铺到账，一百一十一美元"
+  },
+  {
+   "usd": 112,
+   "file": "line-112",
+   "text": "Agentic Page 店铺到账，一百一十二美元"
+  },
+  {
+   "usd": 113,
+   "file": "line-113",
+   "text": "Agentic Page 店铺到账，一百一十三美元"
+  },
+  {
+   "usd": 114,
+   "file": "line-114",
+   "text": "Agentic Page 店铺到账，一百一十四美元"
+  },
+  {
+   "usd": 115,
+   "file": "line-115",
+   "text": "Agentic Page 店铺到账，一百一十五美元"
+  },
+  {
+   "usd": 116,
+   "file": "line-116",
+   "text": "Agentic Page 店铺到账，一百一十六美元"
+  },
+  {
+   "usd": 117,
+   "file": "line-117",
+   "text": "Agentic Page 店铺到账，一百一十七美元"
+  },
+  {
+   "usd": 118,
+   "file": "line-118",
+   "text": "Agentic Page 店铺到账，一百一十八美元"
+  },
+  {
+   "usd": 119,
+   "file": "line-119",
+   "text": "Agentic Page 店铺到账，一百一十九美元"
+  },
+  {
+   "usd": 120,
+   "file": "line-120",
+   "text": "Agentic Page 店铺到账，一百二十美元"
+  },
+  {
+   "usd": 121,
+   "file": "line-121",
+   "text": "Agentic Page 店铺到账，一百二十一美元"
+  },
+  {
+   "usd": 122,
+   "file": "line-122",
+   "text": "Agentic Page 店铺到账，一百二十二美元"
+  },
+  {
+   "usd": 123,
+   "file": "line-123",
+   "text": "Agentic Page 店铺到账，一百二十三美元"
+  },
+  {
+   "usd": 124,
+   "file": "line-124",
+   "text": "Agentic Page 店铺到账，一百二十四美元"
+  },
+  {
+   "usd": 125,
+   "file": "line-125",
+   "text": "Agentic Page 店铺到账，一百二十五美元"
+  },
+  {
+   "usd": 126,
+   "file": "line-126",
+   "text": "Agentic Page 店铺到账，一百二十六美元"
+  },
+  {
+   "usd": 127,
+   "file": "line-127",
+   "text": "Agentic Page 店铺到账，一百二十七美元"
+  },
+  {
+   "usd": 128,
+   "file": "line-128",
+   "text": "Agentic Page 店铺到账，一百二十八美元",
+   "manual": true
+  },
+  {
+   "usd": 129,
+   "file": "line-129",
+   "text": "Agentic Page 店铺到账，一百二十九美元"
+  },
+  {
+   "usd": 130,
+   "file": "line-130",
+   "text": "Agentic Page 店铺到账，一百三十美元"
+  },
+  {
+   "usd": 131,
+   "file": "line-131",
+   "text": "Agentic Page 店铺到账，一百三十一美元"
+  },
+  {
+   "usd": 132,
+   "file": "line-132",
+   "text": "Agentic Page 店铺到账，一百三十二美元"
+  },
+  {
+   "usd": 133,
+   "file": "line-133",
+   "text": "Agentic Page 店铺到账，一百三十三美元"
+  },
+  {
+   "usd": 134,
+   "file": "line-134",
+   "text": "Agentic Page 店铺到账，一百三十四美元"
+  },
+  {
+   "usd": 135,
+   "file": "line-135",
+   "text": "Agentic Page 店铺到账，一百三十五美元"
+  },
+  {
+   "usd": 136,
+   "file": "line-136",
+   "text": "Agentic Page 店铺到账，一百三十六美元"
+  },
+  {
+   "usd": 137,
+   "file": "line-137",
+   "text": "Agentic Page 店铺到账，一百三十七美元"
+  },
+  {
+   "usd": 138,
+   "file": "line-138",
+   "text": "Agentic Page 店铺到账，一百三十八美元"
+  },
+  {
+   "usd": 139,
+   "file": "line-139",
+   "text": "Agentic Page 店铺到账，一百三十九美元"
+  },
+  {
+   "usd": 140,
+   "file": "line-140",
+   "text": "Agentic Page 店铺到账，一百四十美元"
+  },
+  {
+   "usd": 141,
+   "file": "line-141",
+   "text": "Agentic Page 店铺到账，一百四十一美元"
+  },
+  {
+   "usd": 142,
+   "file": "line-142",
+   "text": "Agentic Page 店铺到账，一百四十二美元"
+  },
+  {
+   "usd": 143,
+   "file": "line-143",
+   "text": "Agentic Page 店铺到账，一百四十三美元"
+  },
+  {
+   "usd": 144,
+   "file": "line-144",
+   "text": "Agentic Page 店铺到账，一百四十四美元"
+  },
+  {
+   "usd": 145,
+   "file": "line-145",
+   "text": "Agentic Page 店铺到账，一百四十五美元"
+  },
+  {
+   "usd": 146,
+   "file": "line-146",
+   "text": "Agentic Page 店铺到账，一百四十六美元"
+  },
+  {
+   "usd": 147,
+   "file": "line-147",
+   "text": "Agentic Page 店铺到账，一百四十七美元"
+  },
+  {
+   "usd": 148,
+   "file": "line-148",
+   "text": "Agentic Page 店铺到账，一百四十八美元"
+  },
+  {
+   "usd": 149,
+   "file": "line-149",
+   "text": "Agentic Page 店铺到账，一百四十九美元"
+  },
+  {
+   "usd": 151,
+   "file": "line-151",
+   "text": "Agentic Page 店铺到账，一百五十一美元"
+  },
+  {
+   "usd": 152,
+   "file": "line-152",
+   "text": "Agentic Page 店铺到账，一百五十二美元"
+  },
+  {
+   "usd": 153,
+   "file": "line-153",
+   "text": "Agentic Page 店铺到账，一百五十三美元"
+  },
+  {
+   "usd": 154,
+   "file": "line-154",
+   "text": "Agentic Page 店铺到账，一百五十四美元"
+  },
+  {
+   "usd": 155,
+   "file": "line-155",
+   "text": "Agentic Page 店铺到账，一百五十五美元"
+  },
+  {
+   "usd": 156,
+   "file": "line-156",
+   "text": "Agentic Page 店铺到账，一百五十六美元"
+  },
+  {
+   "usd": 157,
+   "file": "line-157",
+   "text": "Agentic Page 店铺到账，一百五十七美元"
+  },
+  {
+   "usd": 158,
+   "file": "line-158",
+   "text": "Agentic Page 店铺到账，一百五十八美元"
+  },
+  {
+   "usd": 159,
+   "file": "line-159",
+   "text": "Agentic Page 店铺到账，一百五十九美元"
+  },
+  {
+   "usd": 160,
+   "file": "line-160",
+   "text": "Agentic Page 店铺到账，一百六十美元"
+  },
+  {
+   "usd": 161,
+   "file": "line-161",
+   "text": "Agentic Page 店铺到账，一百六十一美元"
+  },
+  {
+   "usd": 162,
+   "file": "line-162",
+   "text": "Agentic Page 店铺到账，一百六十二美元"
+  },
+  {
+   "usd": 163,
+   "file": "line-163",
+   "text": "Agentic Page 店铺到账，一百六十三美元"
+  },
+  {
+   "usd": 164,
+   "file": "line-164",
+   "text": "Agentic Page 店铺到账，一百六十四美元"
+  },
+  {
+   "usd": 165,
+   "file": "line-165",
+   "text": "Agentic Page 店铺到账，一百六十五美元",
+   "manual": true
+  },
+  {
+   "usd": 166,
+   "file": "line-166",
+   "text": "Agentic Page 店铺到账，一百六十六美元"
+  },
+  {
+   "usd": 167,
+   "file": "line-167",
+   "text": "Agentic Page 店铺到账，一百六十七美元"
+  },
+  {
+   "usd": 168,
+   "file": "line-168",
+   "text": "Agentic Page 店铺到账，一百六十八美元"
+  },
+  {
+   "usd": 169,
+   "file": "line-169",
+   "text": "Agentic Page 店铺到账，一百六十九美元"
+  },
+  {
+   "usd": 170,
+   "file": "line-170",
+   "text": "Agentic Page 店铺到账，一百七十美元"
+  },
+  {
+   "usd": 171,
+   "file": "line-171",
+   "text": "Agentic Page 店铺到账，一百七十一美元"
+  },
+  {
+   "usd": 172,
+   "file": "line-172",
+   "text": "Agentic Page 店铺到账，一百七十二美元"
+  },
+  {
+   "usd": 173,
+   "file": "line-173",
+   "text": "Agentic Page 店铺到账，一百七十三美元"
+  },
+  {
+   "usd": 174,
+   "file": "line-174",
+   "text": "Agentic Page 店铺到账，一百七十四美元"
+  },
+  {
+   "usd": 175,
+   "file": "line-175",
+   "text": "Agentic Page 店铺到账，一百七十五美元"
+  },
+  {
+   "usd": 176,
+   "file": "line-176",
+   "text": "Agentic Page 店铺到账，一百七十六美元"
+  },
+  {
+   "usd": 177,
+   "file": "line-177",
+   "text": "Agentic Page 店铺到账，一百七十七美元"
+  },
+  {
+   "usd": 178,
+   "file": "line-178",
+   "text": "Agentic Page 店铺到账，一百七十八美元"
+  },
+  {
+   "usd": 179,
+   "file": "line-179",
+   "text": "Agentic Page 店铺到账，一百七十九美元"
+  },
+  {
+   "usd": 180,
+   "file": "line-180",
+   "text": "Agentic Page 店铺到账，一百八十美元"
+  },
+  {
+   "usd": 181,
+   "file": "line-181",
+   "text": "Agentic Page 店铺到账，一百八十一美元"
+  },
+  {
+   "usd": 182,
+   "file": "line-182",
+   "text": "Agentic Page 店铺到账，一百八十二美元"
+  },
+  {
+   "usd": 183,
+   "file": "line-183",
+   "text": "Agentic Page 店铺到账，一百八十三美元"
+  },
+  {
+   "usd": 184,
+   "file": "line-184",
+   "text": "Agentic Page 店铺到账，一百八十四美元"
+  },
+  {
+   "usd": 185,
+   "file": "line-185",
+   "text": "Agentic Page 店铺到账，一百八十五美元"
+  },
+  {
+   "usd": 186,
+   "file": "line-186",
+   "text": "Agentic Page 店铺到账，一百八十六美元"
+  },
+  {
+   "usd": 187,
+   "file": "line-187",
+   "text": "Agentic Page 店铺到账，一百八十七美元"
+  },
+  {
+   "usd": 188,
+   "file": "line-188",
+   "text": "Agentic Page 店铺到账，一百八十八美元"
+  },
+  {
+   "usd": 189,
+   "file": "line-189",
+   "text": "Agentic Page 店铺到账，一百八十九美元"
+  },
+  {
+   "usd": 190,
+   "file": "line-190",
+   "text": "Agentic Page 店铺到账，一百九十美元"
+  },
+  {
+   "usd": 191,
+   "file": "line-191",
+   "text": "Agentic Page 店铺到账，一百九十一美元"
+  },
+  {
+   "usd": 194,
+   "file": "line-194",
+   "text": "Agentic Page 店铺到账，一百九十四美元"
+  },
+  {
+   "usd": 195,
+   "file": "line-195",
+   "text": "Agentic Page 店铺到账，一百九十五美元"
+  },
+  {
+   "usd": 196,
+   "file": "line-196",
+   "text": "Agentic Page 店铺到账，一百九十六美元"
+  },
+  {
+   "usd": 197,
+   "file": "line-197",
+   "text": "Agentic Page 店铺到账，一百九十七美元"
+  },
+  {
+   "usd": 198,
+   "file": "line-198",
+   "text": "Agentic Page 店铺到账，一百九十八美元"
+  },
+  {
+   "usd": 199,
+   "file": "line-199",
+   "text": "Agentic Page 店铺到账，一百九十九美元"
+  },
+  {
+   "usd": 200,
+   "file": "line-200",
+   "text": "Agentic Page 店铺到账，二百美元"
+  },
+  {
+   "usd": 201,
+   "file": "line-201",
+   "text": "Agentic Page 店铺到账，二百零一美元"
+  },
+  {
+   "usd": 202,
+   "file": "line-202",
+   "text": "Agentic Page 店铺到账，二百零二美元"
+  },
+  {
+   "usd": 203,
+   "file": "line-203",
+   "text": "Agentic Page 店铺到账，二百零三美元"
+  },
+  {
+   "usd": 204,
+   "file": "line-204",
+   "text": "Agentic Page 店铺到账，二百零四美元"
+  },
+  {
+   "usd": 205,
+   "file": "line-205",
+   "text": "Agentic Page 店铺到账，二百零五美元"
+  },
+  {
+   "usd": 207,
+   "file": "line-207",
+   "text": "Agentic Page 店铺到账，二百零七美元"
+  },
+  {
+   "usd": 208,
+   "file": "line-208",
+   "text": "Agentic Page 店铺到账，二百零八美元"
+  },
+  {
+   "usd": 209,
+   "file": "line-209",
+   "text": "Agentic Page 店铺到账，二百零九美元"
+  },
+  {
+   "usd": 210,
+   "file": "line-210",
+   "text": "Agentic Page 店铺到账，二百一十美元",
+   "manual": true
+  },
+  {
+   "usd": 211,
+   "file": "line-211",
+   "text": "Agentic Page 店铺到账，二百一十一美元"
+  },
+  {
+   "usd": 212,
+   "file": "line-212",
+   "text": "Agentic Page 店铺到账，二百一十二美元"
+  },
+  {
+   "usd": 213,
+   "file": "line-213",
+   "text": "Agentic Page 店铺到账，二百一十三美元"
+  },
+  {
+   "usd": 214,
+   "file": "line-214",
+   "text": "Agentic Page 店铺到账，二百一十四美元"
+  },
+  {
+   "usd": 215,
+   "file": "line-215",
+   "text": "Agentic Page 店铺到账，二百一十五美元"
+  },
+  {
+   "usd": 216,
+   "file": "line-216",
+   "text": "Agentic Page 店铺到账，二百一十六美元"
+  },
+  {
+   "usd": 217,
+   "file": "line-217",
+   "text": "Agentic Page 店铺到账，二百一十七美元"
+  },
+  {
+   "usd": 218,
+   "file": "line-218",
+   "text": "Agentic Page 店铺到账，二百一十八美元"
+  },
+  {
+   "usd": 219,
+   "file": "line-219",
+   "text": "Agentic Page 店铺到账，二百一十九美元"
+  },
+  {
+   "usd": 221,
+   "file": "line-221",
+   "text": "Agentic Page 店铺到账，二百二十一美元"
+  },
+  {
+   "usd": 222,
+   "file": "line-222",
+   "text": "Agentic Page 店铺到账，二百二十二美元"
+  },
+  {
+   "usd": 224,
+   "file": "line-224",
+   "text": "Agentic Page 店铺到账，二百二十四美元"
+  },
+  {
+   "usd": 225,
+   "file": "line-225",
+   "text": "Agentic Page 店铺到账，二百二十五美元"
+  },
+  {
+   "usd": 226,
+   "file": "line-226",
+   "text": "Agentic Page 店铺到账，二百二十六美元"
+  },
+  {
+   "usd": 228,
+   "file": "line-228",
+   "text": "Agentic Page 店铺到账，二百二十八美元"
+  },
+  {
+   "usd": 230,
+   "file": "line-230",
+   "text": "Agentic Page 店铺到账，二百三十美元"
+  },
+  {
+   "usd": 231,
+   "file": "line-231",
+   "text": "Agentic Page 店铺到账，二百三十一美元"
+  },
+  {
+   "usd": 232,
+   "file": "line-232",
+   "text": "Agentic Page 店铺到账，二百三十二美元"
+  },
+  {
+   "usd": 233,
+   "file": "line-233",
+   "text": "Agentic Page 店铺到账，二百三十三美元"
+  },
+  {
+   "usd": 234,
+   "file": "line-234",
+   "text": "Agentic Page 店铺到账，二百三十四美元"
+  },
+  {
+   "usd": 235,
+   "file": "line-235",
+   "text": "Agentic Page 店铺到账，二百三十五美元"
+  },
+  {
+   "usd": 237,
+   "file": "line-237",
+   "text": "Agentic Page 店铺到账，二百三十七美元"
+  },
+  {
+   "usd": 238,
+   "file": "line-238",
+   "text": "Agentic Page 店铺到账，二百三十八美元"
+  },
+  {
+   "usd": 239,
+   "file": "line-239",
+   "text": "Agentic Page 店铺到账，二百三十九美元"
+  },
+  {
+   "usd": 241,
+   "file": "line-241",
+   "text": "Agentic Page 店铺到账，二百四十一美元"
+  },
+  {
+   "usd": 242,
+   "file": "line-242",
+   "text": "Agentic Page 店铺到账，二百四十二美元"
+  },
+  {
+   "usd": 243,
+   "file": "line-243",
+   "text": "Agentic Page 店铺到账，二百四十三美元"
+  },
+  {
+   "usd": 244,
+   "file": "line-244",
+   "text": "Agentic Page 店铺到账，二百四十四美元"
+  },
+  {
+   "usd": 245,
+   "file": "line-245",
+   "text": "Agentic Page 店铺到账，二百四十五美元"
+  },
+  {
+   "usd": 246,
+   "file": "line-246",
+   "text": "Agentic Page 店铺到账，二百四十六美元"
+  },
+  {
+   "usd": 248,
+   "file": "line-248",
+   "text": "Agentic Page 店铺到账，二百四十八美元"
+  },
+  {
+   "usd": 249,
+   "file": "line-249",
+   "text": "Agentic Page 店铺到账，二百四十九美元"
+  },
+  {
+   "usd": 250,
+   "file": "line-250",
+   "text": "Agentic Page 店铺到账，二百五十美元"
+  },
+  {
+   "usd": 251,
+   "file": "line-251",
+   "text": "Agentic Page 店铺到账，二百五十一美元"
+  },
+  {
+   "usd": 252,
+   "file": "line-252",
+   "text": "Agentic Page 店铺到账，二百五十二美元"
+  },
+  {
+   "usd": 253,
+   "file": "line-253",
+   "text": "Agentic Page 店铺到账，二百五十三美元"
+  },
+  {
+   "usd": 254,
+   "file": "line-254",
+   "text": "Agentic Page 店铺到账，二百五十四美元"
+  },
+  {
+   "usd": 256,
+   "file": "line-256",
+   "text": "Agentic Page 店铺到账，二百五十六美元"
+  },
+  {
+   "usd": 257,
+   "file": "line-257",
+   "text": "Agentic Page 店铺到账，二百五十七美元"
+  },
+  {
+   "usd": 258,
+   "file": "line-258",
+   "text": "Agentic Page 店铺到账，二百五十八美元",
+   "manual": true
+  },
+  {
+   "usd": 259,
+   "file": "line-259",
+   "text": "Agentic Page 店铺到账，二百五十九美元"
+  },
+  {
+   "usd": 260,
+   "file": "line-260",
+   "text": "Agentic Page 店铺到账，二百六十美元"
+  },
+  {
+   "usd": 261,
+   "file": "line-261",
+   "text": "Agentic Page 店铺到账，二百六十一美元"
+  },
+  {
+   "usd": 262,
+   "file": "line-262",
+   "text": "Agentic Page 店铺到账，二百六十二美元"
+  },
+  {
+   "usd": 264,
+   "file": "line-264",
+   "text": "Agentic Page 店铺到账，二百六十四美元"
+  },
+  {
+   "usd": 265,
+   "file": "line-265",
+   "text": "Agentic Page 店铺到账，二百六十五美元"
+  },
+  {
+   "usd": 266,
+   "file": "line-266",
+   "text": "Agentic Page 店铺到账，二百六十六美元"
+  },
+  {
+   "usd": 267,
+   "file": "line-267",
+   "text": "Agentic Page 店铺到账，二百六十七美元"
+  },
+  {
+   "usd": 268,
+   "file": "line-268",
+   "text": "Agentic Page 店铺到账，二百六十八美元"
+  },
+  {
+   "usd": 269,
+   "file": "line-269",
+   "text": "Agentic Page 店铺到账，二百六十九美元"
+  },
+  {
+   "usd": 270,
+   "file": "line-270",
+   "text": "Agentic Page 店铺到账，二百七十美元"
+  },
+  {
+   "usd": 271,
+   "file": "line-271",
+   "text": "Agentic Page 店铺到账，二百七十一美元"
+  },
+  {
+   "usd": 273,
+   "file": "line-273",
+   "text": "Agentic Page 店铺到账，二百七十三美元"
+  },
+  {
+   "usd": 274,
+   "file": "line-274",
+   "text": "Agentic Page 店铺到账，二百七十四美元"
+  },
+  {
+   "usd": 275,
+   "file": "line-275",
+   "text": "Agentic Page 店铺到账，二百七十五美元"
+  },
+  {
+   "usd": 276,
+   "file": "line-276",
+   "text": "Agentic Page 店铺到账，二百七十六美元"
+  },
+  {
+   "usd": 277,
+   "file": "line-277",
+   "text": "Agentic Page 店铺到账，二百七十七美元"
+  },
+  {
+   "usd": 278,
+   "file": "line-278",
+   "text": "Agentic Page 店铺到账，二百七十八美元"
+  },
+  {
+   "usd": 279,
+   "file": "line-279",
+   "text": "Agentic Page 店铺到账，二百七十九美元"
+  },
+  {
+   "usd": 280,
+   "file": "line-280",
+   "text": "Agentic Page 店铺到账，二百八十美元"
+  },
+  {
+   "usd": 281,
+   "file": "line-281",
+   "text": "Agentic Page 店铺到账，二百八十一美元"
+  },
+  {
+   "usd": 283,
+   "file": "line-283",
+   "text": "Agentic Page 店铺到账，二百八十三美元"
+  },
+  {
+   "usd": 284,
+   "file": "line-284",
+   "text": "Agentic Page 店铺到账，二百八十四美元"
+  },
+  {
+   "usd": 285,
+   "file": "line-285",
+   "text": "Agentic Page 店铺到账，二百八十五美元"
+  },
+  {
+   "usd": 286,
+   "file": "line-286",
+   "text": "Agentic Page 店铺到账，二百八十六美元"
+  },
+  {
+   "usd": 287,
+   "file": "line-287",
+   "text": "Agentic Page 店铺到账，二百八十七美元"
+  },
+  {
+   "usd": 288,
+   "file": "line-288",
+   "text": "Agentic Page 店铺到账，二百八十八美元",
+   "manual": true
+  },
+  {
+   "usd": 289,
+   "file": "line-289",
+   "text": "Agentic Page 店铺到账，二百八十九美元"
+  },
+  {
+   "usd": 290,
+   "file": "line-290",
+   "text": "Agentic Page 店铺到账，二百九十美元"
+  },
+  {
+   "usd": 292,
+   "file": "line-292",
+   "text": "Agentic Page 店铺到账，二百九十二美元"
+  },
+  {
+   "usd": 293,
+   "file": "line-293",
+   "text": "Agentic Page 店铺到账，二百九十三美元"
+  },
+  {
+   "usd": 294,
+   "file": "line-294",
+   "text": "Agentic Page 店铺到账，二百九十四美元"
+  },
+  {
+   "usd": 295,
+   "file": "line-295",
+   "text": "Agentic Page 店铺到账，二百九十五美元"
+  },
+  {
+   "usd": 296,
+   "file": "line-296",
+   "text": "Agentic Page 店铺到账，二百九十六美元"
+  },
+  {
+   "usd": 298,
+   "file": "line-298",
+   "text": "Agentic Page 店铺到账，二百九十八美元"
+  },
+  {
+   "usd": 299,
+   "file": "line-299",
+   "text": "Agentic Page 店铺到账，二百九十九美元"
+  },
+  {
+   "usd": 300,
+   "file": "line-300",
+   "text": "Agentic Page 店铺到账，三百美元"
+  },
+  {
+   "usd": 302,
+   "file": "line-302",
+   "text": "Agentic Page 店铺到账，三百零二美元"
+  },
+  {
+   "usd": 303,
+   "file": "line-303",
+   "text": "Agentic Page 店铺到账，三百零三美元"
+  },
+  {
+   "usd": 304,
+   "file": "line-304",
+   "text": "Agentic Page 店铺到账，三百零四美元"
+  },
+  {
+   "usd": 305,
+   "file": "line-305",
+   "text": "Agentic Page 店铺到账，三百零五美元"
+  },
+  {
+   "usd": 306,
+   "file": "line-306",
+   "text": "Agentic Page 店铺到账，三百零六美元"
+  },
+  {
+   "usd": 307,
+   "file": "line-307",
+   "text": "Agentic Page 店铺到账，三百零七美元"
+  },
+  {
+   "usd": 308,
+   "file": "line-308",
+   "text": "Agentic Page 店铺到账，三百零八美元"
+  },
+  {
+   "usd": 309,
+   "file": "line-309",
+   "text": "Agentic Page 店铺到账，三百零九美元"
+  },
+  {
+   "usd": 310,
+   "file": "line-310",
+   "text": "Agentic Page 店铺到账，三百一十美元"
+  },
+  {
+   "usd": 311,
+   "file": "line-311",
+   "text": "Agentic Page 店铺到账，三百一十一美元"
+  },
+  {
+   "usd": 312,
+   "file": "line-312",
+   "text": "Agentic Page 店铺到账，三百一十二美元"
+  },
+  {
+   "usd": 313,
+   "file": "line-313",
+   "text": "Agentic Page 店铺到账，三百一十三美元"
+  },
+  {
+   "usd": 314,
+   "file": "line-314",
+   "text": "Agentic Page 店铺到账，三百一十四美元"
+  },
+  {
+   "usd": 315,
+   "file": "line-315",
+   "text": "Agentic Page 店铺到账，三百一十五美元"
+  },
+  {
+   "usd": 320,
+   "file": "line-320",
+   "text": "Agentic Page 店铺到账，三百二十美元"
+  },
+  {
+   "usd": 323,
+   "file": "line-323",
+   "text": "Agentic Page 店铺到账，三百二十三美元"
+  },
+  {
+   "usd": 324,
+   "file": "line-324",
+   "text": "Agentic Page 店铺到账，三百二十四美元"
+  },
+  {
+   "usd": 325,
+   "file": "line-325",
+   "text": "Agentic Page 店铺到账，三百二十五美元",
+   "manual": true
+  },
+  {
+   "usd": 327,
+   "file": "line-327",
+   "text": "Agentic Page 店铺到账，三百二十七美元"
+  },
+  {
+   "usd": 328,
+   "file": "line-328",
+   "text": "Agentic Page 店铺到账，三百二十八美元"
+  },
+  {
+   "usd": 330,
+   "file": "line-330",
+   "text": "Agentic Page 店铺到账，三百三十美元"
+  },
+  {
+   "usd": 331,
+   "file": "line-331",
+   "text": "Agentic Page 店铺到账，三百三十一美元"
+  },
+  {
+   "usd": 333,
+   "file": "line-333",
+   "text": "Agentic Page 店铺到账，三百三十三美元"
+  },
+  {
+   "usd": 334,
+   "file": "line-334",
+   "text": "Agentic Page 店铺到账，三百三十四美元"
+  },
+  {
+   "usd": 335,
+   "file": "line-335",
+   "text": "Agentic Page 店铺到账，三百三十五美元"
+  },
+  {
+   "usd": 336,
+   "file": "line-336",
+   "text": "Agentic Page 店铺到账，三百三十六美元"
+  },
+  {
+   "usd": 339,
+   "file": "line-339",
+   "text": "Agentic Page 店铺到账，三百三十九美元"
+  },
+  {
+   "usd": 340,
+   "file": "line-340",
+   "text": "Agentic Page 店铺到账，三百四十美元"
+  },
+  {
+   "usd": 342,
+   "file": "line-342",
+   "text": "Agentic Page 店铺到账，三百四十二美元"
+  },
+  {
+   "usd": 343,
+   "file": "line-343",
+   "text": "Agentic Page 店铺到账，三百四十三美元"
+  },
+  {
+   "usd": 344,
+   "file": "line-344",
+   "text": "Agentic Page 店铺到账，三百四十四美元"
+  },
+  {
+   "usd": 345,
+   "file": "line-345",
+   "text": "Agentic Page 店铺到账，三百四十五美元"
+  },
+  {
+   "usd": 347,
+   "file": "line-347",
+   "text": "Agentic Page 店铺到账，三百四十七美元"
+  },
+  {
+   "usd": 348,
+   "file": "line-348",
+   "text": "Agentic Page 店铺到账，三百四十八美元"
+  },
+  {
+   "usd": 349,
+   "file": "line-349",
+   "text": "Agentic Page 店铺到账，三百四十九美元"
+  },
+  {
+   "usd": 350,
+   "file": "line-350",
+   "text": "Agentic Page 店铺到账，三百五十美元"
+  },
+  {
+   "usd": 351,
+   "file": "line-351",
+   "text": "Agentic Page 店铺到账，三百五十一美元"
+  },
+  {
+   "usd": 352,
+   "file": "line-352",
+   "text": "Agentic Page 店铺到账，三百五十二美元"
+  },
+  {
+   "usd": 353,
+   "file": "line-353",
+   "text": "Agentic Page 店铺到账，三百五十三美元"
+  },
+  {
+   "usd": 354,
+   "file": "line-354",
+   "text": "Agentic Page 店铺到账，三百五十四美元"
+  },
+  {
+   "usd": 356,
+   "file": "line-356",
+   "text": "Agentic Page 店铺到账，三百五十六美元"
+  },
+  {
+   "usd": 357,
+   "file": "line-357",
+   "text": "Agentic Page 店铺到账，三百五十七美元"
+  },
+  {
+   "usd": 359,
+   "file": "line-359",
+   "text": "Agentic Page 店铺到账，三百五十九美元"
+  },
+  {
+   "usd": 360,
+   "file": "line-360",
+   "text": "Agentic Page 店铺到账，三百六十美元"
+  },
+  {
+   "usd": 361,
+   "file": "line-361",
+   "text": "Agentic Page 店铺到账，三百六十一美元"
+  },
+  {
+   "usd": 362,
+   "file": "line-362",
+   "text": "Agentic Page 店铺到账，三百六十二美元"
+  },
+  {
+   "usd": 363,
+   "file": "line-363",
+   "text": "Agentic Page 店铺到账，三百六十三美元"
+  },
+  {
+   "usd": 364,
+   "file": "line-364",
+   "text": "Agentic Page 店铺到账，三百六十四美元"
+  },
+  {
+   "usd": 365,
+   "file": "line-365",
+   "text": "Agentic Page 店铺到账，三百六十五美元"
+  },
+  {
+   "usd": 366,
+   "file": "line-366",
+   "text": "Agentic Page 店铺到账，三百六十六美元"
+  },
+  {
+   "usd": 367,
+   "file": "line-367",
+   "text": "Agentic Page 店铺到账，三百六十七美元"
+  },
+  {
+   "usd": 368,
+   "file": "line-368",
+   "text": "Agentic Page 店铺到账，三百六十八美元"
+  },
+  {
+   "usd": 369,
+   "file": "line-369",
+   "text": "Agentic Page 店铺到账，三百六十九美元"
+  },
+  {
+   "usd": 370,
+   "file": "line-370",
+   "text": "Agentic Page 店铺到账，三百七十美元"
+  },
+  {
+   "usd": 371,
+   "file": "line-371",
+   "text": "Agentic Page 店铺到账，三百七十一美元"
+  },
+  {
+   "usd": 374,
+   "file": "line-374",
+   "text": "Agentic Page 店铺到账，三百七十四美元"
+  },
+  {
+   "usd": 375,
+   "file": "line-375",
+   "text": "Agentic Page 店铺到账，三百七十五美元"
+  },
+  {
+   "usd": 376,
+   "file": "line-376",
+   "text": "Agentic Page 店铺到账，三百七十六美元"
+  },
+  {
+   "usd": 377,
+   "file": "line-377",
+   "text": "Agentic Page 店铺到账，三百七十七美元"
+  },
+  {
+   "usd": 378,
+   "file": "line-378",
+   "text": "Agentic Page 店铺到账，三百七十八美元"
+  },
+  {
+   "usd": 379,
+   "file": "line-379",
+   "text": "Agentic Page 店铺到账，三百七十九美元"
+  },
+  {
+   "usd": 384,
+   "file": "line-384",
+   "text": "Agentic Page 店铺到账，三百八十四美元"
+  },
+  {
+   "usd": 385,
+   "file": "line-385",
+   "text": "Agentic Page 店铺到账，三百八十五美元"
+  },
+  {
+   "usd": 386,
+   "file": "line-386",
+   "text": "Agentic Page 店铺到账，三百八十六美元"
+  },
+  {
+   "usd": 387,
+   "file": "line-387",
+   "text": "Agentic Page 店铺到账，三百八十七美元"
+  },
+  {
+   "usd": 389,
+   "file": "line-389",
+   "text": "Agentic Page 店铺到账，三百八十九美元"
+  },
+  {
+   "usd": 390,
+   "file": "line-390",
+   "text": "Agentic Page 店铺到账，三百九十美元"
+  },
+  {
+   "usd": 393,
+   "file": "line-393",
+   "text": "Agentic Page 店铺到账，三百九十三美元"
+  },
+  {
+   "usd": 396,
+   "file": "line-396",
+   "text": "Agentic Page 店铺到账，三百九十六美元"
+  },
+  {
+   "usd": 397,
+   "file": "line-397",
+   "text": "Agentic Page 店铺到账，三百九十七美元"
+  },
+  {
+   "usd": 398,
+   "file": "line-398",
+   "text": "Agentic Page 店铺到账，三百九十八美元"
+  },
+  {
+   "usd": 399,
+   "file": "line-399",
+   "text": "Agentic Page 店铺到账，三百九十九美元"
+  },
+  {
+   "usd": 400,
+   "file": "line-400",
+   "text": "Agentic Page 店铺到账，四百美元"
+  },
+  {
+   "usd": 401,
+   "file": "line-401",
+   "text": "Agentic Page 店铺到账，四百零一美元"
+  },
+  {
+   "usd": 402,
+   "file": "line-402",
+   "text": "Agentic Page 店铺到账，四百零二美元"
+  },
+  {
+   "usd": 403,
+   "file": "line-403",
+   "text": "Agentic Page 店铺到账，四百零三美元"
+  },
+  {
+   "usd": 404,
+   "file": "line-404",
+   "text": "Agentic Page 店铺到账，四百零四美元"
+  },
+  {
+   "usd": 405,
+   "file": "line-405",
+   "text": "Agentic Page 店铺到账，四百零五美元"
+  },
+  {
+   "usd": 406,
+   "file": "line-406",
+   "text": "Agentic Page 店铺到账，四百零六美元"
+  },
+  {
+   "usd": 407,
+   "file": "line-407",
+   "text": "Agentic Page 店铺到账，四百零七美元"
+  },
+  {
+   "usd": 408,
+   "file": "line-408",
+   "text": "Agentic Page 店铺到账，四百零八美元"
+  },
+  {
+   "usd": 409,
+   "file": "line-409",
+   "text": "Agentic Page 店铺到账，四百零九美元"
+  },
+  {
+   "usd": 411,
+   "file": "line-411",
+   "text": "Agentic Page 店铺到账，四百一十一美元"
+  },
+  {
+   "usd": 413,
+   "file": "line-413",
+   "text": "Agentic Page 店铺到账，四百一十三美元"
+  },
+  {
+   "usd": 414,
+   "file": "line-414",
+   "text": "Agentic Page 店铺到账，四百一十四美元"
+  },
+  {
+   "usd": 415,
+   "file": "line-415",
+   "text": "Agentic Page 店铺到账，四百一十五美元"
+  },
+  {
+   "usd": 417,
+   "file": "line-417",
+   "text": "Agentic Page 店铺到账，四百一十七美元"
+  },
+  {
+   "usd": 419,
+   "file": "line-419",
+   "text": "Agentic Page 店铺到账，四百一十九美元"
+  },
+  {
+   "usd": 421,
+   "file": "line-421",
+   "text": "Agentic Page 店铺到账，四百二十一美元"
+  },
+  {
+   "usd": 422,
+   "file": "line-422",
+   "text": "Agentic Page 店铺到账，四百二十二美元"
+  },
+  {
+   "usd": 423,
+   "file": "line-423",
+   "text": "Agentic Page 店铺到账，四百二十三美元"
+  },
+  {
+   "usd": 425,
+   "file": "line-425",
+   "text": "Agentic Page 店铺到账，四百二十五美元"
+  },
+  {
+   "usd": 426,
+   "file": "line-426",
+   "text": "Agentic Page 店铺到账，四百二十六美元"
+  },
+  {
+   "usd": 429,
+   "file": "line-429",
+   "text": "Agentic Page 店铺到账，四百二十九美元"
+  },
+  {
+   "usd": 430,
+   "file": "line-430",
+   "text": "Agentic Page 店铺到账，四百三十美元",
+   "manual": true
+  },
+  {
+   "usd": 432,
+   "file": "line-432",
+   "text": "Agentic Page 店铺到账，四百三十二美元"
+  },
+  {
+   "usd": 438,
+   "file": "line-438",
+   "text": "Agentic Page 店铺到账，四百三十八美元"
+  },
+  {
+   "usd": 439,
+   "file": "line-439",
+   "text": "Agentic Page 店铺到账，四百三十九美元"
+  },
+  {
+   "usd": 440,
+   "file": "line-440",
+   "text": "Agentic Page 店铺到账，四百四十美元"
+  },
+  {
+   "usd": 442,
+   "file": "line-442",
+   "text": "Agentic Page 店铺到账，四百四十二美元"
+  },
+  {
+   "usd": 445,
+   "file": "line-445",
+   "text": "Agentic Page 店铺到账，四百四十五美元"
+  },
+  {
+   "usd": 446,
+   "file": "line-446",
+   "text": "Agentic Page 店铺到账，四百四十六美元"
+  },
+  {
+   "usd": 447,
+   "file": "line-447",
+   "text": "Agentic Page 店铺到账，四百四十七美元"
+  },
+  {
+   "usd": 453,
+   "file": "line-453",
+   "text": "Agentic Page 店铺到账，四百五十三美元"
+  },
+  {
+   "usd": 454,
+   "file": "line-454",
+   "text": "Agentic Page 店铺到账，四百五十四美元"
+  },
+  {
+   "usd": 463,
+   "file": "line-463",
+   "text": "Agentic Page 店铺到账，四百六十三美元"
+  },
+  {
+   "usd": 465,
+   "file": "line-465",
+   "text": "Agentic Page 店铺到账，四百六十五美元"
+  },
+  {
+   "usd": 468,
+   "file": "line-468",
+   "text": "Agentic Page 店铺到账，四百六十八美元"
+  },
+  {
+   "usd": 472,
+   "file": "line-472",
+   "text": "Agentic Page 店铺到账，四百七十二美元"
+  },
+  {
+   "usd": 473,
+   "file": "line-473",
+   "text": "Agentic Page 店铺到账，四百七十三美元"
+  },
+  {
+   "usd": 476,
+   "file": "line-476",
+   "text": "Agentic Page 店铺到账，四百七十六美元"
+  },
+  {
+   "usd": 477,
+   "file": "line-477",
+   "text": "Agentic Page 店铺到账，四百七十七美元"
+  },
+  {
+   "usd": 484,
+   "file": "line-484",
+   "text": "Agentic Page 店铺到账，四百八十四美元"
+  },
+  {
+   "usd": 486,
+   "file": "line-486",
+   "text": "Agentic Page 店铺到账，四百八十六美元"
+  },
+  {
+   "usd": 487,
+   "file": "line-487",
+   "text": "Agentic Page 店铺到账，四百八十七美元"
+  },
+  {
+   "usd": 488,
+   "file": "line-488",
+   "text": "Agentic Page 店铺到账，四百八十八美元"
+  },
+  {
+   "usd": 490,
+   "file": "line-490",
+   "text": "Agentic Page 店铺到账，四百九十美元"
+  },
+  {
+   "usd": 491,
+   "file": "line-491",
+   "text": "Agentic Page 店铺到账，四百九十一美元"
+  },
+  {
+   "usd": 494,
+   "file": "line-494",
+   "text": "Agentic Page 店铺到账，四百九十四美元"
+  },
+  {
+   "usd": 495,
+   "file": "line-495",
+   "text": "Agentic Page 店铺到账，四百九十五美元"
+  },
+  {
+   "usd": 497,
+   "file": "line-497",
+   "text": "Agentic Page 店铺到账，四百九十七美元"
+  },
+  {
+   "usd": 500,
+   "file": "line-500",
+   "text": "Agentic Page 店铺到账，五百美元"
+  },
+  {
+   "usd": 504,
+   "file": "line-504",
+   "text": "Agentic Page 店铺到账，五百零四美元"
+  },
+  {
+   "usd": 506,
+   "file": "line-506",
+   "text": "Agentic Page 店铺到账，五百零六美元"
+  },
+  {
+   "usd": 508,
+   "file": "line-508",
+   "text": "Agentic Page 店铺到账，五百零八美元"
+  },
+  {
+   "usd": 509,
+   "file": "line-509",
+   "text": "Agentic Page 店铺到账，五百零九美元"
+  },
+  {
+   "usd": 511,
+   "file": "line-511",
+   "text": "Agentic Page 店铺到账，五百一十一美元"
+  },
+  {
+   "usd": 513,
+   "file": "line-513",
+   "text": "Agentic Page 店铺到账，五百一十三美元"
+  },
+  {
+   "usd": 518,
+   "file": "line-518",
+   "text": "Agentic Page 店铺到账，五百一十八美元"
+  },
+  {
+   "usd": 520,
+   "file": "line-520",
+   "text": "Agentic Page 店铺到账，五百二十美元"
+  },
+  {
+   "usd": 527,
+   "file": "line-527",
+   "text": "Agentic Page 店铺到账，五百二十七美元"
+  },
+  {
+   "usd": 531,
+   "file": "line-531",
+   "text": "Agentic Page 店铺到账，五百三十一美元"
+  },
+  {
+   "usd": 533,
+   "file": "line-533",
+   "text": "Agentic Page 店铺到账，五百三十三美元"
+  },
+  {
+   "usd": 538,
+   "file": "line-538",
+   "text": "Agentic Page 店铺到账，五百三十八美元"
+  },
+  {
+   "usd": 545,
+   "file": "line-545",
+   "text": "Agentic Page 店铺到账，五百四十五美元",
+   "manual": true
+  },
+  {
+   "usd": 547,
+   "file": "line-547",
+   "text": "Agentic Page 店铺到账，五百四十七美元"
+  },
+  {
+   "usd": 559,
+   "file": "line-559",
+   "text": "Agentic Page 店铺到账，五百五十九美元"
+  },
+  {
+   "usd": 564,
+   "file": "line-564",
+   "text": "Agentic Page 店铺到账，五百六十四美元"
+  },
+  {
+   "usd": 566,
+   "file": "line-566",
+   "text": "Agentic Page 店铺到账，五百六十六美元"
+  },
+  {
+   "usd": 568,
+   "file": "line-568",
+   "text": "Agentic Page 店铺到账，五百六十八美元"
+  },
+  {
+   "usd": 569,
+   "file": "line-569",
+   "text": "Agentic Page 店铺到账，五百六十九美元"
+  },
+  {
+   "usd": 572,
+   "file": "line-572",
+   "text": "Agentic Page 店铺到账，五百七十二美元"
+  },
+  {
+   "usd": 574,
+   "file": "line-574",
+   "text": "Agentic Page 店铺到账，五百七十四美元"
+  },
+  {
+   "usd": 575,
+   "file": "line-575",
+   "text": "Agentic Page 店铺到账，五百七十五美元"
+  },
+  {
+   "usd": 576,
+   "file": "line-576",
+   "text": "Agentic Page 店铺到账，五百七十六美元"
+  },
+  {
+   "usd": 581,
+   "file": "line-581",
+   "text": "Agentic Page 店铺到账，五百八十一美元"
+  },
+  {
+   "usd": 584,
+   "file": "line-584",
+   "text": "Agentic Page 店铺到账，五百八十四美元"
+  },
+  {
+   "usd": 586,
+   "file": "line-586",
+   "text": "Agentic Page 店铺到账，五百八十六美元"
+  },
+  {
+   "usd": 588,
+   "file": "line-588",
+   "text": "Agentic Page 店铺到账，五百八十八美元"
+  },
+  {
+   "usd": 592,
+   "file": "line-592",
+   "text": "Agentic Page 店铺到账，五百九十二美元"
+  },
+  {
+   "usd": 596,
+   "file": "line-596",
+   "text": "Agentic Page 店铺到账，五百九十六美元"
+  },
+  {
+   "usd": 600,
+   "file": "line-600",
+   "text": "Agentic Page 店铺到账，六百美元"
+  },
+  {
+   "usd": 604,
+   "file": "line-604",
+   "text": "Agentic Page 店铺到账，六百零四美元"
+  },
+  {
+   "usd": 606,
+   "file": "line-606",
+   "text": "Agentic Page 店铺到账，六百零六美元"
+  },
+  {
+   "usd": 608,
+   "file": "line-608",
+   "text": "Agentic Page 店铺到账，六百零八美元"
+  },
+  {
+   "usd": 609,
+   "file": "line-609",
+   "text": "Agentic Page 店铺到账，六百零九美元"
+  },
+  {
+   "usd": 611,
+   "file": "line-611",
+   "text": "Agentic Page 店铺到账，六百一十一美元"
+  },
+  {
+   "usd": 613,
+   "file": "line-613",
+   "text": "Agentic Page 店铺到账，六百一十三美元"
+  },
+  {
+   "usd": 614,
+   "file": "line-614",
+   "text": "Agentic Page 店铺到账，六百一十四美元"
+  },
+  {
+   "usd": 632,
+   "file": "line-632",
+   "text": "Agentic Page 店铺到账，六百三十二美元"
+  },
+  {
+   "usd": 638,
+   "file": "line-638",
+   "text": "Agentic Page 店铺到账，六百三十八美元"
+  },
+  {
+   "usd": 642,
+   "file": "line-642",
+   "text": "Agentic Page 店铺到账，六百四十二美元"
+  },
+  {
+   "usd": 645,
+   "file": "line-645",
+   "text": "Agentic Page 店铺到账，六百四十五美元"
+  },
+  {
+   "usd": 650,
+   "file": "line-650",
+   "text": "Agentic Page 店铺到账，六百五十美元"
+  },
+  {
+   "usd": 658,
+   "file": "line-658",
+   "text": "Agentic Page 店铺到账，六百五十八美元"
+  },
+  {
+   "usd": 666,
+   "file": "line-666",
+   "text": "Agentic Page 店铺到账，六百六十六美元"
+  },
+  {
+   "usd": 673,
+   "file": "line-673",
+   "text": "Agentic Page 店铺到账，六百七十三美元"
+  },
+  {
+   "usd": 676,
+   "file": "line-676",
+   "text": "Agentic Page 店铺到账，六百七十六美元"
+  },
+  {
+   "usd": 679,
+   "file": "line-679",
+   "text": "Agentic Page 店铺到账，六百七十九美元"
+  },
+  {
+   "usd": 680,
+   "file": "line-680",
+   "text": "Agentic Page 店铺到账，六百八十美元",
+   "manual": true
+  },
+  {
+   "usd": 689,
+   "file": "line-689",
+   "text": "Agentic Page 店铺到账，六百八十九美元"
+  },
+  {
+   "usd": 690,
+   "file": "line-690",
+   "text": "Agentic Page 店铺到账，六百九十美元"
+  },
+  {
+   "usd": 698,
+   "file": "line-698",
+   "text": "Agentic Page 店铺到账，六百九十八美元"
+  },
+  {
+   "usd": 700,
+   "file": "line-700",
+   "text": "Agentic Page 店铺到账，七百美元"
+  },
+  {
+   "usd": 704,
+   "file": "line-704",
+   "text": "Agentic Page 店铺到账，七百零四美元"
+  },
+  {
+   "usd": 721,
+   "file": "line-721",
+   "text": "Agentic Page 店铺到账，七百二十一美元"
+  },
+  {
+   "usd": 723,
+   "file": "line-723",
+   "text": "Agentic Page 店铺到账，七百二十三美元"
+  },
+  {
+   "usd": 746,
+   "file": "line-746",
+   "text": "Agentic Page 店铺到账，七百四十六美元"
+  },
+  {
+   "usd": 750,
+   "file": "line-750",
+   "text": "Agentic Page 店铺到账，七百五十美元"
+  },
+  {
+   "usd": 765,
+   "file": "line-765",
+   "text": "Agentic Page 店铺到账，七百六十五美元",
+   "manual": true
+  },
+  {
+   "usd": 790,
+   "file": "line-790",
+   "text": "Agentic Page 店铺到账，七百九十美元"
+  },
+  {
+   "usd": 801,
+   "file": "line-801",
+   "text": "Agentic Page 店铺到账，八百零一美元"
+  },
+  {
+   "usd": 807,
+   "file": "line-807",
+   "text": "Agentic Page 店铺到账，八百零七美元"
+  },
+  {
+   "usd": 812,
+   "file": "line-812",
+   "text": "Agentic Page 店铺到账，八百一十二美元"
+  },
+  {
+   "usd": 817,
+   "file": "line-817",
+   "text": "Agentic Page 店铺到账，八百一十七美元"
+  },
+  {
+   "usd": 838,
+   "file": "line-838",
+   "text": "Agentic Page 店铺到账，八百三十八美元"
+  },
+  {
+   "usd": 839,
+   "file": "line-839",
+   "text": "Agentic Page 店铺到账，八百三十九美元"
+  },
+  {
+   "usd": 848,
+   "file": "line-848",
+   "text": "Agentic Page 店铺到账，八百四十八美元"
+  },
+  {
+   "usd": 850,
+   "file": "line-850",
+   "text": "Agentic Page 店铺到账，八百五十美元"
+  },
+  {
+   "usd": 872,
+   "file": "line-872",
+   "text": "Agentic Page 店铺到账，八百七十二美元"
+  },
+  {
+   "usd": 886,
+   "file": "line-886",
+   "text": "Agentic Page 店铺到账，八百八十六美元"
+  },
+  {
+   "usd": 892,
+   "file": "line-892",
+   "text": "Agentic Page 店铺到账，八百九十二美元"
+  },
+  {
+   "usd": 927,
+   "file": "line-927",
+   "text": "Agentic Page 店铺到账，九百二十七美元"
+  },
+  {
+   "usd": 953,
+   "file": "line-953",
+   "text": "Agentic Page 店铺到账，九百五十三美元"
+  },
+  {
+   "usd": 986,
+   "file": "line-986",
+   "text": "Agentic Page 店铺到账，九百八十六美元"
+  },
+  {
+   "usd": 1024,
+   "file": "line-1024",
+   "text": "Agentic Page 店铺到账，一千零二十四美元"
+  },
+  {
+   "usd": 1060,
+   "file": "line-1060",
+   "text": "Agentic Page 店铺到账，一千零六十美元"
+  },
+  {
+   "usd": 1065,
+   "file": "line-1065",
+   "text": "Agentic Page 店铺到账，一千零六十五美元"
+  },
+  {
+   "usd": 1066,
+   "file": "line-1066",
+   "text": "Agentic Page 店铺到账，一千零六十六美元"
+  },
+  {
+   "usd": 1097,
+   "file": "line-1097",
+   "text": "Agentic Page 店铺到账，一千零九十七美元"
+  },
+  {
+   "usd": 1178,
+   "file": "line-1178",
+   "text": "Agentic Page 店铺到账，一千一百七十八美元"
+  },
+  {
+   "usd": 1280,
+   "file": "line-1280",
+   "text": "Agentic Page 店铺到账，一千二百八十美元",
+   "manual": true
+  },
+  {
+   "usd": 1478,
+   "file": "line-1478",
+   "text": "Agentic Page 店铺到账，一千四百七十八美元"
+  },
+  {
+   "usd": 1780,
+   "file": "line-1780",
+   "text": "Agentic Page 店铺到账，一千七百八十美元"
+  },
+  {
+   "usd": 1813,
+   "file": "line-1813",
+   "text": "Agentic Page 店铺到账，一千八百一十三美元"
+  },
+  {
+   "usd": 1815,
+   "file": "line-1815",
+   "text": "Agentic Page 店铺到账，一千八百一十五美元"
+  },
+  {
+   "usd": 1860,
+   "file": "line-1860",
+   "text": "Agentic Page 店铺到账，一千八百六十美元",
+   "manual": true
+  },
+  {
+   "usd": 1981,
+   "file": "line-1981",
+   "text": "Agentic Page 店铺到账，一千九百八十一美元"
+  },
+  {
+   "usd": 2112,
+   "file": "line-2112",
+   "text": "Agentic Page 店铺到账，两千一百一十二美元"
+  },
+  {
+   "usd": 2460,
+   "file": "line-2460",
+   "text": "Agentic Page 店铺到账，两千四百六十美元",
+   "manual": true
+  },
+  {
+   "usd": 3180,
+   "file": "line-3180",
+   "text": "Agentic Page 店铺到账，三千一百八十美元",
+   "manual": true
+  },
+  {
+   "usd": 3880,
+   "file": "line-3880",
+   "text": "Agentic Page 店铺到账，三千八百八十美元",
+   "manual": true
+  },
+  {
+   "usd": 4260,
+   "file": "line-4260",
+   "text": "Agentic Page 店铺到账，四千二百六十美元",
+   "manual": true
+  }
+ ]
+}

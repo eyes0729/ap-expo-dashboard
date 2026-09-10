@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · Agent Page — 交易大厅</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ===========================================================================
+ * 方案 C「交易大厅」 · P2 暖墨陶土
+ * 全屏只有排版 + 1px hairline。无边框装饰 / 无发光 / 无渐变 / 无扫描线。
+ * =========================================================================== */
+:root{
+  --bg:#12100E; --panel:#1B1815; --hair:#2A2521;
+  --text:#F4EFE6; --sub:#B9AFA1; --mute:#7A7166;
+  --accent:#D97757; --ok:#6A8E7F;
+  --font-display:'Bahnschrift','Segoe UI Variable Display','Segoe UI',Inter,system-ui,sans-serif;
+  --font-mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --font-cn:'Microsoft YaHei','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--font-mono);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ---- 舞台：设计稿 1920x1080，transform scale 适配 ---------------------- */
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  transform-origin:50% 50%;padding:40px 116px 30px;background:var(--bg)}
+
+.hair{height:1px;background:var(--hair);flex:0 0 1px}
+.mono{font-family:var(--font-mono)}
+.cn{font-family:var(--font-cn)}
+
+/* ---- 报头 -------------------------------------------------------------- */
+.masthead{height:56px;display:flex;align-items:flex-end;justify-content:space-between}
+.mhL{display:flex;align-items:baseline;gap:26px}
+.brand{font-size:26px;letter-spacing:.20em;font-weight:600;line-height:30px}
+.prop{font-family:var(--font-cn);font-size:22px;line-height:26px;color:var(--sub);
+  letter-spacing:.04em}
+.mhR{display:flex;align-items:baseline;gap:34px}
+.clock{font-size:22px;line-height:26px;color:var(--sub);letter-spacing:.08em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+.simbadge{font-size:24px;line-height:28px;letter-spacing:.10em;color:var(--sub);opacity:.92}
+.simbadge b{font-family:var(--font-cn);font-weight:400}
+
+/* ---- 上半区 ------------------------------------------------------------ */
+.upper{height:303px;display:flex;gap:32px;margin-top:26px;
+  transition:opacity 320ms linear}
+/* 里程碑横幅是不透明的，但淡入那 320ms 里会透出后面的巨型数字 ——
+   两个大数字叠在一起很脏。所以先把整个上半区淡出，再淡入横幅。 */
+.upper.dim{opacity:0}
+.heroMain{width:1258px;flex:0 0 1258px;position:relative;
+  display:flex;flex-direction:column}
+.kicker{height:18px;font-size:15px;line-height:18px;letter-spacing:.24em;color:var(--mute)}
+.kicker em{font-style:normal;color:var(--sub)}
+.kicker .cn{letter-spacing:.10em;font-size:15px}
+
+/* 巨型数字：固定字宽槽 + 只动 transform + tabular + 无回弹缓动 */
+.digits{flex:1 1 auto;display:flex;justify-content:flex-end;
+  align-items:flex-end;padding-bottom:16px;contain:layout paint}
+/* .slot / .strip span 的高度与 line-height 由 JS 按实测字体度量写入 ——
+   数字轮节距必须贴着字高，否则滚动中间露出大片空白，看着像渲染坏了。 */
+.slot{position:relative;overflow:hidden;flex:0 0 auto}
+.strip{position:absolute;left:0;top:0}
+.strip span{display:block;font-family:var(--font-display);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;font-weight:600;font-stretch:75%;color:var(--text);
+  text-align:center}
+.grp{flex:0 0 auto}
+.heroRule{height:1px;background:var(--hair)}
+.subline{height:18px;margin-top:10px;display:flex;justify-content:space-between;
+  font-size:15px;line-height:18px;letter-spacing:.16em;color:var(--mute)}
+
+/* ---- 仪表列 ------------------------------------------------------------ */
+.gauges{width:398px;flex:0 0 398px;height:303px;overflow:hidden}
+.gTitle{height:18px;font-size:13px;line-height:18px;letter-spacing:.26em;color:var(--mute)}
+.gField{border-top:1px solid var(--hair);padding-top:7px;height:55px}
+.gField.tall{height:60px}
+.gLab{font-size:12px;line-height:14px;letter-spacing:.20em;color:var(--mute)}
+.gRow{display:flex;align-items:baseline;justify-content:space-between}
+.gVal{font-size:26px;line-height:30px;color:var(--text);letter-spacing:.02em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1}
+.gVal.sm{font-size:20px;line-height:24px}
+.gUnit{font-size:13px;letter-spacing:.14em;color:var(--mute)}
+.gTrack{height:3px;background:var(--hair);margin-top:6px;overflow:hidden}
+.gBar{height:3px;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
+.mixBar{height:3px;display:flex;margin-top:8px;gap:2px}
+.mixBar i{display:block;height:3px;background:var(--text)}
+.mixLeg{font-size:11px;line-height:14px;letter-spacing:.10em;color:var(--mute);margin-top:6px}
+
+/* ---- 磁带（split-flap 订单表） ---------------------------------------- */
+.tapeLead{height:24px;margin-top:20px;display:flex;align-items:flex-end;
+  justify-content:space-between}
+.tapeLead .lead{font-size:15px;line-height:18px;letter-spacing:.20em;color:var(--mute)}
+.tapeLead .lead .cn{letter-spacing:.10em;color:var(--sub)}
+.tapeMeta{height:26px;position:relative;width:1688px}
+.tapeMeta b{position:absolute;bottom:4px;font-size:14px;line-height:16px;font-weight:400;
+  letter-spacing:.16em;color:var(--sub);white-space:pre}
+.tapeBody{height:400px;position:relative;overflow:hidden;contain:layout paint}
+.row{position:absolute;left:0;top:0;width:1688px;height:40px;
+  transition:transform 260ms cubic-bezier(.22,1,.36,1);contain:layout paint}
+.row.flipping{will-change:transform}
+.row.hot{background:var(--panel);box-shadow:inset 2px 0 0 0 var(--accent)}
+.cel{position:absolute;top:0;height:40px;line-height:40px;overflow:hidden;
+  white-space:pre;color:var(--sub);backface-visibility:hidden;
+  transform-origin:50% 50%;font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1}
+.cel.wide{overflow:visible;font-family:var(--font-cn)}
+.cel.k1{color:var(--text)}                /* 店名 */
+.cel.k2{color:var(--text);opacity:.86}    /* 商品 */
+.cel.k3{color:var(--text)}                /* 金额 */
+.cel.k4{color:var(--mute)}                /* 来源 */
+.row.hot .cel.k3{color:var(--accent);font-weight:700}
+.row.hot .cel.k0{color:var(--accent);font-size:1.4em;text-align:center;overflow:visible}
+
+/* ---- 里程碑横幅（覆盖上半区，表格照翻） ------------------------------- */
+.ms{position:absolute;left:116px;top:123px;width:1688px;height:303px;background:var(--bg);
+  opacity:0;pointer-events:none;transition:opacity 420ms linear;
+  display:flex;flex-direction:column;justify-content:center}
+.ms.on{opacity:1}
+.ms .mk{font-size:16px;letter-spacing:.30em;color:var(--mute)}
+.ms .mk .cn{letter-spacing:.12em;color:var(--sub)}
+.ms .mv{font-family:var(--font-display);font-size:160px;line-height:170px;font-weight:600;
+  color:var(--accent);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;margin-top:8px}
+.ms .mn{font-size:22px;letter-spacing:.20em;color:var(--sub);margin-top:6px}
+.ms .mn .cn{letter-spacing:.10em}
+.ms .mr{height:1px;background:var(--hair);margin-top:18px}
+
+/* ---- 下半区：公开数据 + 页脚 ----------------------------------------- */
+.pub{height:92px;background:var(--panel);display:flex;align-items:center;
+  padding:0 26px;position:relative}
+.pubItem{flex:1 1 0;display:flex;align-items:baseline;gap:16px}
+.pubItem + .pubItem{border-left:1px solid var(--hair);padding-left:26px}
+.pubFig{font-family:var(--font-display);font-size:46px;line-height:50px;font-weight:600;
+  color:var(--text);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1}
+.pubTxt{display:flex;flex-direction:column;gap:3px}
+.pubLab{font-family:var(--font-cn);font-size:18px;line-height:22px;color:var(--sub)}
+.pubSrc{font-size:12px;line-height:14px;letter-spacing:.12em;color:var(--mute)}
+.pubKind{position:absolute;font-size:11px;letter-spacing:.24em;color:var(--mute)}
+.pubKind .cn{letter-spacing:.10em}
+
+.foot{height:22px;margin-top:14px;display:flex;align-items:center;
+  justify-content:space-between}
+.legalTxt{font-family:var(--font-cn);font-size:13px;line-height:16px;color:var(--mute)}
+.footR{display:flex;gap:22px;align-items:center}
+.status{font-size:12px;letter-spacing:.12em;color:var(--mute);opacity:.7}
+.hintK{font-size:12px;letter-spacing:.12em;color:var(--mute);opacity:.55}
+.hintK .cn{letter-spacing:.06em}
+
+/* ---- 快捷键图例 -------------------------------------------------------- */
+.legend{position:absolute;right:116px;bottom:66px;width:440px;background:var(--panel);
+  border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  padding:16px 20px;display:none}
+.legend.on{display:block}
+.legend h4{font-size:12px;letter-spacing:.26em;color:var(--mute);font-weight:400;
+  margin-bottom:10px}
+.legend div{font-size:14px;line-height:22px;color:var(--sub)}
+.legend div span{display:inline-block;width:92px;color:var(--text)}
+.legend div .cn{font-size:14px;width:auto}
+
+/* ---- 调试网格 ---------------------------------------------------------- */
+.dbg{position:absolute;left:0;top:0;width:1920px;height:1080px;display:none;
+  pointer-events:none}
+.dbg.on{display:block}
+.dbgBase{position:absolute;left:0;top:0;width:100%;height:100%;
+  background-image:repeating-linear-gradient(to bottom,rgba(217,119,87,.10) 0 1px,transparent 1px 8px)}
+.dbg i{position:absolute;background:rgba(125,211,252,.14)}
+.dbg u{position:absolute;background:rgba(217,119,87,.5)}
+.dbg s{position:absolute;outline:1px dashed rgba(244,239,230,.26)}
+.dbgFps{position:absolute;left:8px;top:8px;font-size:13px;letter-spacing:.10em;
+  color:var(--accent);background:var(--bg);padding:4px 8px;white-space:pre}
+
+/* ---- 启动遮罩 ---------------------------------------------------------- */
+#gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+#gate .gBrand{font-size:clamp(22px,2.6vw,40px);letter-spacing:.24em;font-weight:600}
+#gate .gProp{font-family:var(--font-cn);font-size:clamp(15px,1.5vw,24px);color:var(--sub);
+  margin-top:14px;letter-spacing:.06em}
+#gate .gRule{width:clamp(320px,40vw,720px);height:1px;background:var(--hair);margin:32px 0}
+#gate .gEnter{font-family:var(--font-cn);font-size:clamp(16px,1.6vw,26px);color:var(--accent);
+  letter-spacing:.10em}
+#gate .gKeys{margin-top:34px;font-size:clamp(11px,1.05vw,15px);line-height:1.9;
+  color:var(--mute);text-align:center;max-width:min(880px,86vw);font-family:var(--font-cn)}
+#gate .gSim{margin-top:30px;font-family:var(--font-cn);font-size:clamp(11px,1.05vw,15px);
+  color:var(--mute);letter-spacing:.06em}
+
+/* 字宽探针：运行时量测等宽/DIN 字体的实际字宽，用来把列网格钉死 */
+.probe{position:absolute;left:-9999px;top:-9999px;white-space:pre;font-size:100px;
+  line-height:1;visibility:hidden}
+.probe.pm{font-family:var(--font-mono)}
+.probe.pd{font-family:var(--font-display);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;font-weight:600;font-stretch:75%}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- 报头 -->
+  <div class="masthead">
+    <div class="mhL">
+      <div class="brand">AP · AGENT PAGE</div>
+      <div class="prop">让 AI 主动推荐你的商品</div>
+    </div>
+    <div class="mhR">
+      <div class="clock" id="clock">----------  UTC --:--:--</div>
+      <div class="simbadge">SIMULATED DEMO DATA · <b>模拟演示数据</b></div>
+    </div>
+  </div>
+  <div class="hair"></div>
+
+  <!-- 上半区 -->
+  <div class="upper" id="upper">
+    <div class="heroMain">
+      <div class="kicker">CUMULATIVE AI CRAWLS &nbsp;·&nbsp; <em class="cn">AI 累计抓取</em></div>
+      <div class="digits" id="digits"></div>
+      <div class="heroRule"></div>
+      <div class="subline">
+        <div>GPTBOT · CLAUDEBOT · PERPLEXITYBOT · GOOGLE-EXTENDED</div>
+        <div id="since">CUMULATIVE TO DATE · ROUNDED TO 10</div>
+      </div>
+    </div>
+
+    <div class="gauges">
+      <div class="gTitle">INSTRUMENTS</div>
+
+      <div class="gField">
+        <div class="gLab">CRAWL RATE</div>
+        <div class="gRow"><div class="gVal" id="gRate">--.-</div><div class="gUnit">req / s</div></div>
+      </div>
+
+      <div class="gField">
+        <div class="gLab">AP PAGES LIVE</div>
+        <div class="gRow"><div class="gVal" id="gPages">-</div><div class="gUnit">pages</div></div>
+      </div>
+
+      <div class="gField">
+        <div class="gLab">ORDER PACE</div>
+        <div class="gRow"><div class="gVal" id="gPace">-</div><div class="gUnit">avg</div></div>
+      </div>
+
+      <div class="gField tall">
+        <div class="gLab">NEXT MARK</div>
+        <div class="gRow"><div class="gVal sm" id="gMarkVal">-</div><div class="gUnit" id="gMarkPct">--%</div></div>
+        <div class="gTrack"><div class="gBar" id="gMarkBar"></div></div>
+      </div>
+
+      <div class="gField tall">
+        <div class="gLab">PLATFORM MIX</div>
+        <div class="mixBar" id="mixBar"></div>
+        <div class="mixLeg" id="mixLeg">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 磁带 -->
+  <div class="tapeLead">
+    <div class="lead">AI-REFERRED ORDER TAPE &nbsp;·&nbsp; <span class="cn">AI 引荐订单</span></div>
+    <div class="lead" id="tapeCount">—</div>
+  </div>
+  <div class="hair"></div>
+  <div class="tapeMeta" id="tapeHead"></div>
+  <div class="tapeBody" id="tape"></div>
+
+  <div class="hair" style="margin-top:24px"></div>
+
+  <!-- 下半区：公开数据（浅底卡片，与模拟数字视觉分区） -->
+  <div class="pub">
+    <div class="pubKind" style="left:26px;top:9px">PUBLIC RESEARCH · <span class="cn">公开数据</span></div>
+    <div class="pubItem">
+      <div class="pubFig">66%</div>
+      <div class="pubTxt">
+        <div class="pubLab">详情页 AI 可读性均值</div>
+        <div class="pubSrc">ADOBE</div>
+      </div>
+    </div>
+    <div class="pubItem">
+      <div class="pubFig">1.42×</div>
+      <div class="pubTxt">
+        <div class="pubLab">AI 引荐转化率 / 自然搜索</div>
+        <div class="pubSrc">ADOBE · 2026-03</div>
+      </div>
+    </div>
+    <div class="pubItem">
+      <div class="pubFig">13×</div>
+      <div class="pubTxt">
+        <div class="pubLab">AI 引荐订单年增</div>
+        <div class="pubSrc">SHOPIFY · Q1 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="foot">
+    <div class="legalTxt">本屏数据为产品能力演示，非真实交易记录。OpenAI、ChatGPT、Anthropic、Claude、Perplexity、Google 均为其各自所有者的商标；AP 与上述公司无隶属、赞助或合作关系。</div>
+    <div class="footR">
+      <div class="status" id="status">×1</div>
+      <div class="hintK">? <span class="cn">快捷键</span></div>
+    </div>
+  </div>
+
+  <!-- 里程碑横幅 -->
+  <div class="ms" id="ms">
+    <div class="mk">MILESTONE &nbsp;·&nbsp; <span class="cn">里程碑</span></div>
+    <div class="mv" id="msVal">0</div>
+    <div class="mn" id="msMetric">—</div>
+    <div class="mr"></div>
+  </div>
+
+  <!-- 快捷键图例 -->
+  <div class="legend" id="legend">
+    <h4>KEYS</h4>
+    <div><span>SPACE</span><span class="cn">暂停 / 继续</span></div>
+    <div><span>B</span><span class="cn">人工触发大单</span></div>
+    <div><span>N</span><span class="cn">触发普通单</span></div>
+    <div><span>K</span><span class="cn">里程碑庆祝</span></div>
+    <div><span>M / A / H</span><span class="cn">静音 / 环境音 / 展馆模式</span></div>
+    <div><span>1 2 3</span><span class="cn">速率 ×0.5 ×1 ×3</span></div>
+    <div><span>G / F / R</span><span class="cn">网格 / 全屏 / 重置</span></div>
+  </div>
+
+  <!-- 调试网格 -->
+  <div class="dbg" id="dbg"><div class="dbgBase"></div><div class="dbgFps" id="dbgFps">—</div></div>
+</div>
+
+<!-- 启动遮罩 -->
+<div id="gate">
+  <div class="gBrand">AP · AGENT PAGE</div>
+  <div class="gProp">让 AI 主动推荐你的商品</div>
+  <div class="gRule"></div>
+  <div class="gEnter">点击进入 · 交易大厅</div>
+  <div class="gKeys">
+    SPACE 暂停　B 大单　N 普通单　K 里程碑　M 静音　A 环境音　H 展馆模式<br>
+    1 / 2 / 3 速率 ×0.5 ×1 ×3　G 调试网格　F 全屏　R 重置　? 快捷键
+  </div>
+  <div class="gSim">本屏数据为模拟演示数据</div>
+</div>
+
+<span class="probe pm" id="probeMono">00000000000000000000</span>
+<span class="probe pd" id="probeDisp">00000000000000000000</span>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

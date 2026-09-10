@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · 展会调研抽奖</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#08090B">
+<!-- 零网络依赖：无 CDN、无远程字体、无远程图片。展会现场断网也能跑。 -->
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+ * AP 展会互动 · 问卷 + 转盘（手机 H5）
+ * 逻辑严格照《AP展会互动问卷抽奖SOP》v2：
+ *   扫码 → 填问卷（身份分流 2~3 题）→ 转盘（结果由答案预定，100% 中奖）→ 中奖页
+ * 配色与大屏同一套（方案 A 的 P1「深空石墨」），扫码进来能认出是同一家。
+ * ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#08090B; --panel:#101216; --panel2:#15181D; --hair:#1C1F25; --hair2:#262A33;
+  --tx:#F7F8F8; --tx2:#9CA3AF; --mute:#6B7280; --faint:#4B5563;
+  --crawl:#00D3A7; --crawl-d:#0B7360; --order:#FFB86B; --order-d:#8A5A28;
+  --red:#FF6B60;
+  --cn:'PingFang SC','Microsoft YaHei','Segoe UI',-apple-system,sans-serif;
+  --mono:'SF Mono',Consolas,ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--tx)}
+body{font-family:var(--cn);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  padding:0 0 env(safe-area-inset-bottom)}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+
+.wrap{max-width:520px;margin:0 auto;padding:22px 20px 40px;min-height:100vh;
+  display:flex;flex-direction:column}
+
+/* ── 页眉 ── */
+.brand{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700;
+  letter-spacing:.02em;margin-bottom:4px}
+/* logo 按高度定尺寸、宽度自适应 —— 原图 viewBox 595.3×186.1（约 3.2:1），
+   写死宽度会在不同机型上把它压扁。26px 高配 17px 的品牌行视觉重量刚好。 */
+.brand .lgo{height:26px;width:auto;flex:none;display:block}
+.brand em{font-style:normal;color:var(--crawl)}
+.brand s{margin-left:auto;text-decoration:none;font-size:12px;font-weight:400;color:var(--faint);
+  font-family:var(--mono)}
+.tagline{font-size:13px;color:var(--mute);margin-bottom:24px}
+
+/* ── 进度 ── */
+.prog{display:flex;gap:6px;margin-bottom:22px}
+.prog i{flex:1;height:3px;border-radius:2px;background:var(--hair2);transition:background 240ms}
+.prog i.on{background:var(--crawl)}
+
+/* ── 通用卡片 ── */
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  padding:20px 18px;margin-bottom:14px}
+
+/* ── 开场 ── */
+.hero h1{font-size:25px;line-height:1.35;font-weight:700;margin-bottom:12px}
+.hero h1 b{color:var(--order)}
+.hero .lead{font-size:15px;color:var(--tx2);margin-bottom:20px}
+/* 开场三步条 —— 替代原先的四条奖品清单。
+ * 为什么不在答题前列奖品：见 #scIntro 上方的注释。 */
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 6px}
+.flow div{background:var(--panel2);border:1px solid var(--hair);border-radius:9px;
+  padding:13px 8px;text-align:center}
+.flow div u{width:22px;height:22px;margin:0 auto 8px;border-radius:50%;text-decoration:none;
+  background:var(--hair2);color:var(--tx);font-size:12px;font-family:var(--mono);
+  display:flex;align-items:center;justify-content:center}
+.flow div b{display:block;font-size:14px;font-weight:600;color:var(--tx);line-height:1.4}
+.flow div s{display:block;text-decoration:none;font-size:11px;color:var(--mute);margin-top:3px}
+
+/* ── 题目 ── */
+.qnum{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--crawl);
+  margin-bottom:7px}
+.qtitle{font-size:20px;line-height:1.45;font-weight:600;margin-bottom:4px}
+.qsub{font-size:13px;color:var(--mute);margin-bottom:16px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:10px;
+  padding:15px 15px;color:var(--tx);transition:border-color 160ms,background 160ms}
+.opt:active{background:#1a1e25}
+.opt.sel{border-color:var(--crawl);background:#0E1B1A}
+.opt u{width:20px;height:20px;flex:none;border-radius:50%;border:1.5px solid var(--hair2);
+  text-decoration:none;position:relative;transition:border-color 160ms}
+.opt.sel u{border-color:var(--crawl)}
+.opt.sel u::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--crawl)}
+.opt span{flex:1;font-size:15px;line-height:1.45}
+.opt:focus-visible{outline:2px solid var(--crawl);outline-offset:2px}
+
+input[type=text],input[type=tel]{width:100%;background:var(--panel2);color:var(--tx);
+  border:1px solid var(--hair2);border-radius:10px;padding:15px;font-size:17px;
+  font-family:inherit}
+input:focus{outline:none;border-color:var(--crawl)}
+input::placeholder{color:var(--faint)}
+
+.btn{width:100%;padding:16px;border:0;border-radius:11px;background:var(--crawl);
+  color:#04211C;font-size:17px;font-weight:700;letter-spacing:.02em;margin-top:6px}
+.btn:disabled{background:var(--hair2);color:var(--faint)}
+.btn.ghost{background:transparent;border:1px solid var(--hair2);color:var(--tx2);
+  font-weight:400;font-size:15px;padding:13px;margin-top:10px}
+.err{font-size:13px;color:var(--red);margin-top:10px;min-height:18px}
+
+/* ── 转盘 ── */
+.wheelbox{position:relative;width:100%;aspect-ratio:1/1;max-width:340px;margin:6px auto 18px}
+.wheelbox canvas{width:100%;height:100%;display:block;border-radius:50%;
+  transition:transform 4600ms cubic-bezier(.09,.72,.04,1)}
+.needle{position:absolute;left:50%;top:-4px;transform:translateX(-50%);z-index:3;
+  width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;
+  border-top:20px solid var(--order)}
+.hubdot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;
+  width:52px;height:52px;border-radius:50%;background:var(--panel);
+  border:2px solid var(--hair2);display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--tx2)}
+
+/* ── 中奖页 ── */
+.win{text-align:center;padding:26px 18px 22px}
+.win .kicker{font-size:14px;color:var(--crawl);letter-spacing:.14em;margin-bottom:10px}
+.win .pname{font-size:27px;line-height:1.35;font-weight:700;color:var(--order);margin-bottom:14px}
+.win .pdesc{font-size:14px;color:var(--tx2);margin-bottom:20px}
+.ticket{background:var(--panel2);border:1px dashed var(--hair2);border-radius:10px;
+  padding:14px;margin:0 0 16px;font-family:var(--mono);font-size:13px;color:var(--tx2);
+  text-align:left;line-height:1.9}
+.ticket b{color:var(--tx);font-weight:600}
+.notice{background:#1B1509;border:1px solid var(--order-d);border-radius:10px;
+  padding:14px 15px;font-size:15px;color:#F4E4CC;line-height:1.6}
+.notice b{color:var(--order)}
+
+/* ── 管理面板（?admin=1）── */
+.admin{margin-top:22px;font-size:13px}
+.admin table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);
+  margin:10px 0}
+.admin th,.admin td{border:1px solid var(--hair);padding:5px 6px;text-align:left;
+  white-space:nowrap;overflow:hidden;max-width:110px}
+.admin th{background:var(--panel2);color:var(--tx2)}
+.admin .row2{display:flex;gap:8px}
+.admin .row2 .btn{margin-top:0}
+
+.foot{margin-top:auto;padding-top:26px;font-size:11px;color:var(--faint);text-align:center;
+  line-height:1.8}
+.hide{display:none!important}
+
+@media (prefers-reduced-motion:reduce){
+  .wheelbox canvas{transition:none!important}
+  .opt,.prog i{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 用 deeplumen 品牌 logo。深色底所以取 logo-dark.svg（浅色那版在深底上看不见）。
+       顺带把 "Agent Page" 改成正确的产品名 "Agentic Page" —— 原来少了 "ic"。 -->
+  <div class="brand"><img class="lgo" src="logo-dark.svg" alt="deeplumen"
+    ><em>·</em>Agentic Page<s id="devTag"></s></div>
+  <div class="tagline">让 AI 把顾客带进你的店</div>
+
+  <div class="prog hide" id="prog"></div>
+
+  <!-- ① 开场
+       ⚠ 这一屏**不列具体奖品**（原先列了四条奖品名，已移除）。
+       原因：奖项不是抽的，是按答案判定的（身份 + 是否在用 Shopify）。
+       先让人看见「免费 3 个 AP 来源订单」再答题，等于把答案的方向写在题面上 ——
+       没有 Shopify 店的人也会去选「是，正在运营」，拿回来的线索就是脏的。
+       四个奖品仍然在**转盘页**完整展示，那时答案已提交、改不了。 -->
+  <section id="scIntro">
+    <div class="card hero">
+      <h1>参与 30 秒小调研<br>即可参与大转盘抽奖，<b>100% 中奖</b> 🎁</h1>
+      <div class="lead">2~4 道单选题，填完立刻抽。奖品现场领取。</div>
+      <div class="flow">
+        <div><u>1</u><b>答题</b><s>约 30 秒</s></div>
+        <div><u>2</u><b>转盘</b><s>100% 中奖</s></div>
+        <div><u>3</u><b>领奖</b><s>现场发放</s></div>
+      </div>
+      <button class="btn" id="btnStart">开始</button>
+    </div>
+  </section>
+
+  <!-- ② 问卷 -->
+  <section id="scQ" class="hide">
+    <div class="card">
+      <div class="qnum" id="qnum"></div>
+      <div class="qtitle" id="qtitle"></div>
+      <div class="qsub" id="qsub"></div>
+      <div class="opts" id="qopts"></div>
+      <div class="err" id="qerr"></div>
+      <button class="btn" id="btnNext">下一题</button>
+      <button class="btn ghost hide" id="btnBack">上一题</button>
+    </div>
+  </section>
+
+  <!-- ③ 转盘 -->
+  <section id="scWheel" class="hide">
+    <div class="card" style="text-align:center">
+      <div class="qnum">最后一步</div>
+      <div class="qtitle" style="margin-bottom:14px">转动转盘，看看你抽到什么</div>
+      <div class="wheelbox">
+        <div class="needle"></div>
+        <canvas id="wheel" width="680" height="680"></canvas>
+        <div class="hubdot" id="hub">AP</div>
+      </div>
+      <button class="btn" id="btnSpin">开始抽奖</button>
+      <div class="err" id="werr"></div>
+    </div>
+  </section>
+
+  <!-- ④ 中奖页 -->
+  <section id="scWin" class="hide">
+    <div class="card win">
+      <div class="kicker">恭喜中奖</div>
+      <div class="pname" id="pname">—</div>
+      <div class="pdesc" id="pdesc"></div>
+      <div class="ticket" id="ticket"></div>
+      <div class="notice">请<b>凭此页面</b>联系现场工作人员领取。<br>
+        建议截图保存，避免切走后无法出示。</div>
+      <button class="btn ghost" id="btnAgain">回到本页（可重复查看）</button>
+    </div>
+  </section>
+
+  <!-- 管理面板 -->
+  <section id="scAdmin" class="hide">
+    <div class="card admin">
+      <div style="font-weight:600;color:var(--tx);margin-bottom:6px">现场数据（本机）</div>
+      <div id="adminStat" style="color:var(--tx2)"></div>
+      <div id="adminTable"></div>
+      <div class="row2">
+        <button class="btn" id="btnCsv" style="background:var(--crawl)">导出 CSV</button>
+        <button class="btn ghost" id="btnClear" style="margin-top:0">清空</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 只留这一句。原来后面还跟着一段商标与「无隶属/赞助/合作关系」声明，
+       那是给**大屏**写的 —— 大屏上会出现 ChatGPT / Claude / Perplexity 这些
+       AI 助手名字，所以必须声明。而这一页从头到尾没有提到任何第三方品牌
+       （题目、奖项、文案里都没有），声明没有对应的指向对象，属于多余。
+       ⚠ 如果以后往问卷里加了「你用哪个 AI 助手」这类题目，声明要加回来。 -->
+  <div class="foot">
+    本页数据仅用于展会线索跟进 · 奖品现场发放
+  </div>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>

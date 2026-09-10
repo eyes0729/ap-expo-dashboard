@@ -1,0 +1,7 @@
+{
+  "app_token": "your_feishu_base_app_token",
+  "table_id": "your_feishu_table_id",
+  "url": "https://your-tenant.feishu.cn/base/your_app_token",
+  "base_name": "AP 展会问卷线索",
+  "table_name": "线索"
+}

@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · AI 渠道后台</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+ * 方案 E · 可操作后台版
+ *
+ * 与 E-监控台-V1版式 的区别：那一版是「展会大屏画面」，这一版是「真的后台」——
+ * 有侧栏（应用级导航）、顶栏（时间范围/搜索/导出/主题）、表格筛选与排序、
+ * 行点击出详情抽屉。
+ *
+ * 版面尺寸全部来自 `参考-SaaS后台\_关键度量.md` 第 16 节实测：
+ *   侧栏 232（TDesign）· 顶栏 57（TDesign）· 内容内边距 24 · 卡片间距 16 · 圆角 6 · 阴影几乎无
+ *
+ * 两套主题（`app.js` 的 THEMES 覆写 #stage 上的变量）：
+ *   dark  = 保持原「深空石墨」，主题色 #00D3A7 / #FFB86B 一分不改
+ *   light = 纯白简洁科技风，色值取自 _关键度量.md 第 15 节中文后台实测
+ *
+ * 高度账（1080）：顶栏 57 + 内容 1023
+ *   内容内边距 24×2 = 48 → 可用 975
+ *   KPI 96 + gap 16 + 地图区 320 + gap 16 + 订单 268 + gap 16 + 日志 243 = 975
+ * 宽度账（1920）：侧栏 232 + 主区 1688；主区内边距 24×2 → 可用 1640
+ *   地图卡 800 + gap 16 + 右侧板 824 = 1640
+ *
+ * 地图为什么是 800×278 而不是占满 1100：点阵是 64 列 × 26 行，
+ * 1100 宽 × 246 高会让格子变成 17.19 × 9.46 —— **长宽比 1.82，横向拉伸近一倍**，
+ * 世界地图看着就是被压扁的。800 宽 × 278 高的格子是 12.50 × 10.69（比 1.17），基本正方。
+ * 挪出来的 300px 给右侧的饼图。
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+#stage{
+  /* 首屏默认就是浅色，避免 app.js 初始化前短暂闪出深色画面。 */
+  --bg:#F4F7FA; --panel:#FFFFFF; --panel2:#F7F8FA; --bar:#FFFFFF;
+  --side:#FFFFFF; --sideHov:#F1F2F4; --sideOn:#E9F7F3;
+  --hair:#E8E9ED; --hair2:#DCDEE3;
+  --tx:#222222; --tx2:#6C7175; --mute:#969799; --faint:#B4B8BE;
+  --crawl:#008E74; --crawl-d:#5FC9AF;     /* 冷强调：AI 读取层（一直在跑） */
+  --order:#B26A16; --order-d:#E8B978;     /* 暖强调：订单层（刚刚发生） */
+  --fill:#00806A; --fillTx:#F2FFFB;       /* 反色 KPI 卡（焦点手段，见度量 §18①） */
+  --red:#C63A2E; --ok:#128A4B;
+  --land:#DBDFE5; --mkt:#A6B0BA; --mkt2:#78848F;
+  --sh:0 1px 2px rgba(17,24,39,.05);
+  --shPop:0 8px 24px rgba(17,24,39,.13),0 2px 6px rgba(17,24,39,.07);
+  --glassBg:rgba(255,255,255,.94); --glassBd:#DCDEE3;
+  --lot:#FFFFFF; --lotHov:#FBFCFD;
+  --lotSh:0 6px 18px rgba(17,24,39,.13);
+  --lotShHov:0 12px 26px rgba(17,24,39,.18),0 0 0 1px #008E74;
+  --hlRGB:255,184,107;                    /* 行高亮叠加色：浅色加暖色 */
+  --hlA:.24; --hlA2:.05;
+}
+:root{
+  --mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --cn:'Microsoft YaHei','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#F4F7FA;overflow:hidden}
+body{font-family:var(--cn);-webkit-font-smoothing:antialiased;cursor:default}
+/* 主题底只给一层纯色；所有动态环境光都由铺满视口的 Aurora canvas 负责。 */
+body{background:#F4F7FA}
+
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  z-index:1;transform-origin:50% 50%;background:var(--bg);color:var(--tx);overflow:hidden;
+  display:flex;
+  transition:background-color 380ms linear,color 380ms linear}
+
+/* 浅色舞台自己不画底 —— 底是 body 上那层铺满视口的光场，透上来才连续。 */
+#stage[data-theme="light"],
+#stage[data-theme="dark"]{background:transparent;animation:none}
+
+/* ══ 通栏：宽屏下把多余的宽度分给版面，而不是留成两边的黑边 ═══════════
+ * 舞台仍是 1080 设计高度 + 等比缩放，只有宽度按窗口比例撑开（见 app.js
+ * 的 fit()）—— 纵向那套像素账因此原封不动，订单表和读取日志都是定行数的
+ * 翻板，拉高只会在底部空出一块，横向撑开才是对的方向。
+ *
+ * 撑出来的宽度由第二行两张卡分摊，**严格对半**（flex:1 1 0）。
+ *
+ * ── 为什么从 800/824 + 封顶 1040 改成对半 ────────────────────────────────
+ * 原来的分法让两行的竖缝对不上，这是肉眼可见的：
+ *   4 张 KPI 卡等分 ⟹ 第 2/3 张之间的缝心 = 2C + 1.5G
+ *   中段两卡       ⟹ 缝心 = M + 0.5G
+ *   两者相等要求 M = 2C + G = (W − G)/2，也就是**正好一半**
+ * 而原来 M=800 / S=824，1920 下缝差 12px；宽屏下地图被 max-width:1040 卡住，
+ * 2560 时缝差扩大到 92px —— 一块屏上两条本该重合的竖线错开 92px，很难看。
+ *
+ * **代价照实说**：地图点阵吃不下多出来的宽度（mapGeom 里格子长宽比封顶 1.2，
+ * 1920 档已经贴着这个顶了），所以宽屏下地图卡左右会多出留白。
+ * 原作者当初封顶 1040 正是为了避免这段留白，把余量让给右边那张卡。
+ * 现在是**用地图卡的一段留白换两行竖缝对齐** —— 要换回去，把下面两条
+ * 恢复成 `flex:1 1 800px;max-width:1040px` / `flex:1 1 824px` 即可。 */
+#row2 #mapPan{width:auto;flex:1 1 0;min-width:560px}
+#row2 #side2{flex:1 1 0;min-width:560px}
+#stage[data-theme="light"] #top{background:rgba(255,255,255,.90);backdrop-filter:blur(22px)}
+/* 面板透光度是浅色能不能看见极光的**唯一**关键，不是极光的参数。
+ * .84 的白只透 16%：极光那条绿带穿过去会被洗成几乎无色的薄荷，内容区里等于没有。
+ * 深色那边面板是 .80，透光量差不多，但底是近黑 —— 透过来的亮绿仍然读得出，
+ * 差别来自明度对比而不是透光率。所以浅色要拿到同等存在感只能把白压薄一点。
+ * .78 = 透 22%（比 .84 多约 38%），实测是「光带进得来、正文对比度不受影响」的那一档；
+ * 再往下（试过 .70）整个内容区会偷绿，地图点阵的灰阶也跟着被拉低。 */
+#stage[data-theme="light"] .pan{background:rgba(255,255,255,.78);
+  backdrop-filter:blur(16px) saturate(.9)}
+#stage[data-theme="dark"] .pan{background:rgba(16,18,22,.80);
+  backdrop-filter:blur(10px)}
+/* ── KPI 卡从上面那条里**拆出来**，比面板更「玻璃」 ────────────────────────
+ * 上面的 .78 / .80 是给**面板**调的，那段注释也说清了：面板再透
+ * 「整个内容区会偷绿，地图点阵的灰阶也跟着被拉低」。
+ * 但那个顾虑只对大面积面板成立 —— 四张 KPI 卡各 96px 高，
+ * 加起来占不到一成屏幕，透一点不会把内容区染色。
+ * 所以这里单独给一档更薄的（浅 .72 / 深 .58）+ 更重的模糊，
+ * 值在 app.js 的 THEMES 里（--kcBg / --kcBd，深浅逐键对称）。 */
+#stage[data-theme="light"] .kc:not(.fill),
+#stage[data-theme="dark"] .kc:not(.fill){
+  background:var(--kcBg);border-color:var(--kcBd);
+  backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4)}
+#stage[data-theme="light"] #gate{background:rgba(248,252,250,.76);
+  backdrop-filter:blur(22px) saturate(.86)}
+#stage[data-theme="dark"] #gate{background:rgba(3,6,12,.48);
+  backdrop-filter:blur(22px) saturate(.78)}
+
+/* ══ 侧栏 232（应用级导航 —— 这一版「是后台」的身份核心） ═══════════════ */
+/* ── 侧栏磨砂玻璃 ────────────────────────────────────────────────────────
+ * 原来浅色是 .90 的白（只透 10%，看不出玻璃）、深色干脆是实色。
+ * 现在两套都走 --sideBg（浅 .66 / 深 .52）+ 26px 模糊，值在 app.js 的 THEMES。
+ *
+ * 模糊比 KPI 卡还重（26 vs 18）：侧栏是**长条**，背后极光的色带跨度大，
+ * 模糊轻了会把色带的边界透出来，看着像脏了一块而不是玻璃。
+ *
+ * -webkit- 前缀必须写：Safari 只认带前缀的，不写会**静默**退化成半透明色板。
+ * 那样比不做更糟 —— 透了却不糊，背后的极光边界直接印在导航文字底下。 */
+#side{width:232px;flex:none;background:var(--sideBg);
+  border-right:1px solid var(--sideBd);
+  backdrop-filter:blur(26px) saturate(1.3);
+  -webkit-backdrop-filter:blur(26px) saturate(1.3);
+  display:flex;flex-direction:column;
+  transition:background-color 380ms linear,border-color 380ms linear}
+#side .brand{height:57px;flex:none;display:flex;align-items:center;
+  padding:0 18px;border-bottom:1px solid var(--hair)}
+#side .brand .lgo{width:180px;display:none}      /* 3.2:1 → 框高 56px */
+#stage[data-theme="dark"] #side .brand .lgo.dark{display:block}
+#stage[data-theme="light"] #side .brand .lgo.light{display:block}
+
+/* 分组标题已移除（只有一组导航时它不提供信息），空出来的 32px 还给 nav 的上内边距 */
+#side nav{flex:1;min-height:0;padding:14px 10px 0}
+#side a{display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;
+  border-radius:6px;color:var(--tx2);font-size:14px;text-decoration:none;cursor:pointer;
+  transition:background-color 140ms,color 140ms}
+/* 悬停/选中用半透明叠色而不是实色块 —— 实色压在玻璃上会读成两层材质，
+ * 玻璃感当场就破了。 */
+#side a:hover{background:var(--sideHovG);color:var(--tx)}
+#side a.on{background:var(--sideOnG);color:var(--tx);font-weight:600}
+#side a.on .ic{color:var(--crawl)}
+#side a .ic{width:16px;height:16px;flex:none;opacity:.9;color:var(--mute)}
+#side a .ic svg{display:block;width:16px;height:16px}
+#side a .bdg{margin-left:auto;font-size:11px;font-family:var(--mono);color:var(--mute)}
+#side a.on .bdg{color:var(--crawl)}
+
+/* ══ 主区 ═══════════════════════════════════════════════════════════════ */
+#main{flex:1;min-width:0;display:flex;flex-direction:column}
+
+/* 顶栏 57 */
+#top{height:57px;flex:none;display:flex;align-items:center;gap:14px;
+  padding:0 24px;background:var(--panel);border-bottom:1px solid var(--hair);
+  transition:background-color 380ms linear,border-color 380ms linear}
+#top .crumb{font-size:14px;color:var(--tx2)}
+#top .crumb b{color:var(--tx);font-weight:600}
+#top .crumb i{font-style:normal;color:var(--faint);margin:0 7px}
+#top .sp{flex:1}
+/* 表格左右内缩。改这一个值，表头 / 订单行 / 日志行 / 两列分隔线一起走，
+ * app.js 的 applyTableWidths 也读它（getPropertyValue），不会各算各的。 */
+:root{--tblPad:12px}
+/* 隐藏顶栏搜索。display:none 会把它从 flex 流里整个摘掉，
+ * 所以不会在原位留一段空白 —— 右侧那组按钮直接向左靠拢。 */
+#top .fld.hide{display:none}
+
+/* 时间范围分段控件（两档都是引擎真实口径，不造假） */
+#rng{display:flex;background:var(--panel2);border:1px solid var(--hair2);border-radius:6px;
+  padding:2px;gap:2px}
+#rng button{border:0;background:transparent;color:var(--tx2);font-family:var(--cn);
+  font-size:13px;padding:5px 12px;border-radius:4px;cursor:pointer;
+  transition:background-color 140ms,color 140ms}
+#rng button:hover{color:var(--tx)}
+#rng button.on{background:var(--bar);color:var(--tx);font-weight:600;box-shadow:var(--sh)}
+
+/* 搜索 */
+.fld{display:flex;align-items:center;gap:7px;height:32px;padding:0 10px;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:6px;
+  transition:border-color 140ms}
+.fld:focus-within{border-color:var(--crawl)}
+.fld svg{width:14px;height:14px;flex:none;color:var(--mute)}
+.fld input{border:0;background:transparent;color:var(--tx);font-family:var(--cn);
+  font-size:13px;width:168px;outline:0}
+.fld input::placeholder{color:var(--faint)}
+
+/* 顶栏按钮 */
+.tb{display:flex;align-items:center;gap:7px;height:32px;padding:0 12px;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:10px;
+  color:var(--tx2);font-family:var(--cn);font-size:13px;cursor:pointer;
+  transition:background-color 140ms,color 140ms,border-color 140ms}
+.tb:hover{background:var(--bar);color:var(--tx);border-color:var(--crawl)}
+.tb svg{width:14px;height:14px;flex:none}
+.tb.ico{padding:0;width:32px;justify-content:center}
+/* 已静音的按下态。用暖强调而不是 --red：静音是「有个东西被关掉了」，
+ * 不是错误。图标换成带叉的喇叭是主信号，描边加色是给三米外看的第二信号 ——
+ * 展会现场隔着人群看，光靠 14px 图标里那个叉是分不出来的。
+ * 必须压过 .tb:hover 的 color/border（#top 前缀已经够特异性）。 */
+#top .tb.on,#top .tb.on:hover{color:var(--order);border-color:var(--order)}
+#top .who{display:flex;align-items:center;gap:9px;padding-left:4px}
+/* 头像是 <img>，不是首字母方块。给一圈极淡的描边环，浅色主题下
+   头像自己的深底和白顶栏之间才有过渡（否则像贴上去的一块色）。 */
+#top .who .av{width:28px;height:28px;border-radius:50%;flex:none;display:block;
+  object-fit:cover;box-shadow:0 0 0 1px var(--hair2),0 1px 2px rgba(0,0,0,.18)}
+#top .who .nm{font-size:13px;color:var(--tx);line-height:1.25}
+#top .who .nm s{display:block;text-decoration:none;font-size:11px;color:var(--mute)}
+
+/* 内容区。原先自己就是那个 flex 列容器；现在里面装 5 个 .page，
+   列布局下沉到 .page，切页只是换 display。 */
+#content{flex:1;min-height:0;padding:24px;position:relative}
+/* 极光固定在浏览器视口，不再受 16:9 舞台、侧栏或内容区边界限制。 */
+#auroraBg{position:fixed;z-index:0;inset:0;width:100vw;height:100vh;pointer-events:none;
+  background:transparent;opacity:0;transition:opacity 420ms linear}
+#auroraBg.on{opacity:.64}
+#auroraBg.on[data-theme="light"]{opacity:.56}
+.page{display:none;flex-direction:column;gap:16px;height:100%;position:relative;z-index:1}
+.page.on{display:flex}
+.pan.grow{flex:1;min-height:0}
+
+/* ══ 分页表（订单 / 读取记录 / 店铺三页共用） ═══════════════════════════
+ * 和看板上那两张表不是一套：看板要 split-flap 翻板和固定 6 行（远看的画面），
+ * 这三页是给人坐下来读和操作的，所以普通行 + 可排序表头 + 分页。 */
+.ph .fld.sm{height:28px;margin:0 2px}
+.ph .fld.sm input{font-size:12px;width:186px}
+.ph .fld.sm.wide input{width:232px}
+
+.pstats{flex:none;display:flex;gap:0;padding:12px 16px 13px;
+  border-bottom:1px solid var(--hair)}
+.pstats .stt{flex:0 0 auto;min-width:150px;padding:0 22px;
+  border-left:1px solid var(--hair)}
+.pstats .stt:first-child{border-left:0;padding-left:0}
+.pstats .l{display:block;font-size:12px;color:var(--tx2);margin-bottom:5px}
+.pstats .v{display:block;font-family:var(--mono);font-size:20px;font-weight:700;
+  color:var(--tx);line-height:1;letter-spacing:-.3px}
+.pstats .v.em{color:var(--crawl)}
+.pstats .v.ok{color:var(--ok)}
+.pstats .v.warn{color:var(--order)}
+
+.pbody{flex:1;min-height:0;overflow:hidden;position:relative}
+.prow{display:flex;align-items:center;height:34px;font-size:13px;
+  border-bottom:1px solid var(--hair);cursor:default}
+#pOrdBody .prow{cursor:pointer}
+.prow:hover{background:rgba(var(--hlRGB),var(--hlA2))}
+.prow .c{flex:none;min-width:0;padding:0 10px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+.prow .c.mono{font-family:var(--mono);font-size:12px;color:var(--tx2)}
+.prow .c.r{text-align:right}
+.th .c.so{cursor:pointer;user-select:none}
+.th .c.so:hover{color:var(--tx)}
+/* ── 排序箭头：**全站唯一一套**，必须绝对定位 ────────────────────────────
+ * 原来它是 inline-block + margin-left:5px，**在 flex 流里占 12px**，
+ * 于是把表头文字从它该在的位置挤开，四列的表头和表体对不齐（实测 1920）：
+ *     金额（右对齐）        表头被挤左 15px
+ *     国家 / 来自 / 订单规模（居中）  被挤偏 7.5px（居中列吃一半）
+ * 绝对定位后，表头文字和表体走完全同一套对齐规则。
+ *
+ * 另外：这条规则原先和 app.js 生成的 `<i class="ar">` **并存**，
+ * 排序列上会画出**两个三角**（第一版截图里 `时间` 后面就是两个）。
+ * 已删掉 `<i class="ar">` 那一套 —— 因为 `pages.js` 的四个内页表头只有
+ * `.so` 类、没有那个 `<i>`，它们的箭头全靠这条伪元素规则，删错边会让内页哑掉。
+ * 顺带四个内页的表头也跟着对齐了，它们本来踩着同一个坑。 */
+.th .c.so::after{content:'';position:absolute;right:6px;top:50%;margin-top:-2px;
+  width:0;height:0;
+  border-left:3px solid transparent;border-right:3px solid transparent;
+  border-top:4px solid var(--faint);opacity:0}
+/* 右对齐列：箭头挪到文字左侧，否则和贴右的数字抢同一块地方 */
+.th .c.r.so::after{right:auto;left:6px}
+.th .c.ic.so::after{right:4px}
+.th .c.so:hover::after{opacity:.5}
+.th .c.so.desc::after{opacity:1;border-top-color:var(--crawl)}
+.th .c.so.asc::after{opacity:1;border-top:0;border-bottom:4px solid var(--crawl)}
+
+/* 状态药丸：结果 / 接入状态共用 */
+.pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;
+  font-size:11px;border:1px solid var(--hair2);color:var(--tx2);background:var(--panel2)}
+.pill.p200{border-color:var(--crawl-d);color:var(--crawl)}
+.pill.p304{border-color:var(--hair2);color:var(--mute)}
+.pill.poff{border-color:var(--red);color:var(--red)}
+
+.pager{flex:none;display:flex;align-items:center;gap:7px;
+  padding:10px 16px;border-top:1px solid var(--hair);font-size:12px}
+.pager .sp{flex:1}
+.pager .pg-i{color:var(--tx2)}
+/* 「实时刷新中 / 已暂停」必须写出来 —— 翻到第 2 页后表不再自己动，
+   不告知的话用户会以为数据断了 */
+.pager .pg-live{margin-left:12px;padding:2px 8px;border-radius:10px;font-size:11px}
+.pager .pg-live.on{color:var(--crawl);background:color-mix(in srgb,var(--crawl-d) 20%,transparent)}
+.pager .pg-live.off{color:var(--mute);background:var(--panel2)}
+.pager .pg-b{min-width:28px;height:26px;padding:0 8px;border-radius:5px;cursor:pointer;
+  background:var(--panel2);border:1px solid var(--hair2);color:var(--tx2);
+  font-family:var(--cn);font-size:12px;
+  transition:background-color 140ms,color 140ms,border-color 140ms}
+.pager .pg-b:hover:not([disabled]){color:var(--tx);border-color:var(--crawl)}
+.pager .pg-b.on{background:var(--crawl-d);border-color:var(--crawl);color:var(--tx);font-weight:600}
+.pager .pg-b[disabled]{opacity:.4;cursor:default}
+.pager .pg-e{color:var(--faint);padding:0 2px}
+
+.pempty{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:9px;color:var(--mute)}
+.pempty svg{width:30px;height:30px;opacity:.5}
+.pempty b{font-size:14px;font-weight:600;color:var(--tx2)}
+.pempty s{text-decoration:none;font-size:12px;color:var(--faint)}
+
+/* ══ 设置页 ═══════════════════════════════════════════════════════════
+ * 两列。单列排下来 1150px，在 1080 的屏上要滚 —— 而这是块朝外的展会屏，
+ * 没人会去发现设置页里还能滚。两列后 5 组全落在一屏内。
+ * overflow-y:auto 留着当保险（万一在更矮的屏上跑），正常情况下不会触发。 */
+.sbody{overflow-y:auto;padding:4px 0 20px;display:flex;align-items:flex-start}
+.scol{flex:1;min-width:0}
+.scol + .scol{border-left:1px solid var(--hair)}
+.sgrp{padding:18px 24px 6px}
+.scol .sgrp + .sgrp{border-top:1px solid var(--hair)}
+.sgt{font-size:13px;font-weight:600;color:var(--crawl);margin-bottom:6px;
+  letter-spacing:.3px}
+.srow{display:flex;align-items:center;gap:24px;padding:13px 0;
+  border-bottom:1px solid var(--hair)}
+.srow:last-child{border-bottom:0}
+.srow .sl{flex:1;min-width:0}
+.srow .sl b{display:block;font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
+.srow .sl s{display:block;text-decoration:none;font-size:12px;color:var(--tx2);
+  line-height:1.5}
+.srow .sr{flex:none}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--hair2);
+  border-radius:10px;overflow:hidden}
+.seg button{height:28px;padding:0 15px;background:transparent;border:0;cursor:pointer;
+  color:var(--tx2);font-family:var(--cn);font-size:12px;
+  transition:background-color 140ms,color 140ms}
+.seg button + button{border-left:1px solid var(--hair2)}
+.seg button:hover{color:var(--tx)}
+.seg button.on{background:var(--crawl-d);color:var(--tx);font-weight:600}
+.tgl{width:42px;height:24px;border-radius:12px;cursor:pointer;position:relative;
+  background:var(--panel2);border:1px solid var(--hair2);
+  transition:background-color 180ms,border-color 180ms}
+.tgl i{position:absolute;left:3px;top:2px;width:18px;height:18px;border-radius:50%;
+  background:var(--mute);transition:transform 180ms cubic-bezier(.16,1,.3,1),background-color 180ms}
+.tgl.on{background:var(--crawl-d);border-color:var(--crawl)}
+.tgl.on i{transform:translateX(18px);background:var(--tx)}
+.snote{padding:4px 0 8px;font-size:12px;color:var(--tx2);line-height:1.7;max-width:1000px}
+.snote p{margin-bottom:7px}
+.snote b{color:var(--tx);font-weight:600}
+.snote code{font-family:var(--mono);font-size:11px;padding:1px 5px;border-radius:3px;
+  background:var(--panel2);color:var(--crawl)}
+
+/* 顶栏控件在内页上不适用时禁用 —— 留一个点了没反应的搜索框就是又一个假操作 */
+#top .fld.off,#rng.off{opacity:.4;pointer-events:none}
+#top .tb[disabled]{opacity:.4;cursor:default}
+#top .tb[disabled]:hover{background:var(--panel2);color:var(--tx2);border-color:var(--hair2)}
+/* KPI 卡选中「读取」/「成交额」时，对应面板给一圈主题色环，指明它管的是哪张表 */
+.pan.focus{box-shadow:var(--sh),0 0 0 1px var(--crawl)}
+
+/* ══ KPI 四卡 96 ═════════════════════════════════════════════════════════
+ * 焦点手段照 _关键度量.md §18①：第一张整块反色填实，不靠字号砸。
+ * 其余三张结构完全相同 —— 3 米外先看到那块色，走近才读旁边三张。 */
+#kpi{height:96px;flex:none;display:flex;gap:16px}
+/* 磨砂玻璃。背后是 body 那层极光光场（面板本来就半透），blur 把它化开，
+ * 卡片才有「浮在光上」的质感而不是贴在底色上。
+ * -webkit- 前缀必须写：Safari 至今只认带前缀的，不写会**静默**退化成一块
+ * 半透明色板（不报错，只是没有模糊）。 */
+.kc{flex:1;min-width:0;background:var(--kcBg);border:1px solid var(--kcBd);
+  backdrop-filter:blur(16px) saturate(1.35);
+  -webkit-backdrop-filter:blur(16px) saturate(1.35);
+  border-radius:26px;padding:15px 22px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:var(--sh);
+  transition:background-color 380ms linear,border-color 380ms linear}
+.kc .lb{font-size:13px;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.kc .lb em{font-style:normal;font-size:11px;color:var(--faint);
+  border:1px solid var(--hair2);border-radius:6px;padding:0 5px}
+.kc .vv{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--tx);
+  line-height:1;letter-spacing:-.5px;display:flex;align-items:baseline;gap:6px}
+.kc .vv b{font-weight:700}
+.kc .vv u{text-decoration:none;font-size:14px;font-weight:400;color:var(--tx2);
+  font-family:var(--cn)}
+/* 趋势线 104×30。原先 74×26 且 opacity .8 —— 在 398px 宽的卡上太小太淡，
+ * 1~3 米外基本看不到。现在满不透明，靠面积渐变自己控制轻重。 */
+/* 左端渐隐。398px 的卡里可用宽只有 354，而 10 位金额约 200px + 曲线 168px
+ * 必然重叠十几到几十像素 —— 加宽是需求，所以化解的办法是让曲线**左端溶掉**
+ * 而不是把它改窄。34% 的渐隐带（约 57px）正好盖住重叠区，
+ * 曲线读起来像从数字后面浮出来，不是撞上去。 */
+.kc .sk{position:absolute;right:18px;bottom:13px;line-height:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%,#000 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 34%,#000 100%)}
+/* 第一张：整块反色 */
+/* ── 第一张：反色卡做成磨砂玻璃 ────────────────────────────────────────
+ * 「反色」和「玻璃」不冲突：玻璃不是「透明」，是**透光的实体**。
+ * 三层叠出来，缺一层就不像：
+ *   ① 底 —— --kcFill 半透明主色，把背后的底色透一点进来。
+ *      不透的色板永远只是色板，这是玻璃与否的分界线。
+ *   ② 颗粒 —— feTurbulence 细噪点走 overlay 混合。「磨砂」字面就是毛面，
+ *      光在这层上漫反射。没有它只是「有色玻璃」，有了才是「磨砂玻璃」。
+ *      文字画在背景**之上**，background-blend-mode 够不着它，
+ *      所以加强颗粒不会咬花 32px 的大数字 —— 放心调。
+ *
+ *      !! 这里是两个独立旋钮，别拧成一个（我连着栽了三次）：
+ *         · 颗粒**强度** = 噪点自身对比度 → 滤镜的 slope
+ *         · 颗粒**覆盖度** = rect 的 opacity → 直接吃掉透光度
+ *      踩过的三个坑，改参数前先读：
+ *      1) 第一版没写 rect opacity。滤镜里 feFuncA slope=0 intercept=1 把贴图
+ *         alpha 强制成 1 —— 一张**完全不透明**的图平铺满卡，把半透明的
+ *         --kcFill 整个盖死，卡片退回实心色板（实测 G 被抬高 25，玻璃感归零）。
+ *      2) 第二版补了 opacity 救回透光，却顺手把噪点压到 [.33,.67] ——
+ *         两个旋钮同时拧小，颗粒幅度只剩 5/255，7 倍放大都看不见。
+ *      3) 第三版取消压缩，以为噪点会走满 [0,1] —— 并不会。fractalNoise 是
+ *         分形叠加、接近高斯，再过 saturate(0) 三通道平均，实测 sd 仅 15/255。
+ *         「取消压缩」≠「放开」，必须 slope>1 主动放大。
+ *         同时发现贴图均值不是 128 而是 **186.7**（feComponentTransfer 拿到的
+ *         是预乘 RGB，被 alpha 除亮了），而 overlay 遇到比中灰亮的源会提亮，
+ *         所以 intercept 必须把均值推回中灰，不能留 0。
+ *      现版 slope 2.5 / intercept -.96 / opacity .15 是**扫参数实测**出来的：
+ *      贴图均值 132.6（≈中灰，不染色）、sd 62、低端截断 10.7%。
+ *      调完请重新量一次贴图均值，偏离 128 太远它就会开始给整张卡染色。
+ *
+ *      opacity 为什么是 .15 而不是更高：噪点贴图按 **CSS 像素**平铺（120px），
+ *      在 dpr=2 的视网膜屏上每个噪点被放大成 2×2 设备像素，颗粒会明显变粗。
+ *      .22 在 1×屏（展会机就是 1920×1080 1×，见规格 §5）刚好，
+ *      但在 2×屏上像砂纸。.15 是两种屏上都成立的那一档。
+ *      如果确定只上 1× 展会机，可以回到 .22 拿更足的质感。
+ *   ③ 高光 —— 135° 一道镜面反射 + 顶边 1px 亮线（inset）。
+ *      玻璃的**厚度**全靠这道边读出来，去掉它整张卡会重新拍回平面。
+ *
+ * !! blur 半径在这张卡上几乎不起作用，别指望调它。
+ *    实测卡片背后那块区域 aurora 的平均 alpha 只有 6.6/255（≈2.6%），
+ *    再乘元素自身 .56 不透明度 → 不到 1.5%，背景近乎纯色。
+ *    模糊一块纯色等于没模糊。质感来自 ①②③；backdrop-filter 留着是
+ *    为了将来背景变复杂（换壁纸 / 加强极光）时不用再回来补。 */
+.kc.fill{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.08) 32%,rgba(255,255,255,0) 58%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.5' intercept='-.96'/%3E%3CfeFuncG type='linear' slope='2.5' intercept='-.96'/%3E%3CfeFuncB type='linear' slope='2.5' intercept='-.96'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E"),
+    var(--kcFill);
+  background-size:auto,120px 120px,auto;
+  background-blend-mode:normal,overlay,normal;
+  border-color:rgba(255,255,255,.30);
+  backdrop-filter:blur(24px) saturate(1.5);
+  -webkit-backdrop-filter:blur(24px) saturate(1.5);
+  box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -1px 0 rgba(0,0,0,.10)}
+/* 标签从 .82 提到 .90：底色透明度降了之后，这一行是全卡最弱的一环
+ * （改前实测 2.86:1，连 WCAG 4.5:1 都不到），不补会更糊。 */
+.kc.fill .lb{color:var(--fillTx);opacity:.90}
+.kc.fill .lb em{border-color:rgba(255,255,255,.30);color:var(--fillTx)}
+.kc.fill .vv{color:var(--fillTx)}
+.kc.fill .vv u{color:var(--fillTx);opacity:.75}
+/* 指标跳动时浮出的增量 —— 四张卡里有三张的底层量是阶梯函数
+ * （成交额与订单约 55 秒跳一次、店铺约 36 分钟跳一次）。
+ * 不给反馈的话，商家盯着看半分钟会以为这几个数字是死的。 */
+.dl{position:absolute;right:16px;top:12px;font-family:var(--mono);font-size:15px;
+  font-weight:700;color:var(--crawl);opacity:0;pointer-events:none}
+.kc.fill .dl{color:var(--fillTx)}
+
+/* ── KPI 卡的选中态 ─────────────────────────────────────────────────────
+ * 四张卡都是「指标选择器」：点一张，下面的表就按这个指标重排/聚焦（见 app.js selectKpi）。
+ * 原先只有第一张靠反色看着像被选中，其余三张点了毫无反应 —— 那不是「没做选中态」，
+ * 是四张卡里三张在假装可点。
+ * 选中的表达手段是**外描边 + 底部主题色横条**，不改背景色：
+ * 第一张是反色实底，靠背景表达选中的话它没有可用的第二种背景。
+ *
+ * **状态类名叫 pick 不叫 sel。** `.sel` 已经是筛选下拉的包裹类
+ * （`.sel{height:26px}`，见上面「筛选/操作条」一节），KPI 卡加上 `sel` 会继承那个
+ * 26px 高度 —— 实测卡片从 96px 塌成 28px，整张卡的内容被挤没了。
+ * 这和 `.act` 把「暂停滚动」按钮变透明是**同一个坑**（见 README 坑 18），
+ * 我在修完那个之后又自己踩了一遍：状态类名必须限定在组件内，或者带组件前缀。 */
+.kc{cursor:pointer}
+.kc:hover{border-color:var(--hair2)}
+/* 原来 hover 把描边整个抹成 transparent —— 那是玻璃最关键的一道边，
+ * 抹掉等于一碰就退回平面。改成把边**提亮**，玻璃被光扫过的感觉。 */
+.kc.fill:hover{border-color:rgba(255,255,255,.46)}
+/* 选中态的底部强调条。圆角放大到 26 之后，通栏的直角条两端会被圆角
+ * **削掉一大截**，看起来像断了 —— 所以两端各缩进 26（＝半径），
+ * 并把自己也做成圆头，落在圆角的直边段上。 */
+.kc::after{content:'';position:absolute;left:26px;right:26px;bottom:0;height:3px;
+  border-radius:2px 2px 0 0;
+  background:var(--crawl);transform:scaleX(0);transform-origin:left center;
+  transition:transform 220ms cubic-bezier(.16,1,.3,1)}
+.kc.pick::after{transform:scaleX(1)}
+/* 选中态**不再加整圈内描边**。原来是 inset 0 0 0 1px var(--crawl)：
+ * 写的是 1px，但 --crawl 是高饱和主题色（#00D3A7），叠在卡片自己那圈 1px
+ * 描边上，视觉上就是一条又粗又亮的环，把四张卡的秩序整个打散。
+ * 选中的表达交给下面两样，都够读：
+ *   · ::after 底部 3px 强调条（同色，但只占一条边，不圈住整张卡）
+ *   · .kc.pick .sk 趋势线提饱和
+ * 注意别把 box-shadow 声明留成空的再写 var(--sh) —— .kc.pick 比 .kc.fill
+ * 晚出现且同特异性(0,2,0)，会把反色卡的玻璃高光一起覆盖掉。整条删干净。 */
+.kc.fill::after{background:var(--fillTx)}
+/* 同上，反色卡的选中环也去掉。这条规则整个删除后，.kc.fill 自己的
+ * box-shadow（投影 + 玻璃顶边高光）自然生效，选中前后玻璃质感一致。 */
+/* 被选中的那张，趋势线不再压低存在感 */
+.kc.pick .sk{filter:saturate(1.15)}
+.dl.on{animation:gmvpop 1500ms cubic-bezier(.16,1,.3,1) forwards}
+@keyframes gmvpop{0%{opacity:0;transform:translateY(7px)}
+  18%,62%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-5px)}}
+
+/* ══ 通用面板 ═══════════════════════════════════════════════════════════ */
+/* 圆角 26。原值 6 是照 TDesign 实测的（见 README 的版面账），这一版按要求放大。
+ * overflow:hidden 仍然必须留着（表体靠它裁剪），代价是**面板四角会切到内容**：
+ * 表格首行/末行贴着圆角，角上那一小块会被削掉。26 的半径下削掉的是
+ * 行首那几像素的留白（.c 有 10px padding），碰不到文字，所以可接受。
+ * 再往上加半径就要给 .th / .tb2 单独补内边距了。 */
+.pan{background:var(--panel);border:1px solid var(--hair);border-radius:26px;
+  display:flex;flex-direction:column;min-width:0;overflow:hidden;box-shadow:var(--sh);
+  transition:background-color 380ms linear,border-color 380ms linear}
+/* 圆角放大到 26 之后，原来 16px 的内边距让标题贴着圆弧起点。
+ * 20 是「文字左沿离面板左沿」的统一档位，下面表格那一套也对齐到这个数
+ * （表格内缩 12 + 单元格内边距 10 ≈ 22，视觉上和 20 齐）。 */
+.ph{height:42px;flex:none;display:flex;align-items:center;gap:10px;padding:0 20px;
+  border-bottom:1px solid var(--hair)}
+.ph .ti{font-size:14px;font-weight:600;color:var(--tx);white-space:nowrap}
+.ph .sub{font-size:12px;color:var(--mute);white-space:nowrap}
+.ph .sp{flex:1}
+.ph .r{font-size:12px;color:var(--mute);font-family:var(--mono)}
+
+/* 面板里的筛选下拉 —— 这一版「可操作」的主要入口 */
+.sel{position:relative;display:flex;align-items:center;height:26px}
+.sel select{appearance:none;-webkit-appearance:none;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:5px;
+  color:var(--tx2);font-family:var(--cn);font-size:12px;
+  padding:0 24px 0 9px;height:26px;cursor:pointer;outline:0;
+  transition:border-color 140ms,color 140ms}
+.sel select:hover{color:var(--tx);border-color:var(--crawl)}
+.sel select:focus-visible{border-color:var(--crawl);outline:2px solid var(--crawl-d);outline-offset:1px}
+.sel.act select{border-color:var(--crawl);color:var(--tx)}
+.sel::after{content:'';position:absolute;right:9px;top:11px;pointer-events:none;
+  width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;
+  border-top:4px solid var(--mute)}
+.chip{display:flex;align-items:center;gap:5px;height:26px;padding:0 9px;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:10px;
+  color:var(--tx2);font-family:var(--cn);font-size:12px;cursor:pointer;
+  transition:background-color 140ms,color 140ms,border-color 140ms}
+.chip:hover{color:var(--tx);border-color:var(--crawl)}
+.chip svg{width:12px;height:12px}
+/* 图标型 chip：26×26 正方形。沿用 .chip 的高度，只把左右内边距换成等宽 ——
+ * 保留 padding:0 9px 的话会得到一个 30×26 的宽药丸里孤零零一个 12px 图标。 */
+.chip.ico{width:26px;padding:0;justify-content:center;gap:0}
+.chip[disabled]{opacity:.45;cursor:default}
+.chip[disabled]:hover{color:var(--tx2);border-color:var(--hair2)}
+/* 按下态（暂停中）：实底 + 主题色描边。深浅两套都够看清 —— 这是「暂停滚动」
+ * 唯一的状态反馈，之前它被全局 .act 的 opacity:0 吃掉了。 */
+.chip.hot{background:var(--crawl-d);border-color:var(--crawl);color:var(--tx);font-weight:600}
+.chip.hot:hover{background:var(--crawl-d);border-color:var(--crawl);color:var(--tx)}
+
+/* ── 订单筛选浮层 ────────────────────────────────────────────────────────
+ * 三列并排：AI 助手 / 国家 / 订单规模。国家那列可能有二十几项，所以
+ * 每列**各自**滚动（.fl 上 max-height）—— 整个面板一起滚的话，
+ * 只有 4 项的「订单规模」会被拖到看不见的地方。
+ * 玻璃底沿用 --glassBg / --glassBd（和礼花卡同一套），两套主题都有值。 */
+/* 圆角梯度：卡片 26 · 浮层 16 · 按钮 10 · 小徽标 6。
+ * 各层约 0.6 的比例，26 和 5 直接并排会显得按钮特别「硬」。 */
+.fpop{position:absolute;z-index:55;display:none;
+  background:var(--glassBg);border:1px solid var(--glassBd);border-radius:16px;
+  box-shadow:var(--shPop);padding:12px 0 0;
+  backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3)}
+.fpop.on{display:block}
+#filterPop{width:452px}
+#logFilterPop{width:296px}
+.fpop .fgrps{display:flex}
+.fpop .fgrp{flex:1;min-width:0;padding:0 10px}
+.fpop .fgrp + .fgrp{border-left:1px solid var(--hair)}
+.fpop .fh{font-size:11px;color:var(--mute);padding:0 6px;margin-bottom:6px}
+.fpop .fl{max-height:206px;overflow-y:auto;overflow-x:hidden}
+.fpop .fnone{font-size:12px;color:var(--mute);padding:6px}
+/* 勾选项。原生 checkbox 各平台样式不一、也没法跟主题走，所以藏起来自己画 <i>。
+ * label 包着 input，点整行都能切 —— 不用额外的 click 监听。 */
+.fo{position:relative;display:flex;align-items:center;gap:7px;height:26px;padding:0 6px;
+  border-radius:4px;font-size:12px;color:var(--tx2);cursor:pointer;user-select:none;
+  white-space:nowrap;overflow:hidden}
+.fo:hover{background:var(--panel2);color:var(--tx)}
+.fo input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.fo i{width:13px;height:13px;border-radius:3px;border:1px solid var(--hair2);flex:none;
+  position:relative;transition:background-color 120ms,border-color 120ms}
+.fo.on{color:var(--tx)}
+.fo.on i{background:var(--crawl);border-color:var(--crawl)}
+/* 对勾用两条边框旋转出来 —— 比塞一个 svg 省事，颜色也跟着走 */
+.fo.on i::after{content:'';position:absolute;left:4px;top:1px;width:3px;height:6.5px;
+  border:solid #FFFFFF;border-width:0 1.6px 1.6px 0;transform:rotate(43deg)}
+.fpop .ffoot{display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding:9px 14px;border-top:1px solid var(--hair)}
+.fpop .ffoot > span{font-size:12px;color:var(--mute)}
+
+/* 计数徽标。带文字的按钮里它跟在文字后面；纯图标按钮（日志那个）没有文字，
+ * 所以改成右上角悬挂 —— 26×26 的方按钮里再塞一个数字会把图标挤没。
+ * .chip.ico 必须 overflow:visible，否则角标被按钮自己裁掉。 */
+/* 两个筛选按钮现在都是纯图标，徽标统一走右上角悬挂的 .bdg，
+ * 原来那条「跟在文字后面」的行内徽标样式已经没有使用者，删掉。 */
+.chip.ico{position:relative;overflow:visible}
+.chip.ico .bdg{position:absolute;top:-6px;right:-6px;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:14px;height:14px;padding:0 3px;border-radius:7px;
+  background:var(--crawl);color:#FFFFFF;font-size:9px;font-weight:700;font-style:normal;
+  box-shadow:0 0 0 1.5px var(--panel)}
+#btnFilter.act,#btnLogFilter.act{border-color:var(--crawl);color:var(--tx)}
+
+/* ══ 第二行：地图 + 右侧两板 320 ═════════════════════════════════════════ */
+#row2{height:320px;flex:none;display:flex;gap:16px}
+#mapPan{width:800px;flex:none}
+#mapWrap{flex:1;position:relative;min-height:0}
+#map{position:absolute;left:0;top:0;width:100%;height:100%}
+/* 地图订单播报层：新订单在点位旁弹一张小卡（见 app.js 的 popOrder） */
+#pops{position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+/* ── 地图播报卡：拟态玻璃 ──────────────────────────────────────────────────
+ * 卡片压在点阵地图上，`backdrop-filter` 把底下的点化开 —— 玻璃感来自
+ * **看得见但看不清**的背景，不是来自半透明本身。三样缺一不可：
+ *   ① 背景模糊（blur 14）+ 提饱和（saturate 1.5，模糊会让颜色发灰，补回来）
+ *   ② 半透明底（--popBg，深浅两套值不同，见 app.js 的 THEMES）
+ *   ③ 顶边 1px 高光（::after）—— 这是「玻璃的厚度」。少了它就只是个
+ *      半透明方块，怎么调都不像玻璃
+ * 圆角从 6 提到 10：玻璃在视觉上是有厚度的实体，小圆角会读成一张纸。
+ *
+ * `-webkit-` 前缀必须写：Safari 至今只认带前缀的（现场万一用 Safari 放，
+ * 不写就完全没有模糊 —— 而且它是**静默**退化成一块半透明色板，不报错）。
+ *
+ * 稀有度不再靠描边色区分（玻璃的描边是「反光」，染成红色就不像玻璃了），
+ * 改成左侧 2px 强调条 —— 和订单行的 .mk 是同一套语言。 */
+.pop{position:absolute;min-width:132px;padding:8px 11px 8px 13px;border-radius:16px;
+  background:var(--popBg);border:1px solid var(--popBd);
+  box-shadow:var(--popSh);
+  backdrop-filter:blur(14px) saturate(1.5);
+  -webkit-backdrop-filter:blur(14px) saturate(1.5);
+  opacity:0;transform:translateY(5px) scale(.96);
+  transform-origin:left bottom;
+  transition:opacity 200ms linear,transform 260ms cubic-bezier(.16,1,.3,1)}
+.pop.on{opacity:1;transform:translateY(0) scale(1)}
+/* 左侧强调条：稀有度信号（和订单行 .mk 同语言） */
+.pop::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:2px;
+  border-radius:0 2px 2px 0;background:var(--order)}
+.pop.big::before{background:var(--red)}
+/* 顶边高光 = 玻璃的厚度。两端收进 12px 并渐隐，硬边会读成一条描边而不是反光 */
+.pop::after{content:'';position:absolute;left:12px;right:12px;top:0;height:1px;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--popHi),transparent)}
+.pop .p1{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);
+  white-space:nowrap;margin-bottom:3px}
+.pop .p1 i{font-style:normal;width:5px;height:5px;border-radius:50%;flex:none;
+  background:var(--order)}
+.pop.big .p1 i{background:var(--red)}
+.pop .p2{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--order);
+  line-height:1.1;white-space:nowrap}
+.pop.big .p2{color:var(--red)}
+.pop .p3{font-size:11px;color:var(--mute);white-space:nowrap;margin-top:2px}
+/* 从点位牵向卡片的引线。1px + opacity .85 在深色地图上几乎看不见（实测），
+ * 所以走 1.5px 实色。**引线不参与玻璃** —— 它是指示线不是卡片的一部分，
+ * 跟着一起半透明会让「这张卡指向哪个点」这条唯一的信息变弱。 */
+.pop .ld{position:absolute;background:var(--order);height:1.5px!important}
+.pop.big .ld{background:var(--red)}
+
+#mapLg{position:absolute;left:20px;bottom:14px;display:flex;gap:14px;
+  font-size:11px;color:var(--mute)}
+#mapLg span{display:flex;align-items:center;gap:5px}
+/* 图例色块跟着点阵一起改成圆 —— 它代表的就是地图上那个点，方块会对不上 */
+#mapLg i{width:6px;height:6px;border-radius:50%;flex:none}
+
+/* 右侧一个面板、内部两列 —— 两个 136px 的独立面板装不下「头 42 + 5 行」，
+ * Perplexity 和「其他」会被挤掉（实测只显示到第 3 行）。合成两列后每列有 246px
+ * 可用，渠道 5 行、国家 6 行都放得开。 */
+#side2{flex:1;min-width:0}
+.two{flex:1;min-height:0;display:flex;padding:10px 4px 8px}
+/* 两列不是对半分。左列一行是「名字 74 + 条 + 百分比 44」，条再宽也只是把
+ * 一条 6px 高的横线拉长，读数不会更清楚；右列要在同一高度里塞下 158 的
+ * 甜甜圈 + 六行图例 + 列头那串「6 个国家 / 地区 按成交额」，一半宽是紧的。
+ * 43 / 57：左列 350（条仍有 190，够读），右列 464 —— 图例多拿 57px。
+ * 甜甜圈本身不跟着变大：它内圈只有 80px，中心那三行文案是按 158 的框
+ * 逐像素调过的（见 #pieSvg 上面那条注释），一动就得重排。 */
+.two .col{flex:1 1 43%;min-width:0;display:flex;flex-direction:column;padding:0 18px}
+.two .col + .col{flex:1 1 57%;border-left:1px solid var(--hair)}
+.two .ch{flex:none;font-size:12px;color:var(--tx2);padding-bottom:7px;
+  display:flex;align-items:baseline;gap:6px}
+.two .ch u{text-decoration:none;font-size:11px;color:var(--faint);margin-left:auto;
+  display:flex;align-items:baseline;gap:7px}
+.two .ch u em{font-style:normal;color:var(--tx2);font-family:var(--mono)}
+/* hover 详情一出现就把「按订单数」这个单位标注让位，避免列头挤成两行 */
+.two .ch u s{text-decoration:none}
+.two .ch u em:not(:empty) + s{display:none}
+
+/* ── 渠道占比条：可 hover / 可点击筛选 ─────────────────────────────────── */
+.rr.hit{cursor:pointer;border-radius:4px;padding:0 5px;margin:0 -5px;
+  transition:background-color 140ms,opacity 140ms}
+.rr.hit:hover,.rr.hi{background:var(--panel2)}
+.rr.dim{opacity:.42}
+/* 选中态（订单表正按这个渠道筛）：左侧一道主题色竖条 + 名字加重。
+   不能只靠 hover 表示 —— 鼠标移开后「现在筛的是谁」必须还看得见。 */
+.rr.on{background:var(--panel2);box-shadow:inset 2px 0 0 var(--crawl)}
+.rr.on .nm{color:var(--crawl);font-weight:600}
+.pb{flex:1;min-height:0;display:flex;flex-direction:column}
+.rr{display:flex;align-items:center;gap:9px;height:28px;flex:none;font-size:12px}
+.rr .nm{width:74px;flex:none;color:var(--tx);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.rr .bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.rr .bar u{display:block;height:100%;background:var(--crawl-d);border-radius:3px;
+  transition:width 620ms cubic-bezier(.22,1,.36,1)}
+.rr .pc{width:44px;flex:none;text-align:right;font-family:var(--mono);color:var(--tx2)}
+
+/* ── 助手标：占比条下面那块留白 ─────────────────────────────────────────
+ * 单色而不是各自的品牌色 —— 五种色相会把这套「简洁科技风」搅花，
+ * 和上面饼图那条注释是同一个理由。用 --mute，深浅两套都有对应值
+ * （浅 #969799 / 深 #6B7280），不用再各写一份。
+ * 悬浮用负延迟错开：正延迟的话五个标会在开场同时起步，一眼是假的。 */
+.mlg{flex:none;height:72px;display:flex;align-items:center;justify-content:center;gap:24px}
+.mlg i{display:block;width:26px;height:26px;flex:none;color:var(--mute);
+  animation:mlgFloat 4.2s ease-in-out infinite alternate;animation-delay:var(--d)}
+.mlg i svg{display:block;width:100%;height:100%;fill:currentColor}
+@keyframes mlgFloat{from{transform:translateY(3.5px)}to{transform:translateY(-3.5px)}}
+
+/* ── 国家 / 地区甜甜圈图（可 hover） ─────────────────────────────────────
+ * 分类数据本该用分类色，但六种色相会把「简洁科技风」搅花。
+ * 真实后台（TDesign / antd 的默认饼图）走的是品牌色的明度阶 —— 这里照做，
+ * 「其他」固定用最末一档的中性灰，一眼能看出它不是某个具体国家。 */
+/* 甜甜圈 + 图例整体居中。图例收成定宽之后两边会各余出几十 px，
+   靠左摆会把整块推得贴着分隔线，居中才配得上放大后的圆。 */
+/* 中缝 64。圆放大到 224 之后原来的 14 太挤，34 仍偏近 —— 这里把两侧余量
+ * 几乎全部匀进中缝：224 + 64 + 137 = 425，列内 439，每边只剩 7，
+ * 加上 .col 自己的 12px 内边距，离分隔线和面板边仍有 19。
+ * 弧线外沿到图例色块的净距离由此到 79.6（hover 时 PIE_OUT 弹出后仍有 72.5）。
+ * 用定值而不是 space-between：通栏拉宽时 space-between 会把圆和图例
+ * 越推越远，定值在任何宽度下间距恒定，整组居中。 */
+#pie{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:64px}
+/* svg 自己不吃指针事件，只有扇区吃 —— 否则甜甜圈的洞和四角空白会挡住 hover */
+/* 158 → 224。只动 CSS 尺寸、不动 viewBox（仍是 0 0 158 158），于是整张图等比放大
+ * 1.418 倍：弧线（app.js 的 PIE_R1/R2/OUT）、内圈、中心那三行文案都是用户单位，
+ * 一起跟着缩放 —— 中心文案「按 158 的框逐像素调过」那笔账因此原样成立，不用重排。
+ * 上限来自高度：列高 258 − 列头 22.5 = 235.5，224 留 11.5 的呼吸。 */
+#pieSvg{flex:none;width:224px;height:224px;overflow:visible;pointer-events:none}
+#pieSvg path{cursor:pointer;pointer-events:auto;
+  transition:opacity 160ms linear,transform 200ms cubic-bezier(.16,1,.3,1)}
+#pieSvg path.dim{opacity:.34}
+#pie .ctr{pointer-events:none}
+/* 19 → 11。这个字号是**用户单位**：圆从 158 放大到 224 之后它跟着放大 1.418 倍，
+ * 19 变成了约 27 CSS px（放大前正好是 19）—— 所以「金额太大」是放大的连带效果。
+ *
+ * 落到 11 的依据是量出来的，不是拍的：内圈直径 PIE_R1×2 = 80 用户单位，
+ * 而「$1,579,660」这一串的宽度按字号是 19→103 / 15→81.6 / 13→70.7 / 12→65.3 / 11→59.9。
+ * 也就是说 15 那档已经**溢出洞口**（102%），13 也贴到 88%。11 占 75%，
+ * 文字四周留出一圈看得见的余量，才像是「装在洞里」而不是「塞满洞」。
+ * 想再大一点就往回走 12（82%），别超过 13。 */
+#pie .ctr .c1{font-family:var(--mono);font-size:11px;font-weight:700;fill:var(--tx)}
+/* 金额和百分比里的符号（$ , . %）小一号排。等大的逗号会把「1,579,022」
+ * 每三位切一刀，整串数字读起来是碎的；符号收到 .68em 再压一点不透明度之后，
+ * 数字自己连成一条，撇号退成分隔提示。fill-opacity 而不是写死颜色 ——
+ * .c1 用 --tx、.c3 用 --mute，各自按自己的底色去淡。 */
+#pie .ctr .p{font-size:.68em;fill-opacity:.62}
+/* 标签与 hover 金额跟着降一档。c1 收到 11 之后，原来的 11 / 10 会和主数字齐平，
+ * 「金额 > 标签」的层级就没了 —— 主数字靠加粗撑着不够，尺寸也得有台阶。 */
+#pie .ctr .c2{font-size:9px;fill:var(--tx2)}
+#pie .ctr .c3{font-family:var(--mono);font-size:9px;fill:var(--mute)}
+/* flex:none —— 图例按内容取宽，多出来的宽度让给圆，而不是把百分比顶到最右边 */
+#pieLg{flex:none;display:flex;flex-direction:column;gap:1px}
+#pieLg .lr{display:flex;align-items:center;gap:8px;height:23px;flex:none;
+  font-size:12px;cursor:pointer;border-radius:4px;padding:0 5px;
+  transition:background-color 140ms}
+#pieLg .lr:hover,#pieLg .lr.on{background:var(--panel2)}
+#pieLg .lr.dim{opacity:.42}
+#pieLg .sw{width:9px;height:9px;border-radius:2px;flex:none}
+/* 国名定宽而不是 flex:1。flex:1 会吃掉整行剩余宽度，把百分比推到图例最右端 ——
+ * 图例 267px 宽时「美国」和「47.4%」之间空了近 200px，读一行要横跨半个面板。
+ * 58 = 四个中文字（12px 字号，最长的是「巴基斯坦」「澳大利亚」）。
+ * 百分比定宽右对齐，六行的小数点才对得齐。 */
+#pieLg .nm{flex:none;width:58px;color:var(--tx);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+#pieLg .pc{flex:none;width:44px;text-align:right;font-family:var(--mono);color:var(--tx2)}
+
+/* ══ 表格（订单 268 / 日志 275） ═══════════════════════════════════════════
+ * 表头可点排序；行可点出详情抽屉；空态是真的空态（筛没结果就说没结果）。 */
+#ordPan{height:268px;flex:none}
+#logPan{height:243px;flex:none}   /* 42 头 + 32 表头 + 7 行 × 24 = 242 */
+
+.th{flex:none;display:flex;align-items:center;font-size:12px;color:var(--tx2);
+  border-bottom:1px solid var(--hair);background:var(--panel2);white-space:nowrap;
+  transition:background-color 380ms linear}
+/* position:relative 是给排序箭头当定位父级用的，见下面 .ar 那条 */
+/* 表格整体左右内缩 --tblPad。**必须内缩**：日志末行的文字中线离面板底沿
+ * 只有 12px，而 26px 圆角在那个高度已经把左沿吃进 4px —— 不内缩就贴着弧线走。
+ * 宽度账由弹性列吸收（见 app.js 的 applyTableWidths），列宽合计仍然精确等于行宽。 */
+.th{padding:0 var(--tblPad)}
+.th .c{padding:0 10px;display:flex;align-items:center;gap:4px;height:100%;flex:none;
+  position:relative}
+.th .c.ic{justify-content:center;padding:0 6px}
+/* 两份表头之间的沟槽。宽度必须和 app.js 的 ORD_GUT 一致，否则右列表头错位。
+ * 中间那道 1px 是**必须的**：16px 空白在「每行都有内容」的表格里读不出边界，
+ * 眼睛会把左右两列连成一条 16 列的记录（实测第一版就是这个观感）。
+ * 表头和表体各画一段，合起来是一条通到底的线。 */
+.th .gut{flex:none;height:100%;position:relative}
+.th .gut::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:var(--hair)}
+/* 分隔线跟着列宽走（--ordColW 由 app.js 的 applyTableWidths 写）。
+ * 沟槽是 colW..colW+16，所以线画在 colW+8 —— 和表头 .gut::before 的 50% 同一条。 */
+#ordBody::after{content:'';position:absolute;
+  left:calc(var(--ordColW,812px) + var(--tblPad) + 8px);
+  top:0;bottom:0;width:1px;background:var(--hair);pointer-events:none;z-index:2}
+.th .c.so{cursor:pointer;transition:color 140ms}
+.th .c.so:hover{color:var(--tx)}
+.th .c.so.asc,.th .c.so.desc{color:var(--tx);font-weight:600}
+.th .c.r{justify-content:flex-end}
+
+.tb2{flex:1;min-height:0;position:relative;overflow:hidden}
+.empty{position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:7px;color:var(--mute);font-size:13px}
+.empty.on{display:flex}
+.empty svg{width:26px;height:26px;opacity:.5}
+.empty b{color:var(--tx2);font-weight:400}
+
+/* 订单行 64 × 812 —— 两列 × 三行，split-flap 字符格在 .cf 里，见 app.js。
+ * 宽度写死 812 而不是 100%：一行只占半个面板，靠 translate3d 的 x 分左右列。
+ * will-change:transform 保留 —— 这里它是**常驻**的，和 §2 第 9 条
+ * 「只在动画期间加」冲突，但订单行的 transform 本来就一直在被改写
+ * （每来一笔整块板重排），加加减减比常驻更贵。6 个节点的代价可控。 */
+.orow{position:absolute;left:var(--tblPad);top:0;width:var(--ordColW,812px);height:64px;display:flex;
+  align-items:center;border-bottom:1px solid var(--hair);will-change:transform;
+  transition:transform 260ms cubic-bezier(.22,1,.36,1);contain:layout paint;
+  cursor:pointer}
+.orow:hover{background:var(--panel2)}
+.orow .c{padding:0 10px;font-size:13px;color:var(--tx);white-space:nowrap;
+  overflow:hidden;flex:none;position:relative}
+.orow .c.dim{color:var(--tx2)}
+.orow .c.m{font-family:var(--mono);font-size:12px}
+.orow .c.r{text-align:right}
+.orow .amt{font-family:var(--mono);font-weight:600;color:var(--order);font-size:18px}
+
+/* ── 图标列（国家 / 来自 / 订单规模）────────────────────────────────────────
+ * 每格是「图标 + 一行小字」两层。小字 9px 在 1~3 米（这一版的观看距离）
+ * 刚好够读 —— 它的职责不是远看，是**图标认不准时兜底**，所以小没关系。
+ * .bk 是整格翻板的包装：翻转加在它身上，不加在 .c 上 ——
+ * .c 带着列宽和 padding，转它会把列宽一起转歪。 */
+.orow .c.ic{display:flex;align-items:center;justify-content:center;padding:0 6px}
+.bk{display:flex;flex-direction:column;align-items:center;gap:3px;
+  backface-visibility:hidden;transform-origin:50% 50%}
+.bk .fl{display:block;width:24px;height:16px;border-radius:1.5px}
+.bk u{text-decoration:none;font-size:9px;line-height:9px;color:var(--tx2);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 来自：品牌色 monogram 圆标。**不是 logo** —— 见 app.js 的 PF_MONO 注释 */
+.bk i{display:flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:50%;font-style:normal;color:#fff;flex:none}
+/* logo 走 fill:currentColor，颜色由 .bk i 的 color:#fff 给 —— 白标压品牌色底。
+ * 14/24：simple-icons 的图形本来就画满 24 视框，留 5px 内边才不顶着圆边。 */
+.bk i svg{display:block;width:14px;height:14px;fill:currentColor}
+.orow .mk{position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent}
+.orow.hot .mk{background:var(--order)}
+.orow.big .mk{background:var(--red)}
+.orow.big .amt{color:var(--red)}
+.orow .hl{position:absolute;left:3px;right:0;top:0;bottom:0;pointer-events:none;
+  background:rgb(var(--hlRGB));opacity:0}
+.orow.enter .hl{animation:hlf 1500ms linear forwards}
+.orow.enter.big .hl{animation:hlfB 1700ms linear forwards}
+@keyframes hlf{0%,34%{opacity:var(--hlA)}100%{opacity:var(--hlA2)}}
+@keyframes hlfB{0%,31%{opacity:calc(var(--hlA) * 1.9)}100%{opacity:calc(var(--hlA2) * 1.6)}}
+/* 订单规模徽标 */
+.tag{display:inline-flex;align-items:center;height:19px;padding:0 7px;border-radius:6px;
+  font-size:11px;border:1px solid var(--hair2);color:var(--tx2);background:var(--panel2)}
+.tag.t2{border-color:var(--order-d);color:var(--order)}
+/* t3 是实底徽标，字色必须走主文字色 —— 用 --order 的话浅色下是
+ * #B26A16 字压在 #E8B978 底上，对比度只有 2.3:1，糊成一团 */
+.tag.t3{border-color:var(--order-d);color:var(--tx);background:var(--order-d)}
+.tag.t4{border-color:var(--red);color:var(--red)}
+/* 行内「查看」。**必须限定在 .orow 里**：这个类名原先是全局的，
+ * 而 btnPause 按下时也会加 .act —— 于是「暂停滚动」按钮整个 opacity:0 变透明（实测）。
+ * 通用类名 + opacity:0 的组合是个陷阱，任何别的组件复用这个词就会隐身。 */
+/* 悬停提示整个去掉了。可点性靠 .orow:hover 的整行变底色表达（上面那条规则），
+ * 不再写字 —— 后台里表格行可点是默认预期，写出来是噪音。 */
+
+/* split-flap 字符格：每字符一个 span，只改 transform + textContent。
+ * white-space:pre 是必须的 —— 每格是独立的 inline-block，一个格里只放一个空格时
+ * HTML 会把它折叠掉，时间就显示成「08-2010:45:18」（实测踩过）。 */
+.cf{display:inline-block;white-space:nowrap}
+.cf span{display:inline-block;backface-visibility:hidden;white-space:pre}
+
+/* 日志行 24 —— 25 的话 8 行 = 200px 超出可用的 199px，最后一行被切掉 1px（实测） */
+.crow{position:absolute;left:var(--tblPad);right:var(--tblPad);top:0;width:auto;height:24px;display:flex;
+  align-items:center;font-size:12px;font-family:var(--mono);color:var(--tx2);
+  white-space:nowrap;
+  /* **不要 transition** —— transform 和 opacity 现在都由 app.js 的
+   * tickLogScroll / placeLogRows 逐帧写。留着 CSS 过渡会和逐帧写打架：
+   * 每帧的新目标都启动一次新过渡，实际效果是永远追不上、整体变糊。 */
+  will-change:transform,opacity;contain:layout paint}
+.crow .c{padding:0 12px;overflow:hidden;text-overflow:ellipsis;flex:none}
+.crow .bot{color:var(--crawl);font-family:var(--cn)}
+.crow .bot .bt{color:var(--faint);margin-left:7px;font-size:11px}
+.crow .st200{color:var(--mute)}
+.crow .st304{color:var(--order)}
+.crow .r{text-align:right}
+.crow .sh{font-family:var(--cn);color:var(--mute)}
+
+/* ══ 订单详情抽屉（点行弹出） ═══════════════════════════════════════════ */
+#drawer{position:absolute;right:0;top:0;bottom:0;width:420px;z-index:60;
+  background:var(--panel);border-left:1px solid var(--hair2);
+  box-shadow:var(--shPop);transform:translateX(100%);
+  transition:transform 300ms cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column}
+#drawer.on{transform:translateX(0)}
+#drawer .dh{height:57px;flex:none;display:flex;align-items:center;gap:10px;
+  padding:0 20px;border-bottom:1px solid var(--hair)}
+#drawer .dh .ti{font-size:15px;font-weight:600;color:var(--tx)}
+#drawer .dh .sp{flex:1}
+#drawer .db{flex:1;min-height:0;overflow:hidden;padding:6px 20px 20px}
+#drawer .kv{display:flex;align-items:flex-start;gap:12px;padding:11px 0;
+  border-bottom:1px solid var(--hair);font-size:13px}
+#drawer .kv .k{width:104px;flex:none;color:var(--mute)}
+#drawer .kv .v{flex:1;min-width:0;color:var(--tx);word-break:break-all}
+#drawer .kv .v.m{font-family:var(--mono)}
+#drawer .kv .v.big{font-family:var(--mono);font-size:21px;font-weight:700;
+  color:var(--order);line-height:1.2}
+#drawer .note{margin-top:16px;padding:11px 13px;border-radius:6px;
+  background:var(--panel2);border:1px solid var(--hair);
+  font-size:12px;color:var(--tx2);line-height:1.65}
+#drawer .note b{color:var(--crawl)}
+#scrim{position:absolute;inset:0;z-index:55;background:rgba(0,0,0,.42);
+  opacity:0;pointer-events:none;transition:opacity 260ms linear}
+#scrim.on{opacity:1;pointer-events:auto}
+
+/* ══ 大额横幅 ═══════════════════════════════════════════════════════════ */
+#banner{position:absolute;left:50%;top:96px;transform:translateX(-50%) translateY(-14px);
+  z-index:50;display:flex;align-items:center;gap:12px;padding:11px 20px;
+  background:var(--panel2);border:1px solid var(--order-d);border-radius:8px;
+  box-shadow:var(--shPop);opacity:0;pointer-events:none;
+  transition:opacity 300ms linear,transform 320ms cubic-bezier(.16,1,.3,1)}
+#banner.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#banner .bt{font-size:12px;border-radius:4px;padding:2px 8px;flex:none}
+#banner .txt{font-size:16px;color:var(--tx)}
+#banner .txt b{font-family:var(--mono);font-weight:700}
+/* 单笔大额成交 —— 暖色（订单层的颜色） */
+#banner.deal{border-color:var(--order-d)}
+#banner.deal .bt{color:var(--order);border:1px solid var(--order-d)}
+#banner.deal .txt b{color:var(--order)}
+/* 平台累计里程碑 —— 冷色（读取层的颜色）。左侧加一道竖条区分：
+   这是「存量跨过整数关」，不是某一笔交易，不该和成交共用一套视觉。 */
+#banner.mile{border-color:var(--crawl-d)}
+#banner.mile .bt{color:var(--crawl);border:1px solid var(--crawl-d);
+  background:color-mix(in srgb,var(--crawl-d) 22%,transparent)}
+#banner.mile .txt b{color:var(--crawl)}
+#banner.mile::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  border-radius:3px;background:var(--crawl)}
+
+/* ══ 地图卡右上角的「全屏」按钮 ═════════════════════════════════════════ */
+#btnGlobe{position:absolute;right:12px;top:10px;z-index:6;
+  display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:5px;
+  color:var(--tx2);font-family:var(--cn);font-size:12px;cursor:pointer;opacity:0;
+  transition:opacity 160ms linear,color 140ms,border-color 140ms,background-color 140ms}
+#mapPan:hover #btnGlobe{opacity:1}
+#btnGlobe:hover{color:var(--tx);border-color:var(--crawl);background:var(--bar)}
+#btnGlobe:focus-visible{opacity:1;outline:2px solid var(--crawl);outline-offset:2px}
+#btnGlobe svg{width:13px;height:13px}
+
+/* ══ 全屏地球 ═══════════════════════════════════════════════════════════
+ * 原先这一屏刻意**不**跟随主题，理由是「发光天体只在深底上成立」。
+ * 那个理由只对了一半：浅色主题下整个后台是白的，按 G 突然全屏黑，
+ * 比配色不统一更突兀。所以浅色下换的是隐喻而不是亮度 ——
+ * 深色 = 夜地球（城市灯光在发光），浅色 = 白日卫星图 / 纸质地球仪（城市是墨点）。
+ * canvas 那一侧的两套配色见 globe.js 的 PAL。 */
+#gv{position:absolute;inset:0;z-index:85;display:none;
+  background:radial-gradient(120% 90% at 50% 38%,#0B1226 0%,#070B16 46%,#03050C 100%)}
+#stage[data-theme="light"] #gv{
+  background:radial-gradient(120% 90% at 50% 34%,#FFFFFF 0%,#EEF1F5 44%,#DFE4EA 100%)}
+/* 浅底上的顶栏/指标/跑马灯文字必须换成深色，否则整屏白底白字 */
+#stage[data-theme="light"] #gvTop .gt{color:#1B2733}
+#stage[data-theme="light"] #gvTop .gd{color:#6C7785}
+#stage[data-theme="light"] #gvTop .gvsep{background:rgba(27,39,51,.16)}
+#stage[data-theme="light"] #gvTop .glg{color:#5B6775}
+#stage[data-theme="light"] #gvTop .glg i.c{background:#008E74;box-shadow:0 0 6px rgba(0,142,116,.5)}
+#stage[data-theme="light"] #gvTop .glg i.o{background:#B26A16;box-shadow:0 0 6px rgba(178,106,22,.5)}
+#stage[data-theme="light"] #gvTop .gx{background:rgba(27,39,51,.05);
+  border-color:rgba(27,39,51,.16);color:#43505E}
+#stage[data-theme="light"] #gvTop .gx:hover{background:rgba(27,39,51,.10);
+  border-color:rgba(27,39,51,.30)}
+#stage[data-theme="light"] #gvKpi .gk{border-left-color:rgba(27,39,51,.14)}
+#stage[data-theme="light"] #gvKpi .gk:last-child{border-right-color:rgba(27,39,51,.14)}
+#stage[data-theme="light"] #gvKpi .l{color:#68737F}
+#stage[data-theme="light"] #gvKpi .v{color:#16202B}
+#stage[data-theme="light"] #gvTick{background:rgba(255,255,255,.72);
+  border-top-color:rgba(27,39,51,.10)}
+#stage[data-theme="light"] .gtk{color:#68737F}
+#stage[data-theme="light"] .gtk b{color:#008E74}
+#stage[data-theme="light"] .gtk s{color:#98A2AE}
+#stage[data-theme="light"] .gtk em{color:#4E5A67}
+/* 球面上的订单卡：浅色下要变成白卡 + 深字，不然是黑卡贴在白日地球上 */
+#stage[data-theme="light"] .gpop{background:rgba(255,255,255,.95);
+  border-color:rgba(178,106,22,.45);
+  box-shadow:0 8px 22px rgba(17,24,39,.16),0 0 0 1px rgba(17,24,39,.04)}
+#stage[data-theme="light"] .gpop.big{border-color:rgba(198,58,46,.55)}
+#stage[data-theme="light"] .gpop .r1{color:#68737F}
+#stage[data-theme="light"] .gpop .r1 i{background:#B26A16;box-shadow:0 0 6px rgba(178,106,22,.5)}
+#stage[data-theme="light"] .gpop.big .r1 i{background:#C63A2E}
+#stage[data-theme="light"] .gpop .r2{color:#B26A16}
+#stage[data-theme="light"] .gpop.big .r2{color:#C63A2E}
+#stage[data-theme="light"] .gpop .r3{color:#8B95A1}
+#stage[data-theme="light"] .gpop .ld{background:rgba(178,106,22,.75)}
+#stage[data-theme="light"] .gpop.big .ld{background:rgba(198,58,46,.8)}
+#gv.on{display:block}
+#gv.in{animation:gvIn 520ms cubic-bezier(.16,1,.3,1)}
+@keyframes gvIn{0%{opacity:0}100%{opacity:1}}
+#gvGlobe{position:absolute;left:50%;top:0;width:1920px;height:1080px;margin-left:-960px}
+#gv.in #gvGlobe{animation:gvZoom 720ms cubic-bezier(.16,1,.3,1)}
+@keyframes gvZoom{0%{transform:scale(.86);opacity:0}100%{transform:scale(1);opacity:1}}
+
+#gvTop{position:absolute;left:0;right:0;top:0;height:60px;z-index:3;
+  display:flex;align-items:center;gap:14px;padding:0 30px}
+#gvTop .gvlogo{width:168px;flex:none;display:none}
+#stage[data-theme="dark"] #gvTop .gvlogo.dark{display:block}
+#stage[data-theme="light"] #gvTop .gvlogo.light{display:block}
+#gvTop .gvsep{width:1px;height:20px;flex:none;background:rgba(255,255,255,.16);margin:0 4px}
+#gvTop .gt{font-size:15px;font-weight:600;color:#E8EEF9;letter-spacing:.3px}
+#gvTop .gd{font-family:var(--mono);font-size:13px;color:#7B8AA6}
+#gvTop .sp{flex:1}
+#gvTop .glg{display:flex;gap:18px;font-size:12px;color:#8B9AB5}
+#gvTop .glg span{display:flex;align-items:center;gap:6px}
+#gvTop .glg i{width:7px;height:7px;border-radius:50%;flex:none}
+#gvTop .glg i.c{background:#00D3A7;box-shadow:0 0 8px rgba(0,211,167,.85)}
+#gvTop .glg i.o{background:#FFB86B;box-shadow:0 0 8px rgba(255,184,107,.85)}
+#gvTop .gx{width:32px;height:32px;flex:none;display:flex;align-items:center;
+  justify-content:center;border-radius:6px;cursor:pointer;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);color:#C8D4E8;
+  transition:background-color 150ms,border-color 150ms}
+#gvTop .gx:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.28)}
+#gvTop .gx svg{width:14px;height:14px}
+
+/* 悬浮在地球上的订单卡（用 APGlobe.screenOf 定位到城市所在的球面点） */
+#gvPops{position:absolute;left:50%;top:0;bottom:0;width:1920px;margin-left:-960px;
+  z-index:4;pointer-events:none}
+.gpop{position:absolute;min-width:158px;padding:9px 13px;border-radius:9px;
+  background:rgba(10,16,30,.86);border:1px solid rgba(255,184,107,.42);
+  box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 22px rgba(255,184,107,.12);
+  backdrop-filter:blur(2px);
+  opacity:0;transform:translateY(6px) scale(.96);transform-origin:left bottom;
+  transition:opacity 240ms linear,transform 300ms cubic-bezier(.16,1,.3,1)}
+.gpop.on{opacity:1;transform:translateY(0) scale(1)}
+.gpop.big{border-color:rgba(255,107,96,.6);box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 26px rgba(255,107,96,.18)}
+.gpop .r1{display:flex;align-items:center;gap:7px;font-size:12px;color:#93A3BF;
+  white-space:nowrap;margin-bottom:4px}
+.gpop .r1 i{width:6px;height:6px;border-radius:50%;flex:none;background:#FFB86B;
+  box-shadow:0 0 8px rgba(255,184,107,.9)}
+.gpop.big .r1 i{background:#FF6B60;box-shadow:0 0 8px rgba(255,107,96,.9)}
+.gpop .r2{font-family:var(--mono);font-size:21px;font-weight:700;color:#FFB86B;
+  line-height:1.1;white-space:nowrap}
+.gpop.big .r2{color:#FF6B60}
+.gpop .r3{font-size:11px;color:#7B8AA6;white-space:nowrap;margin-top:3px}
+.gpop .ld{position:absolute;background:rgba(255,184,107,.7);height:1.5px}
+.gpop.big .ld{background:rgba(255,107,96,.75)}
+
+/* 四个指标（照参考图放在球下方，竖线分隔） */
+#gvKpi{position:absolute;left:0;right:0;bottom:66px;z-index:3;
+  display:flex;justify-content:center;gap:0;padding:0 40px}
+#gvKpi .gk{flex:0 1 340px;min-width:0;padding:0 30px;
+  border-left:1px solid rgba(255,255,255,.14)}
+#gvKpi .gk:last-child{border-right:1px solid rgba(255,255,255,.14)}
+#gvKpi .l{display:block;font-size:13px;color:#8B9AB5;margin-bottom:7px}
+#gvKpi .v{display:block;font-family:var(--mono);font-size:34px;font-weight:700;
+  color:#F2F6FD;line-height:1;letter-spacing:-.6px}
+
+/* 底部跑马灯：每条 AI 读取记录从右往左飘过 */
+#gvTick{position:absolute;left:0;right:0;bottom:0;height:42px;z-index:3;
+  overflow:hidden;border-top:1px solid rgba(255,255,255,.09);
+  background:rgba(4,8,18,.6)}
+#gvTickIn{position:absolute;left:0;top:0;height:100%;white-space:nowrap}
+.gtk{display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 22px;
+  font-size:12px;font-family:var(--mono);color:#7B8AA6;white-space:nowrap}
+.gtk b{color:#00D3A7;font-weight:400}
+.gtk s{text-decoration:none;color:#5C6B85}
+.gtk em{font-style:normal;color:#93A3BF}
+
+/* ══ 全屏礼花庆祝 ═══════════════════════════════════════════════════════
+ * 只给最高一档金额用（epic / legendary），普通大单仍走顶部横幅 ——
+ * 每笔大单都全屏一次的话，3 分钟后就没人抬头了。
+ * 纸片在 canvas 里跑，不是 DOM，所以 DOM 节点数不变。
+ * 背景只压一层半透明幕，后台本身仍然看得见（这不是切场，是叠一层庆祝）。 */
+/* z-index 必须高于全屏地球（#gv 是 85）。原先是 80 —— 地球开着的时候
+ * 礼花整个被地球盖住，等于「全屏地球里不庆祝」（实测）。 */
+#celebrate{position:absolute;inset:0;z-index:95;display:none;
+  align-items:center;justify-content:center;pointer-events:none}
+#celebrate.on{display:flex}
+/* 幕布：模糊 + 压暗底下的后台界面。
+ * 不加这层的话纸片和 104px 的金额全糊在后台的表格/地图纹理里，分不出前后景（实测）。
+ * blur 走单独一层而不是加在 #celebrate 上：canvas 是它的子节点，
+ * 给父节点加 backdrop-filter 会把纸片自己也一起模糊掉。 */
+#celScrim{position:absolute;inset:0;background:var(--celScrim);
+  backdrop-filter:blur(7px) saturate(.9);-webkit-backdrop-filter:blur(7px) saturate(.9);
+  opacity:0;transition:opacity 320ms linear}
+#celebrate.on #celScrim{opacity:1}
+#celebrate.out #celScrim{opacity:0}
+
+/* ── 全屏地球里的庆祝：让地球和那张订单卡露出来 ──────────────────────────
+ * 平铺看板上「压暗 + 模糊整屏」是对的：底下是表格和点阵地图，糊掉正好。
+ * 但在全屏地球上，**被庆祝的那笔单本身就长在地球上** ——
+ * 卡片钉在球面上、球心那一块正是镜头刚摇过去的位置。
+ * 于是原来的做法把主角糊掉了：实测卡片落在 (736,397) 447×286，
+ * 球心 (960,452) **就在卡片里面**；同时 blur(7px) 把球面上那张订单卡也糊了。
+ *
+ * 两处都改：
+ *   ① 卡片从屏幕正中挪到**左侧留白**。球体横向占 592~1328，
+ *      左边 592px 是空的，447px 宽的卡片放进去还剩 89px 余量，一点都不压球。
+ *   ② 幕布不再整屏模糊，改成**中间挖空的径向渐变** ——
+ *      球（半径 368）整个落在透明区里保持清晰，只把球外的边缘压暗，
+ *      纸片照样有底衬。 */
+#celebrate.gv{justify-content:flex-start}
+#celebrate.gv .cbox{margin-left:calc(50% - 904px)}
+#celebrate.gv #celScrim{
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:radial-gradient(circle 820px at 50% 452px,
+    transparent 0,transparent 46%,var(--celScrim) 100%)}
+#confetti{position:absolute;left:50%;top:0;width:1920px;height:1080px;margin-left:-960px}
+#celebrate .cbox{position:relative;text-align:center;
+  padding:34px 60px 30px;border-radius:16px;
+  background:var(--glassBg);border:1px solid var(--glassBd);
+  box-shadow:var(--shPop);backdrop-filter:blur(3px);
+  opacity:0;transform:scale(.9)}
+#celebrate.on .cbox{animation:cbIn 620ms cubic-bezier(.16,1,.3,1) forwards}
+@keyframes cbIn{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+#celebrate.out .cbox{animation:cbOut 420ms linear forwards}
+@keyframes cbOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.03)}}
+#celebrate .ctag{display:inline-flex;align-items:center;gap:8px;
+  padding:5px 14px;border-radius:20px;margin-bottom:14px;
+  background:var(--order-d);color:var(--tx);font-size:14px}
+#celebrate .ctag i{width:7px;height:7px;border-radius:50%;background:var(--order);flex:none}
+#celebrate .camt{font-family:var(--mono);font-size:104px;font-weight:700;line-height:1;
+  letter-spacing:-3px;color:var(--order)}
+#celebrate .cmeta{margin-top:16px;font-size:22px;color:var(--tx)}
+#celebrate .cmeta b{font-weight:600}
+#celebrate .cmeta s{text-decoration:none;color:var(--tx2);margin-left:12px;font-size:19px}
+#celebrate .cvia{margin-top:8px;font-size:15px;color:var(--mute)}
+
+/* ══ 侧栏底部：常驻二维码 ════════════════════════════════════════════════ */
+#lot{flex:none;padding:12px;border-top:1px solid var(--hair)}
+/* 不描边、不投影、不加色条 —— 卡片直接平进侧栏，只靠内容本身划出范围
+ * （浅色下卡片是纯白、侧栏是 90% 白，两者本来就几乎同色）。
+ *
+ * 左边原先有一条 3px 的 var(--crawl) 竖条（::before），现已去掉：
+ * 那条绿色在侧栏底部只是一道无来由的强调，二维码本身已经足够抢眼。
+ *
+ * 那圈 1px 原先藏在两个地方：border，以及 --lotSh 末段的 `0 0 0 1px`
+ * （box-shadow 冒充描边的常见写法）。只删 border 会剩下另一道，看着还是有框，
+ * 所以 THEMES 里深浅两套的 lotSh 也去了环 —— 现在整条 box-shadow 都不用了。
+ *
+ * 卡片底色（原 background:var(--lot)）也去掉了 —— 深色下它是 #1E242C，
+ * 在 #0C0E12 的侧栏上是一块看得见的浅色方板；浅色下 --lot 和 --side 都是
+ * #FFFFFF，本来就等于没画。既然框、影、竖条都没了，这块底也一起收掉，
+ * 卡片彻底平进侧栏，只剩二维码那块白（那是码的静区，删不得，见 .lq）。
+ *
+ * 注意：--lot / --lotSh / --lotShHov / --lotHov 四个变量现在**没有任何地方 var() 引用**，
+ * #lotCard 也从来没有过 :hover 规则（别看见 lotShHov 就以为有悬停反馈）。
+ * 变量本身留在 THEMES 里没删：那张表深浅两套必须逐键对称，单删一边会破坏它，
+ * 而这套配色以前正因为键不对称出过 bug（见 glassBg 那条注释）。 */
+/* 卡片本身刻意**没有底**（background:none）—— 白色的那块是里面的 .lq。
+ * 侧栏改磨砂之后这一点变得关键：卡片透，但 .lq 是实白，
+ * 二维码的静默区不会被背后的极光透穿（否则码直接扫不出来）。 */
+#lotCard{position:relative;width:100%;overflow:hidden;
+  background:none;border:0;border-radius:26px;
+  padding:11px 11px 10px}
+#lotCard .lh{font-size:13px;font-weight:700;color:var(--tx);text-align:center}
+#lotCard .lb{display:block}
+/* 嵌套半径 = 外圆角 26 − 卡片内边距 11 ≈ 15。6 会在 26 的外框里显得方。
+ * background 必须是**实白**，见上面那条注释。 */
+#lotCard .lq{width:184px;margin:9px auto 0;background:#fff;border-radius:15px;
+  padding:8px;line-height:0}
+#lotCard .lq canvas{display:block;width:168px;height:168px;image-rendering:pixelated}
+/* 二维码不可用时的告警条。刻意做得刺眼 —— 它要在 3 米外就让人发现
+   「这个码是坏的」，而不是等观众扫了打不开才知道。 */
+#lotCard .lwarn{margin-top:8px;padding:8px;border-radius:6px;
+  background:#3A1518;border:1px solid #7A2530;color:#FFB4B4;
+  font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+#lotCard .lwarn b{color:#FFE0E0}
+/* 「正在建立」用中性色，不用红 —— 那是正常启动过程，不是故障。
+   红色留给真出问题的情况（隧道起不来 / file:// 打开）。 */
+#lotCard .lwarn.calm{background:#1A2330;border-color:#2C3E52;color:#A8C0D8}
+#lotCard .lwarn.calm b{color:#DCEAF7}
+#lotCard .lwarn code{font-family:var(--mono);font-size:12px;color:#FFD9D9}
+/* 码本身也要标成废的，免得有人拍下来当物料用 */
+#lotCard.bad .lq{position:relative;filter:grayscale(1) opacity(.42)}
+#lotCard.bad .lq::after{content:'扫不开';position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:#B3121F;
+  background:rgba(255,255,255,.55);letter-spacing:.06em}
+/* ── 码下方的走马灯 ────────────────────────────────────────────────────────
+ * 原先这四条信息分两处：「回答 2~3 个问题 · 100% 中奖」在码**上方**，
+ * 「手机相机扫码 · 约 30 秒」在码下方。现在合成一行滚在码下面 ——
+ * 观众的视线路径是「标题 → 码 → 说明」，把说明拆到码两侧会打断它。
+ *
+ * 为什么必须滚：侧栏内容宽只有 184px，这行文字排开约 290px。
+ * 不滚就只有两条路 —— 截断（信息丢一半）或折三行（把码往上挤）。
+ *
+ * 无缝循环的做法：两份**完全相同**的副本并排，位移正好 -50%（= 一份的宽度），
+ * 走完时第二份推到起点，看不出接缝。少一份、或位移写成 -100%/固定 px，
+ * 每圈都会闪一段空白。
+ * 间距做成每份的 padding-right，不用 flex 的 gap ——
+ * gap 只在两份**之间**出现一次，绕回接缝处就少一个间距，首尾会黏成一坨。
+ * width:max-content 让轨道按内容自然宽排开，-50% 才等于精确一份。
+ *
+ * 不加 will-change：见 _共享规格.md §2 第 9 条（常驻 will-change 是内存泄漏元凶）。
+ * 这里只是一条 184×19px 的文字带，合成层的收益抵不过常驻纹理的代价。
+ *
+ * 三层结构，别想着合并：
+ *   .lmq  上下两条发丝线 + 内边距（**不裁剪、不带 mask**）
+ *   .mqw  裁剪窗口 + 两端淡出（mask 只作用在这层）
+ *   .trk  被位移的轨道
+ * 线必须画在 mask 层外面 —— mask 会连元素自己的 border 一起吃掉，
+ * 画在 .mqw 上的话两条线会跟着文字在左右两端淡成虚的。
+ *
+ * 条目类叫 .mqi 不叫 .seg：.seg 已经被分段按钮组占了（见本文件 §.seg），
+ * 那条规则带 background + 1px 边框 + 6px 圆角，命名撞上会让每份文字
+ * 套上一个圆角小方框 —— 左右两条竖边尤其显眼。 */
+#lotCard .lmq{margin-top:9px;padding:5px 0;font-size:11px;line-height:1.7;
+  color:var(--mute);
+  border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+#lotCard .lmq .mqw{overflow:hidden;
+  /* 两端淡出：文字是「滚进来 / 滚出去」，不是被边框硬切一刀 */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
+/* 9s 跑完一份（280px）≈ 31px/s。慢了像卡住，快了 11px 的中文跟不上 ——
+ * 这个速度下任意一句话在 185px 的窗口里停留约 6 秒，扫一眼够读完。
+ * 改文案就要回来调时长：px/s 要维持在 30 上下，别只改字不改秒。 */
+#lotCard .lmq .trk{display:flex;width:max-content;animation:lotmq 9s linear infinite}
+#lotCard .lmq .mqi{flex:none;white-space:nowrap;padding-right:26px}
+#lotCard .lmq b{color:var(--crawl);font-weight:600}
+@keyframes lotmq{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+
+/* ══ 快捷键图例 / 启动遮罩（操作员看的，点进去就消失） ═════════════════════ */
+#legend{position:absolute;inset:0;z-index:90;background:var(--bg);
+  display:none;align-items:center;justify-content:center;padding:70px}
+#legend.on{display:flex}
+#legend .box{max-width:840px}
+#legend h3{font-size:22px;color:var(--tx);margin-bottom:18px;font-weight:600}
+#legend .kk{display:grid;grid-template-columns:repeat(3,1fr);gap:11px 26px}
+#legend .kk div{font-size:14px;color:var(--tx2);display:flex;align-items:center;gap:9px}
+#legend .kk b{font-family:var(--mono);color:var(--tx);background:var(--panel2);
+  border:1px solid var(--hair2);border-radius:4px;padding:2px 8px;min-width:30px;
+  text-align:center;font-weight:400}
+#legend .kk u{text-decoration:none;color:var(--crawl)}
+#legend .tip{margin-top:20px;font-size:13px;color:var(--mute)}
+
+#gate{position:absolute;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity 320ms linear}
+#gate.off{opacity:0;pointer-events:none}
+#gate .t{font-size:26px;color:var(--tx);font-weight:600}
+#gate .s{font-size:15px;color:var(--mute);text-align:center;line-height:1.8}
+#gate .s b{color:var(--tx2);font-weight:400}
+#gate .go{margin-top:10px;padding:13px 34px;border:1px solid var(--crawl);
+  border-radius:6px;color:var(--crawl);font-size:17px;background:var(--panel2);
+  cursor:pointer;font-family:var(--cn);transition:background-color 160ms}
+#gate .go:hover{background:var(--bar)}
+
+@media (prefers-reduced-motion:reduce){
+  body,.orow,.crow,#banner,.dl,.rr .bar u,#stage,.pop,#drawer,#lotCard,#pieSvg path,.mlg i,
+  #lotCard .lmq .trk{
+    transition:none!important;animation:none!important}
+  /* 光停下不够：停在原位只露得出第一份的前 184px，后半句被裁掉。
+     停了就改成折行居中，把第二份收起来 —— 静止状态下它是重复噪音。 */
+  #lotCard .lmq{text-align:center}
+  #lotCard .lmq .mqw{-webkit-mask-image:none;mask-image:none}
+  /* 必须退回 block —— flex 项目 flex:none 不肯收缩，即使允许换行也会撑成
+     280px 顶出容器，被 overflow 裁掉，等于没停下时一样只看得见前半句。 */
+  #lotCard .lmq .trk{display:block;width:auto}
+  #lotCard .lmq .mqi{display:block;white-space:normal;padding-right:0}
+  #lotCard .lmq .mqi+.mqi{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="auroraBg" aria-hidden="true"></canvas>
+<div id="stage" data-theme="light">
+
+  <!-- ══ 侧栏 ══════════════════════════════════════════════════════════ -->
+  <aside id="side">
+    <div class="brand">
+      <!-- 公司 logo（横排）。两版切换而不是用 filter：
+           SVG 里文字色 #040000 只出现一次，换成浅色就能上深底，
+           而图标那道暖色渐变**原样保留** —— invert 会把它反成青蓝，品牌色就错了。 -->
+      <img class="lgo dark" src="logo-dark.svg" alt="deeplumen">
+      <img class="lgo light" src="logo.svg" alt="deeplumen">
+    </div>
+    <!-- 这里原先有一行分组标题「AI 渠道」。去掉了：侧栏只有这一组导航，
+         一个只领一组的分组标题不提供任何信息，只占 32px 高。 -->
+    <nav>
+      <a class="on" data-nav="ov"><span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.6" y="1.6" width="5.2" height="5.2" rx="1"/><rect x="9.2" y="1.6" width="5.2" height="5.2" rx="1"/><rect x="1.6" y="9.2" width="5.2" height="5.2" rx="1"/><rect x="9.2" y="9.2" width="5.2" height="5.2" rx="1"/></svg></span>实时看板</a>
+      <a data-nav="ord"><span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.4 3.2h11.2M2.4 8h11.2M2.4 12.8h7.2"/></svg></span>AI 订单<b class="bdg" id="navOrd">0</b></a>
+      <a data-nav="crawl"><span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.2"/><path d="M1.8 8h12.4M8 1.8c2 2.2 2 10.2 0 12.4M8 1.8c-2 2.2-2 10.2 0 12.4"/></svg></span>AI 读取记录</a>
+      <a data-nav="store"><span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 6.2 3.4 2.6h9.2L14 6.2M2 6.2h12v7.2H2zM6 13.4V9.4h4v4"/></svg></span>店铺</a>
+      <a data-nav="set"><span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.4v2M8 12.6v2M1.4 8h2M12.6 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4"/></svg></span>设置</a>
+    </nav>
+    <div id="lot">
+      <div id="lotCard" aria-label="扫码参与调研抽奖">
+        <div class="lh">扫码参与调研抽奖</div>
+        <div class="lb">
+          <div class="lq"><canvas id="lotQr" role="img" aria-label="调研抽奖二维码"></canvas></div>
+        </div>
+        <div class="lwarn" id="lotWarn" hidden></div>
+        <!-- 走马灯。三层不能合并：.lmq 画上下两条线，.mqw 负责裁剪和两端淡出，
+             .trk 是被位移的轨道 —— 淡出的 mask 会把它自己的边框一起吃掉，
+             所以线必须画在 mask 层的**外面**。
+             两份 .mqi 必须**逐字相同**，靠 -50% 位移接缝，改一份就要改两份。
+             第二份 aria-hidden —— 它只为循环存在，读屏念两遍是噪音。 -->
+        <div class="lmq">
+          <div class="mqw">
+            <div class="trk">
+              <span class="mqi">回答 <b>2~3 个问题</b> · <b>100% 中奖</b> · 手机相机扫码 · <b>约 30 秒</b></span>
+              <span class="mqi" aria-hidden="true">回答 <b>2~3 个问题</b> · <b>100% 中奖</b> · 手机相机扫码 · <b>约 30 秒</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ 主区 ══════════════════════════════════════════════════════════ -->
+  <div id="main">
+    <header id="top">
+      <span class="crumb">AI 渠道<i>/</i><b id="crumbCur">实时看板</b></span>
+      <span class="sp"></span>
+      <div id="rng">
+        <button data-rng="session" class="on">开幕至今</button>
+        <button data-rng="all">累计</button>
+      </div>
+      <!-- 店铺搜索已按要求隐藏（.fld.hide → display:none）。
+           **保留标记不删**：JS 侧 qEl 的监听、onPageChange 的启用/禁用、
+           「清空筛选」对 oF.q 的重置、APDiag.setFilter({q}) 全都还引用它，
+           删掉要连改五处；而 display:none 之后这些代码原样跑，一行不用动。
+           要复原：把下面这个 hide 类去掉即可。 -->
+      <label class="fld hide">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>
+        <input id="q" type="text" placeholder="搜店铺或商品名" autocomplete="off">
+      </label>
+      <!-- 纯图标。title / aria-label 由 app.js 的 onPageChange 维护 ——
+           它在内页会把这个按钮禁用并改写说明，没有文字之后那句说明就是
+           用户唯一能拿到的解释，所以两个属性都得跟着走。 -->
+      <button class="tb ico" id="btnExp" type="button"
+              title="导出当前筛选后的全部订单" aria-label="导出 CSV">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.8v8.4M4.8 7l3.2 3.2L11.2 7M2.4 13.4h11.2"/></svg>
+      </button>
+      <!-- 静音。M 键早就有了，但邻摊来投诉的时候没人记得按哪个键 ——
+           这是全场最需要「一眼看见、一下按到」的开关，所以给它一个可见入口。
+           图标与状态由 app.js 的 applyMute() 统一刷新，键盘和设置页共用同一个入口。 -->
+      <button class="tb ico" id="btnMute" type="button" title="声音开启 · 点击静音（M）">
+        <svg id="icMute" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <button class="tb ico" id="btnTheme" type="button" title="切换深色 / 浅色">
+        <svg id="icTheme" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"></svg>
+      </button>
+      <!-- 全屏。F 键一直有，但现场没人记得按哪个键 —— 和静音那个按钮同一个理由。
+           图标必须随状态互换（⤢ ↔ ⤡）：纯图标按钮如果图标恒定，
+           按下去之后按钮一点没变，看起来就是没生效（见 btnPause 那条注释）。 -->
+      <button class="tb ico" id="btnFull" type="button" title="全屏（F）" aria-label="全屏">
+        <svg id="icFull" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <!-- 不能挂单个店铺的身份：这块屏上的订单来自全部接入店铺，
+           写成「Riverstone 旗舰店」的话，表里冒出别家店就自相矛盾了。
+           所以挂的是**运营人**（penquan），作用域写在下面一行。
+           头像用画好的卡通 SVG，不用首字母方块 —— 方块本身就是「假头像」的样子。 -->
+      <span class="who"><img class="av" src="avatar.svg" alt="penquan">
+        <span class="nm">penquan<s id="whoScope">全部店铺</s></span></span>
+    </header>
+
+    <div id="content">
+    <!-- ══ 页 1：实时看板（原本的整屏内容） ═══════════════════════════════ -->
+    <div class="page on" data-page="ov">
+      <!-- KPI 四卡 -->
+      <!-- 四张卡都是指标选择器（data-kpi）。点一张 → 下面的表按这个指标聚焦，
+           见 app.js 的 selectKpi()。不是纯展示，所以四张都有选中态。 -->
+      <div id="kpi">
+        <div class="kc fill" data-kpi="gmv" tabindex="0" role="button"
+             title="按成交额聚焦：订单表改为金额降序">
+          <div class="lb">Agentic Page 带来的成交额 <em id="e1">开幕至今</em></div>
+          <div class="vv"><b id="kGmv">$0</b></div>
+          <span class="dl" id="dGmv"></span>
+          <!-- 这张卡原先没有趋势线，四张卡里只有它光着。反色卡上的线走 fillTx（浅字色）。 -->
+          <div class="sk" id="sk0"></div>
+        </div>
+        <div class="kc" data-kpi="ord" tabindex="0" role="button" title="按订单聚焦：订单表回到最新在前">
+          <div class="lb">Agentic Page 带来的订单 <em id="e2">开幕至今</em></div>
+          <div class="vv"><b id="kOrd">0</b><u>笔</u></div>
+          <span class="dl" id="dOrd"></span>
+          <div class="sk" id="sk2"></div>
+        </div>
+        <!-- 主数字走「已读取页数」这个累计量（约 38/秒，肉眼可见在涨）。
+             原先显示 crawlsPerSec 速率，一秒内几乎不变，看着像卡住了。 -->
+        <div class="kc" data-kpi="crawl" tabindex="0" role="button" title="按读取聚焦：高亮下方读取日志面板">
+          <div class="lb">AI 读取的商品页 <em id="e3">开幕至今</em></div>
+          <div class="vv"><b id="kCrawls">0</b><u>页</u></div>
+          <div class="sk" id="sk1"></div>
+        </div>
+        <!-- 引擎是 40 家/天 = 约 36 分钟才 +1 家，主数字盯着看是不动的。
+             所以副标给一个「开幕以来 +N」，它和主数字同步跳，让慢变化有个可读的落点。 -->
+        <div class="kc" data-kpi="store" tabindex="0" role="button" title="按店铺聚焦：打开店铺页">
+          <div class="lb">已接入的店铺 <em id="e4">开幕以来 +0</em></div>
+          <div class="vv"><b id="kStores">0</b><u>家</u></div>
+          <span class="dl" id="dStores"></span>
+          <div class="sk" id="sk3"></div>
+        </div>
+      </div>
+
+      <!-- 地图 + 右侧两板 -->
+      <div id="row2">
+        <div class="pan" id="mapPan">
+          <div class="ph">
+            <span class="ti">顾客来自哪里</span>
+            <span class="sp"></span>
+            <span class="r" id="mapNote">近 5 分钟</span>
+          </div>
+          <div id="mapWrap">
+            <canvas id="map"></canvas>
+            <button id="btnGlobe" type="button" title="放大成全屏地球（G）">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2.2H2.2V6M10 2.2h3.8V6M10 13.8h3.8V10M6 13.8H2.2V10"/></svg>
+              <span>全屏</span>
+            </button>
+            <div id="pops"></div>
+            <div id="mapLg">
+              <span><i id="lgA"></i>AI 读取</span>
+              <span><i id="lgB"></i>成交</span>
+            </div>
+          </div>
+        </div>
+        <div class="pan" id="side2">
+          <div class="ph">
+            <span class="ti">订单来源分布</span>
+            <span class="sp"></span>
+            <span class="r" id="splitScope">开幕至今</span>
+          </div>
+          <div class="two">
+            <div class="col">
+              <!-- hover 详情放列头（行宽只有 74 + 条 + 44，塞不进第四个字段）。
+                   没 hover 时显示「按订单数」，hover 时换成「渠道 · N 笔 · 占比」。 -->
+              <div class="ch">来自哪个 AI 助手<u><em id="chanNote"></em><s id="chanUnit">按订单数</s></u></div>
+              <div class="pb" id="chanBody"></div>
+              <!-- 五行占比条只占 140px，列高 258 —— 底下空着 95px。放五个助手的标，
+                   轻微悬浮。只提示身份，不重复上面已有的占比数字，所以 aria-hidden。
+                   四个品牌路径取自 simple-icons 的官方 24×24 单色版，不是手描的：
+                   展会大屏上画歪的品牌标比不放更糟。第五个是「其他 AI」的三点。 -->
+              <div class="mlg" aria-hidden="true">
+                <i style="--d:0s"><svg viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg></i>
+                <i style="--d:-.9s"><svg viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg></i>
+                <i style="--d:-1.8s"><svg viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></i>
+                <i style="--d:-2.7s"><svg viewBox="0 0 24 24"><path d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg></i>
+                <i style="--d:-3.6s"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/></svg></i>
+              </div>
+            </div>
+            <div class="col">
+              <!-- 「N 个国家 / 地区」放在列头而不是甜甜圈中心：内圈直径只有 80px，
+                   在 y=102 那条线上可用宽度只剩约 65px，而这行文案 11 个字符
+                   （CJK 约 10px/字）会压到扇区上（实测就是叠在一起的）。 -->
+              <div class="ch">按国家 / 地区<u><em id="pieCC"></em>按成交额</u></div>
+              <div id="pie">
+                <svg id="pieSvg" viewBox="0 0 158 158" aria-label="按国家/地区的成交额占比">
+                  <g id="pieArcs"></g>
+                  <!-- 固定三行。内圈直径只有 80px，「美国 · $156,969」挤成一行会溢出到
+                       甜甜圈外面（实测），所以国名与金额分行。两态都是三行，切换时不跳。 -->
+                  <g class="ctr" text-anchor="middle">
+                    <text class="c1" id="pieC1" x="79" y="74">—</text>
+                    <text class="c2" id="pieC2" x="79" y="89">总成交额</text>
+                    <text class="c3" id="pieC3" x="79" y="102"></text>
+                  </g>
+                </svg>
+                <div id="pieLg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 订单表 -->
+      <div class="pan" id="ordPan">
+        <div class="ph">
+          <span class="ti">Agentic Page 带来的订单</span>
+          <!-- 原来这里有个「共 N 笔」副标，产品要求去掉。
+               筛选反馈不依赖它：筛选器会高亮、「清空筛选」从禁用变可用、行数会变、
+               筛空了有空态提示；要看完整统计去「AI 订单」页。 -->
+          <span class="sp"></span>
+          <!-- 三个下拉浓缩成一个按钮，点开是勾选面板（多选）。
+               徽标是必须的：下拉框至少会把选中值显示在框面上，换成按钮之后
+               面板一关就完全看不出在不在筛选状态了，所以按钮要带计数。 -->
+          <button class="chip ico" id="btnFilter" type="button"
+                  title="筛选" aria-label="筛选"
+                  aria-haspopup="dialog" aria-expanded="false" aria-controls="filterPop">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round"><path d="M1.4 2.4h9.2L7 6.6v3.2L5 8.9V6.6z"/></svg>
+            <b id="fCount" class="bdg" style="display:none"></b>
+          </button>
+          <button class="chip" id="btnClr" type="button" disabled>
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.4 2.4l7.2 7.2M9.6 2.4l-7.2 7.2"/></svg>
+            清空筛选
+          </button>
+        </div>
+        <div class="th" id="ordHead"></div>
+        <div class="tb2" id="ordBody">
+          <div class="empty" id="ordEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg>
+            <b>没有符合筛选条件的订单</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- 订单筛选浮层。**必须挂在这一层**，不能放进 #ordPan：
+           .pan 是 overflow:hidden（表体靠它裁剪），放进 42px 高的面板头里
+           会被整个裁掉。位置由 app.js 的 openFilterPop 每次打开时算。 -->
+      <div id="filterPop" class="fpop" role="dialog" aria-label="筛选订单">
+        <div class="fgrps">
+          <div class="fgrp"><div class="fh">AI 助手</div><div class="fl" data-k="src"></div></div>
+          <div class="fgrp"><div class="fh">国家 / 地区</div><div class="fl" data-k="cc"></div></div>
+          <div class="fgrp"><div class="fh">订单规模</div><div class="fl" data-k="tier"></div></div>
+        </div>
+        <div class="ffoot">
+          <span id="fpN">符合 0 笔</span>
+          <button class="chip fpclr" id="fpClr" type="button">清空勾选</button>
+        </div>
+      </div>
+
+      <!-- AI 读取记录的筛选浮层。和订单那个共用 .fpop 样式与 app.js 的
+           fpWire / fpOpen / fpSync（配置驱动，不是复制一份）。 -->
+      <div id="logFilterPop" class="fpop" role="dialog" aria-label="筛选 AI 读取记录">
+        <div class="fgrps">
+          <div class="fgrp"><div class="fh">AI 助手</div><div class="fl" data-k="bot"></div></div>
+          <div class="fgrp"><div class="fh">结果</div><div class="fl" data-k="st"></div></div>
+        </div>
+        <div class="ffoot">
+          <span class="fpn" id="lpN">符合 0 条</span>
+          <button class="chip fpclr" type="button">清空勾选</button>
+        </div>
+      </div>
+
+      <!-- AI 读取日志 -->
+      <div class="pan" id="logPan">
+        <div class="ph">
+          <span class="ti">AI 正在读取的商品页</span>
+          <span class="sub" id="logRate">—</span>
+          <span class="sp"></span>
+          <!-- 两个下拉合成一个**纯图标**按钮（按要求不带中文字）。
+               没有文字之后，「正在筛选」这条状态只剩角标能表达 ——
+               所以 #lCount 角标是必须的，不是装饰。
+               title / aria-label 是它唯一的可访问名字。 -->
+          <button class="chip ico" id="btnLogFilter" type="button"
+                  title="筛选" aria-label="筛选"
+                  aria-haspopup="dialog" aria-expanded="false" aria-controls="logFilterPop">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round"><path d="M1.4 2.4h9.2L7 6.6v3.2L5 8.9V6.6z"/></svg>
+            <b id="lCount" class="bdg" style="display:none"></b>
+          </button>
+          <!-- 只留图标。去掉文字之后**图标必须自己表达状态** ——
+               原来图标恒定是「‖」、靠旁边的字在「暂停滚动/继续滚动」之间切；
+               字没了还留着恒定的「‖」，按下去屏幕停了但按钮一点没变，
+               看起来就是没生效。所以改成 ‖ ↔ ▶ 互换（见 app.js 的 PAUSE_ICON）。
+               title / aria-label 同步更新：图标按钮没有可见文字，
+               这两个是它唯一的可访问名字，不给就是一个纯谜语。 -->
+          <button class="chip ico" id="btnPause" type="button"
+                  title="暂停滚动" aria-label="暂停滚动">
+            <svg id="pauseIcon" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linejoin="round"><path d="M4 2.4v7.2M8 2.4v7.2"/></svg>
+          </button>
+        </div>
+        <div class="th" id="logHead"></div>
+        <div class="tb2" id="logBody">
+          <div class="empty" id="logEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg>
+            <b>没有符合筛选条件的读取记录</b>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page ov -->
+
+    <!-- ══ 页 2：AI 订单 ═════════════════════════════════════════════════
+         全宽订单管理：统计条 + 筛选 + 9 列可排序表 + 分页 + 导出。
+         行为定义在 pages.js（分页表只在第 1 页跟着流走，翻页即快照）。 -->
+    <div class="page" data-page="ord">
+      <div class="pan grow">
+        <div class="ph">
+          <span class="ti">AI 订单</span>
+          <span class="sub">全部接入店铺 · 经 AI 助手引荐成交</span>
+          <span class="sp"></span>
+          <label class="fld sm">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>
+            <input id="pOrdQ" type="text" placeholder="搜订单号 / 店铺 / 商品" autocomplete="off">
+          </label>
+          <span class="sel"><select id="pOrdSrc" aria-label="按 AI 助手筛选"></select></span>
+          <span class="sel"><select id="pOrdCC" aria-label="按国家筛选"></select></span>
+          <span class="sel"><select id="pOrdTier" aria-label="按规模筛选">
+            <option value="">全部规模</option><option value="common">普通</option>
+            <option value="rare">较大</option><option value="epic">大额</option>
+            <option value="legendary">特大</option></select></span>
+          <button class="chip" id="pOrdClr" type="button">清空筛选</button>
+          <button class="chip" id="pOrdExp" type="button">导出 CSV</button>
+        </div>
+        <div class="pstats" id="pOrdStats"></div>
+        <div class="th" id="pOrdHead"></div>
+        <div class="pbody" id="pOrdBody"></div>
+        <div class="pager" id="pOrdPager"></div>
+      </div>
+    </div>
+
+    <!-- ══ 页 3：AI 读取记录 ══════════════════════════════════════════════ -->
+    <div class="page" data-page="crawl">
+      <div class="pan grow">
+        <div class="ph">
+          <span class="ti">AI 读取记录</span>
+          <span class="sub">各家 AI 爬虫对商品页的抓取明细</span>
+          <span class="sp"></span>
+          <label class="fld sm">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>
+            <input id="pCrQ" type="text" placeholder="搜路径 / 店铺 / 爬虫 token" autocomplete="off">
+          </label>
+          <span class="sel"><select id="pCrBot" aria-label="按 AI 助手筛选"></select></span>
+          <span class="sel"><select id="pCrSt" aria-label="按结果筛选">
+            <option value="">全部结果</option><option value="200">已读取</option>
+            <option value="304">内容未变</option></select></span>
+          <button class="chip" id="pCrClr" type="button">清空筛选</button>
+          <button class="chip" id="pCrExp" type="button">导出 CSV</button>
+        </div>
+        <div class="pstats" id="pCrStats"></div>
+        <div class="th" id="pCrHead"></div>
+        <div class="pbody" id="pCrBody"></div>
+        <div class="pager" id="pCrPager"></div>
+      </div>
+    </div>
+
+    <!-- ══ 页 4：店铺 ════════════════════════════════════════════════════
+         搜索是真的：命中店名 / 域名 / 国家 / 行业四个字段，作用于全部 1067 家。 -->
+    <div class="page" data-page="store">
+      <div class="pan grow">
+        <div class="ph">
+          <span class="ti">店铺</span>
+          <span class="sub">已接入 AP 的 Shopify 店铺名录（店名已脱敏）</span>
+          <span class="sp"></span>
+          <label class="fld sm wide">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>
+            <input id="pStQ" type="text" placeholder="搜店铺名 / 域名 / 国家 / 行业" autocomplete="off">
+          </label>
+          <span class="sel"><select id="pStCC" aria-label="按国家筛选"></select></span>
+          <span class="sel"><select id="pStInd" aria-label="按行业筛选"></select></span>
+          <span class="sel"><select id="pStSt" aria-label="按状态筛选"></select></span>
+          <button class="chip" id="pStClr" type="button">清空筛选</button>
+          <button class="chip" id="pStExp" type="button">导出 CSV</button>
+        </div>
+        <div class="pstats" id="pStStats"></div>
+        <div class="th" id="pStHead"></div>
+        <div class="pbody" id="pStBody"></div>
+        <div class="pager" id="pStPager"></div>
+      </div>
+    </div>
+
+    <!-- ══ 页 5：设置 ════════════════════════════════════════════════════
+         每一个控件都真的接在引擎 / 音频 / 主题上（见 pages.js buildSettings）。 -->
+    <div class="page" data-page="set">
+      <div class="pan grow">
+        <div class="ph">
+          <span class="ti">设置</span>
+          <span class="sub">改动立即生效，不需要保存</span>
+        </div>
+        <div class="pbody sbody" id="pSetBody"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- 大额横幅（普通大单走这个，全屏庆祝只留给最高一档） -->
+  <!-- 两类提醒共用这条横幅，但标签/配色/时长按 kind 分开（见 app.js 的 BN_KIND）：
+       deal = 单笔大额成交（暖色）· milestone = 平台累计里程碑（冷色） -->
+  <div id="banner"><span class="bt" id="bannerTag">大额成交</span><span class="txt" id="bannerTxt"></span></div>
+
+  <!-- ══ 全屏地球 ══════════════════════════════════════════════════════
+       地球渲染器是方案 B 的 globe.js（真实城市点云 + 弧线流），本目录一份副本，
+       只把球心与半径改成全屏居中，并补了大气光晕 / 球体本体 / 球缘亮边三层。 -->
+  <div id="gv">
+    <div id="gvTop">
+      <!-- 这一屏永远是深底，固定用浅字版 -->
+      <!-- 两版都放着，靠 data-theme 切。全屏地球在浅色主题下是白底，
+           浅字版的 logo 在白底上等于不见（和侧栏是同一个道理）。 -->
+      <img class="gvlogo dark" src="logo-dark.svg" alt="deeplumen">
+      <img class="gvlogo light" src="logo.svg" alt="deeplumen">
+      <span class="gvsep"></span>
+      <span class="gt">AI 渠道 · 全球实时</span>
+      <span class="gd" id="gvClock">—</span>
+      <span class="sp"></span>
+      <span class="glg">
+        <span><i class="c"></i>AI 读取你的商品页</span>
+        <span><i class="o"></i>AI 带来的订单</span>
+      </span>
+      <button class="gx" id="gvClose" type="button" title="退出全屏（Esc）">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.6 3.6l8.8 8.8M12.4 3.6l-8.8 8.8"/></svg>
+      </button>
+    </div>
+
+    <canvas id="gvGlobe" width="1920" height="1080"></canvas>
+    <div id="gvPops"></div>
+
+    <div id="gvKpi">
+      <div class="gk"><span class="l">Agentic Page 带来的成交额</span><span class="v" id="gvGmv">$0</span></div>
+      <div class="gk"><span class="l">Agentic Page 带来的订单</span><span class="v" id="gvOrd">0</span></div>
+      <div class="gk"><span class="l">AI 读取的商品页</span><span class="v" id="gvCrawls">0</span></div>
+      <div class="gk"><span class="l">已接入的店铺</span><span class="v" id="gvStores">0</span></div>
+    </div>
+
+    <!-- 底部跑马灯：每一次 AI 读取都从右往左走一条 -->
+    <div id="gvTick"><div id="gvTickIn"></div></div>
+  </div>
+
+  <!-- 全屏礼花庆祝：纸片在 canvas 里跑（不是 DOM），文字是 DOM -->
+  <div id="celebrate">
+    <div id="celScrim"></div>
+    <canvas id="confetti" width="1920" height="1080"></canvas>
+    <div class="cbox">
+      <div class="ctag"><i></i><span id="cbTag">大额成交</span></div>
+      <div class="camt" id="cbAmt">$0</div>
+      <div class="cmeta"><b id="cbShop">—</b><s id="cbWhere">—</s></div>
+      <div class="cvia" id="cbVia">—</div>
+    </div>
+  </div>
+
+  <!-- 订单详情抽屉 -->
+  <div id="scrim"></div>
+  <div id="drawer">
+    <div class="dh">
+      <span class="ti">订单详情</span>
+      <span class="sp"></span>
+      <button class="tb ico" id="btnClose" type="button" title="关闭">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.6 3.6l8.8 8.8M12.4 3.6l-8.8 8.8"/></svg>
+      </button>
+    </div>
+    <div class="db" id="drawerBody"></div>
+  </div>
+
+  <!-- 快捷键图例 -->
+  <div id="legend">
+    <div class="box">
+      <h3>操作员快捷键</h3>
+      <div class="kk">
+        <div><b>D</b>切换深色 / 浅色</div>
+        <div><b>空格</b>暂停 / 继续</div>
+        <div><b>N</b>造一笔<u>普通</u>单（$9~99）</div>
+        <div><b>C</b>造一笔<u>较大</u>单（$120~290）</div>
+        <div><b>B</b>造一笔<u>大额</u>单（$320~770）</div>
+        <div><b>V</b>造一笔<u>特大</u>单（$850~4,600）</div>
+        <div><b>K</b>里程碑</div>
+        <div><b>M</b>静音</div>
+        <div><b>A</b>环境音床</div>
+        <div><b>H</b>展馆音频模式</div>
+        <div><b>1 2 3</b>速率 ×0.5 / ×1 / ×3</div>
+        <div><b>F</b>全屏</div>
+        <div><b>R</b>重置</div>
+        <div><b>Esc</b>关闭浮层</div>
+        <div><b>?</b>本页</div>
+      </div>
+      <div class="tip">按 <b style="font-family:var(--mono)">?</b> 或 <b style="font-family:var(--mono)">Esc</b> 关闭</div>
+    </div>
+  </div>
+
+  <!-- 启动遮罩 -->
+  <div id="gate">
+    <div class="t">AP 商家后台 · AI 渠道</div>
+    <div class="s">点击进入以解锁音频<br><b>D 切换深色 / 浅色 · ? 查看全部快捷键</b></div>
+    <button class="go" id="goBtn" type="button">点击进入</button>
+  </div>
+</div>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="flags.js"></script>
+<script src="shops.js"></script>
+<script src="feed.js"></script>
+<script src="coast.js"></script>
+<script src="aurora.js"></script>
+<script src="globe.js"></script>
+<script src="qr.js"></script>
+<script src="pages.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

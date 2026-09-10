@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · Agent Page — 实时看板</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 零网络依赖：无 CDN、无远程字体、无远程图片。断网照跑。 -->
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+ * 方案 E · 运营监控台（V1 版式 · 可切换主题色）
+ *
+ * 版面严格照 V1 静态稿：
+ *   顶栏 56 │ 远距离层 168（1 主角 + 3 配角，配角归到「今日汇总」组下降权）
+ *   中段 464（地图 40% │ 按引荐渠道 │ 按市场 24%）
+ *   下段 392（AI 引荐订单流 50% │ 边缘抓取日志）—— 行高守住 49px，所以只排 6 行
+ *   页脚：按要求整条省掉，腾出的 44px 给了中段
+ *
+ * 主题色全部走 CSS 自定义属性，由 JS 换一组值即可整屏换肤。
+ * 五套主题都取自本项目已有色板（_共享规格.md §4.1 + 各方案实现），不是随手调的：
+ *   深空石墨   方案 A/B 的 P1（默认，青绿 #00D3A7 + 暖金 #FFB86B）
+ *   Grafana    02 线 getComputedStyle 实测的那套
+ *   暖墨陶土   方案 C 原版的 P2
+ *   黑绿       方案 D 的 P3
+ *   点阵琥珀   C-LED 第四版
+ *
+ * 不做的事：不发光、不做点阵/LED 质感、不做霓虹。强调靠色相 + 字重 + 面积。
+ * ═══════════════════════════════════════════════════════════════════════ */
+#stage{
+  /* 默认＝方案 A 的 P1「深空石墨」。整组值由 app.js 的 THEMES 覆写。 */
+  --bg:#08090B; --panel:#101216; --panel2:#15181D; --bar:#131620;
+  --hair:#1C1F25; --hair2:#262A33;
+  --tx:#F7F8F8; --tx2:#9CA3AF; --mute:#6B7280; --faint:#4B5563;
+  --crawl:#00D3A7; --crawl-d:#0B7360;     /* 冷强调：爬虫层 */
+  --order:#FFB86B; --order-d:#8A5A28;     /* 暖强调：订单层，稀有出现 */
+  --red:#FF6B60; --ok:#35D06A;
+  --land:#2A313B; --mkt:#4A5A66; --mkt2:#6E8794;
+}
+:root{
+  --mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --cn:'Microsoft YaHei','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#06070a;overflow:hidden}
+body{font-family:var(--cn);-webkit-font-smoothing:antialiased;cursor:default}
+
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  transform-origin:50% 50%;background:var(--bg);color:var(--tx);overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:background-color 420ms linear,color 420ms linear}
+
+/* ── 顶栏 56 ── */
+#top{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 18px;
+  background:var(--panel);border-bottom:1px solid var(--hair)}
+#top .brand{font-size:17px;font-weight:700;letter-spacing:.02em}
+#top .brand em{font-style:normal;color:var(--crawl)}
+.ctl{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;
+  border:1px solid var(--hair2);border-radius:4px;background:var(--panel2);
+  font-size:14px;color:var(--tx2);white-space:nowrap}
+.ctl b{font-weight:400;color:var(--tx)}
+.ctl i{font-style:normal;font-size:11px;color:var(--mute)}
+#top .rt{margin-left:auto;display:flex;align-items:center;gap:12px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)}
+.live u{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none;
+  text-decoration:none}
+
+/* ── 远距离层 168：1 主角 + 3 配角。焦点公式来自 Live View 像素实测 ──
+ * 主角不靠字号（84 vs 72，1.17 倍），靠：字重 700 vs 300、标签在数字**上方**、
+ * 配角归到「今日汇总」组下、主角**不挂 sparkline**、右侧**满高**分隔线（配角之间是短线）。*/
+#far{height:168px;flex:none;display:flex;background:var(--panel);
+  border-bottom:1px solid var(--hair)}
+#far .hero{width:36%;flex:none;padding:16px 24px;display:flex;flex-direction:column;
+  justify-content:center;border-right:1px solid var(--hair2)}
+#far .hero .lb{font-size:14px;font-weight:600;letter-spacing:.03em;color:var(--tx2);
+  margin-bottom:4px}
+#far .hero .vv{font-size:84px;line-height:1;font-weight:700;letter-spacing:-.018em;
+  color:var(--order);font-variant-numeric:tabular-nums;white-space:nowrap;
+  display:inline-block;align-self:flex-start}
+#far .hero .un{font-size:13px;color:var(--mute);margin-top:6px}
+#far .grp{flex:1;display:flex;position:relative;padding-top:14px}
+#far .grp .gt{position:absolute;left:24px;top:15px;font-size:12px;letter-spacing:.10em;
+  color:var(--mute)}
+#far .c{flex:1;padding:32px 24px 18px;display:flex;flex-direction:column;
+  justify-content:center;position:relative}
+#far .c + .c{border-left:1px solid var(--hair)}
+/* 配角之间只有短线：上下各留 24% 的缺口，靠**线长**表达层级强度 */
+#far .c + .c::before,#far .c + .c::after{content:"";position:absolute;left:-1px;
+  width:1px;height:24%;background:var(--panel)}
+#far .c + .c::before{top:0}
+#far .c + .c::after{bottom:0}
+#far .c .vv{font-size:44px;line-height:1.05;font-weight:300;color:var(--tx);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+#far .c .lb{font-size:14px;color:var(--tx2);margin-top:6px}
+#far .c .lb s{text-decoration:none;color:var(--mute);font-size:12px}
+#far .c .sk{position:absolute;right:24px;top:50%;transform:translateY(-50%)}
+/* 成交额跳动浮字：一次性 1.3s 衰减，不循环 */
+#gmvDelta{position:absolute;right:22px;top:50px;font-family:var(--mono);font-size:20px;
+  font-weight:600;color:var(--order);opacity:0;pointer-events:none;white-space:nowrap}
+#gmvDelta.on{animation:gmvpop 1300ms cubic-bezier(.16,1,.3,1) forwards}
+@keyframes gmvpop{0%{opacity:0;transform:translateY(6px)}
+  18%{opacity:1;transform:translateY(0)}
+  70%{opacity:1;transform:translateY(-3px)}
+  100%{opacity:0;transform:translateY(-9px)}}
+
+/* ── 面板通用 ── */
+.pan{background:var(--panel);border:1px solid var(--hair);border-radius:6px;
+  display:flex;flex-direction:column;overflow:hidden}
+.ph{height:34px;flex:none;display:flex;align-items:center;gap:9px;padding:0 14px;
+  border-bottom:1px solid var(--hair);background:var(--bar)}
+.ph .t{font-size:16px;font-weight:600;color:var(--tx)}
+.ph .r{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;
+  color:var(--mute)}
+.win{border:1px dashed var(--hair2);border-radius:3px;padding:1px 6px}
+.pb{flex:1;min-height:0;position:relative;overflow:hidden}
+
+/* ── 中段 464：地图 40% │ 渠道 │ 市场 24%（严格照 V1 稿的三块）── */
+#mid{height:464px;flex:none;display:flex;gap:8px;padding:8px}
+#mapPan{width:40%;flex:none}
+#chanPan{flex:1}
+#mktPan{width:24%;flex:none}
+#map{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#mapLg{position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:14px;
+  font-size:13px;color:var(--tx2)}
+#mapLg s{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;
+  text-decoration:none}
+
+/* 重复行（渠道 / 市场共用） */
+.rr{display:flex;align-items:center;height:44px;padding:0 14px;gap:12px;font-size:14px;
+  border-bottom:1px solid var(--hair)}
+.rr .nm{flex:none;color:var(--tx);white-space:nowrap;overflow:hidden}
+.rr .nm i{font-style:normal;color:var(--faint);font-size:12px}
+.rr .ct{flex:none;text-align:right;font-family:var(--mono);color:var(--tx)}
+.rr .bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;
+  min-width:30px}
+.rr .bar u{display:block;height:100%;background:var(--crawl-d);text-decoration:none;
+  transition:width 600ms cubic-bezier(.22,1,.36,1)}
+.rr .pc{width:46px;flex:none;text-align:right;font-family:var(--mono);color:var(--tx2)}
+.rr.tot{background:var(--panel2);font-weight:600;border-bottom:0}
+
+/* ── 下段 392：订单流 50% │ 抓取日志 ── */
+#low{height:392px;flex:none;display:flex;gap:8px;padding:0 8px 8px}
+#ordPan{width:50%;flex:none}
+#logPan{flex:1}
+#ordHead,#logHead{display:flex;align-items:center;flex:none;
+  border-bottom:1px solid var(--hair);background:var(--panel2);white-space:nowrap}
+#ordHead{height:38px;font-size:14px;font-weight:600;color:var(--tx2)}
+#logHead{height:30px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--mute)}
+#ordBody,#logBody{position:relative;flex:1;min-height:0;overflow:hidden}
+
+/* 订单流：入场动画取 C 原版（整表下移 + 逐格翻牌），强调样式取 C-LED 中文版 */
+.orow{position:absolute;left:0;top:0;width:100%;height:49px;display:flex;
+  align-items:center;border-bottom:1px solid var(--hair);
+  transition:transform 260ms cubic-bezier(.22,1,.36,1);contain:layout paint}
+.orow .c{padding:0 12px;font-size:14px;color:var(--tx);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;flex:none}
+.orow .c.dim{color:var(--tx2)}
+.orow .c.m{font-family:var(--mono)}
+.orow .c.r{text-align:right}
+.orow .amt{font-family:var(--mono);font-weight:600;color:var(--order);
+  font-variant-numeric:tabular-nums}
+.orow .mk{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--order-d)}
+.orow.hot .mk{background:var(--order)}
+.orow.big .mk{background:var(--red)}
+.orow.big .amt{color:var(--red)}
+.orow .hl{position:absolute;left:3px;right:0;top:0;bottom:0;pointer-events:none;
+  background:var(--order);opacity:0}
+/* 500ms 满亮保持 + 900ms 淡出 → 静息 3%（ag-grid 的业界值；C-LED 第四版只有
+   480ms 线性、没有保持段，一闪即没像故障） */
+.orow.enter .hl{animation:hlfade 1400ms linear forwards}
+.orow.enter.big .hl{animation:hlfadeBig 1600ms linear forwards}
+@keyframes hlfade{0%,35%{opacity:.13}100%{opacity:.03}}
+@keyframes hlfadeBig{0%,31%{opacity:.20}100%{opacity:.045}}
+.pill{display:inline-block;font-size:12px;line-height:19px;padding:0 8px;border-radius:10px;
+  border:1px solid var(--hair2);color:var(--tx2)}
+.pill.hi{color:var(--order);border-color:var(--order-d)}
+.pill.bad{color:var(--red);border-color:var(--red)}
+
+/* 抓取日志：方案 A 右半边的样式 + 渐入 + 按行龄渐隐 + 底部蒙版 */
+.crow{position:absolute;left:0;top:0;width:100%;height:28px;display:flex;
+  align-items:center;font-family:var(--mono);font-size:13px;color:var(--tx2);
+  white-space:nowrap;transition:transform 200ms linear,opacity 320ms linear;
+  contain:layout paint}
+.crow .c{padding:0 8px;overflow:hidden;text-overflow:ellipsis;flex:none}
+.crow .bot{color:var(--crawl)}
+.crow .bot .pf{font-weight:400}
+.crow .bot .bt{color:var(--faint);margin-left:8px;text-decoration:none;font-size:12px}
+.crow .st200{color:var(--mute)}
+.crow .st304{color:var(--order)}
+.crow .r{text-align:right}
+#logBody{-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 68%,rgba(0,0,0,.15) 94%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0,#000 68%,rgba(0,0,0,.15) 94%,transparent 100%)}
+
+/* ── 大额横幅：一次性入场，不循环，不发光 ── */
+#banner{position:absolute;left:50%;top:250px;transform:translateX(-50%) translateY(-8px);
+  z-index:30;display:flex;align-items:center;gap:14px;padding:11px 22px;
+  background:var(--panel2);border:1px solid var(--order-d);border-radius:6px;
+  opacity:0;pointer-events:none;
+  transition:opacity 320ms linear,transform 320ms cubic-bezier(.16,1,.3,1)}
+#banner.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#banner .tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--order)}
+#banner .txt{font-size:17px;color:var(--tx)}
+#banner .txt b{color:var(--order);font-weight:700;font-family:var(--mono)}
+
+/* ── 启动遮罩（规格 §6 必须有）── */
+#gate{position:absolute;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity 320ms linear}
+#gate.off{opacity:0;pointer-events:none}
+#gate h1{font-size:40px;font-weight:700;letter-spacing:.02em;color:var(--tx)}
+#gate h1 em{font-style:normal;color:var(--crawl)}
+#gate p{font-size:18px;color:var(--tx2)}
+#gate .go{margin-top:6px;padding:12px 30px;border:1px solid var(--crawl-d);
+  border-radius:6px;color:var(--crawl);font-size:17px;background:var(--panel2);cursor:pointer}
+#gate .keys{margin-top:12px;font-size:13px;color:var(--mute);max-width:920px;
+  text-align:center;line-height:2}
+#gate kbd{font-family:var(--mono);border:1px solid var(--hair2);border-radius:3px;
+  padding:1px 6px;color:var(--tx2);margin:0 2px}
+#legend{position:absolute;inset:0;z-index:90;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  font-size:15px;color:var(--tx2)}
+#legend.on{display:flex}
+#legend kbd{font-family:var(--mono);border:1px solid var(--hair2);border-radius:3px;
+  padding:1px 7px;color:var(--tx);margin-right:8px}
+
+/* ══ 左下角「扫码参与调研抽奖」入口 ══════════════════════════════════
+ * 收起态是一枚小标（不抢画面）；悬停浮起并出提示；点击展开二维码卡。
+ * 二维码必须是**深色码 + 白底**：扫描器靠这个对比度定位，反过来大量机型扫不出。 */
+#lot{position:absolute;left:14px;bottom:12px;z-index:40;display:flex;
+  flex-direction:column;align-items:flex-start;gap:9px}
+#lotChip{display:flex;align-items:center;gap:9px;padding:8px 13px;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:8px;
+  color:var(--tx2);font-family:var(--cn);font-size:14px;cursor:pointer;
+  transition:transform 180ms cubic-bezier(.16,1,.3,1),border-color 180ms,background 180ms}
+#lotChip:hover{transform:translateY(-2px);border-color:var(--crawl);background:var(--bar)}
+#lotChip:focus-visible{outline:2px solid var(--crawl);outline-offset:2px}
+#lotChip b{color:var(--tx);font-weight:600}
+#lotChip s{text-decoration:none;color:var(--crawl);font-size:12px;
+  border:1px solid var(--crawl-d);border-radius:4px;padding:1px 6px}
+/* 小二维码图标：纯 CSS 画三个定位角，不用图片 */
+#lotChip .qi{width:16px;height:16px;flex:none;position:relative;opacity:.85}
+#lotChip .qi::before,#lotChip .qi::after{content:'';position:absolute;width:6px;height:6px;
+  border:1.5px solid var(--crawl)}
+#lotChip .qi::before{left:0;top:0}
+#lotChip .qi::after{right:0;top:0}
+#lotChip .qi i{position:absolute;left:0;bottom:0;width:6px;height:6px;
+  border:1.5px solid var(--crawl)}
+/* 悬停提示（tool tip 态） */
+#lotTip{position:absolute;left:0;bottom:calc(100% + 9px);white-space:nowrap;
+  background:var(--panel2);border:1px solid var(--hair2);border-radius:6px;
+  padding:7px 11px;font-size:13px;color:var(--tx2);opacity:0;pointer-events:none;
+  transform:translateY(4px);transition:opacity 180ms,transform 180ms}
+#lot:hover #lotTip{opacity:1;transform:translateY(0)}
+#lot.open #lotTip{opacity:0}
+/* 展开的二维码卡 */
+#lotCard{position:absolute;left:0;bottom:calc(100% + 10px);width:430px;
+  background:var(--panel);border:1px solid var(--hair2);border-radius:12px;
+  padding:16px 18px 14px;opacity:0;pointer-events:none;transform:translateY(8px) scale(.98);
+  transform-origin:left bottom;
+  transition:opacity 220ms linear,transform 260ms cubic-bezier(.16,1,.3,1)}
+#lot.open #lotCard{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+#lotCard .lh{font-size:19px;font-weight:700;color:var(--tx);margin-bottom:2px}
+#lotCard .ls{font-size:13px;color:var(--mute);margin-bottom:14px}
+#lotCard .ls b{color:var(--crawl)}
+#lotCard .lb{display:flex;gap:16px;align-items:flex-start}
+#lotCard .lq{flex:none;background:#fff;border-radius:8px;padding:8px;line-height:0}
+#lotCard .lq canvas{display:block;width:180px;height:180px;image-rendering:pixelated}
+#lotCard ol{margin:0;padding-left:0;list-style:none;counter-reset:pz;flex:1;min-width:0}
+#lotCard ol li{counter-increment:pz;display:flex;align-items:center;gap:9px;
+  font-size:14px;color:var(--tx);padding:5px 0}
+#lotCard ol li::before{content:counter(pz);width:19px;height:19px;flex:none;
+  border-radius:50%;background:var(--hair2);color:var(--tx2);font-size:11px;
+  font-family:var(--mono);display:flex;align-items:center;justify-content:center}
+/* 二维码不可用时的告警条 —— 刻意刺眼，要在 3 米外就看出「这个码是坏的」 */
+#lotCard .lwarn{margin-top:12px;padding:10px 12px;border-radius:6px;
+  background:#3A1518;border:1px solid #7A2530;color:#FFB4B4;font-size:13px;line-height:1.55}
+#lotCard .lwarn b{color:#FFE0E0}
+#lotCard .lwarn code{font-size:12px;color:#FFD9D9}
+#lotCard.bad .lq{position:relative;filter:grayscale(1) opacity(.42)}
+#lotCard.bad .lq::after{content:'扫不开';position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;font-size:19px;font-weight:700;
+  color:#B3121F;background:rgba(255,255,255,.55);letter-spacing:.06em}
+#lotCard .lf{margin-top:12px;padding-top:10px;border-top:1px solid var(--hair);
+  font-size:12px;color:var(--faint);display:flex;gap:10px;align-items:baseline}
+#lotCard .lf code{font-family:var(--mono);color:var(--mute);font-size:11px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media (prefers-reduced-motion:reduce){
+  .orow,.crow,#banner,#gmvDelta,.rr .bar u,#stage{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="top">
+    <div class="brand">AP <em>·</em> 实时看板</div>
+    <span class="ctl"><i>时间范围</i><b>最近 24 小时</b> ▾</span>
+    <span class="ctl"><i>国家 / 地区</i><b>全部 18 个</b> ▾</span>
+    <div class="rt">
+      <span class="live"><u></u>实时更新中</span>
+      <span class="ctl" style="border-style:dashed"><i>最后更新</i><b id="upd">—</b></span>
+      <span class="ctl">每秒更新</span>
+    </div>
+  </div>
+
+  <div id="far">
+    <div class="hero">
+      <div class="lb">Agentic Page 带来的成交额</div>
+      <div class="vv" id="kGmv">$0</div>
+      <div class="un">全部已接入店铺 · 累计至今</div>
+    </div>
+    <div class="grp">
+      <div class="gt">今日汇总</div>
+      <div class="c">
+        <div class="vv" id="kRate">0</div>
+        <div class="lb">AI 正在读取商品页<s> · 页/秒</s></div>
+        <div class="sk" id="sk1"></div>
+      </div>
+      <div class="c">
+        <div class="vv" id="kOrd">0</div>
+        <div class="lb">Agentic Page 带来的订单<s> · 笔</s></div>
+        <div class="sk" id="sk2"></div>
+      </div>
+      <div class="c">
+        <div class="vv" id="kStores">0</div>
+        <div class="lb">已接入的店铺<s> · 家</s></div>
+        <div class="sk" id="sk3"></div>
+      </div>
+      <span id="gmvDelta"></span>
+    </div>
+  </div>
+
+  <div id="mid">
+    <div class="pan" id="mapPan">
+      <div class="ph"><span class="t">顾客来自哪里</span>
+        <span class="r"><span id="mapLgTop"></span><span class="win">近 5 分钟</span></span></div>
+      <div class="pb">
+        <canvas id="map"></canvas>
+        <div id="mapLg">
+          <span><s style="background:var(--mkt2)"></s>已开通市场</span>
+          <span><s style="background:var(--crawl)"></s>AI 正在读取</span>
+          <span><s style="background:var(--order)"></s>刚刚成交</span>
+        </div>
+      </div>
+    </div>
+    <div class="pan" id="chanPan">
+      <div class="ph"><span class="t">来自哪个 AI 助手</span>
+        <span class="r" id="chanNote">按订单来源统计</span></div>
+      <div class="pb" id="chanBody"></div>
+    </div>
+    <div class="pan" id="mktPan">
+      <div class="ph"><span class="t">按国家 / 地区</span>
+        <span class="r">折合美元</span></div>
+      <div class="pb" id="mktBody"></div>
+    </div>
+  </div>
+
+  <div id="low">
+    <div class="pan" id="ordPan">
+      <div class="ph"><span class="t">Agentic Page 带来的订单</span>
+        <span class="r">实时</span></div>
+      <div id="ordHead"></div>
+      <div id="ordBody"></div>
+    </div>
+    <div class="pan" id="logPan">
+      <div class="ph"><span class="t">AI 正在读取你的商品页</span>
+        <span class="r" id="logRate">—</span></div>
+      <div id="logHead"></div>
+      <div id="logBody"></div>
+    </div>
+  </div>
+
+  <div id="banner"><span class="tag">大额成交</span><span class="txt" id="bannerTxt"></span></div>
+
+  <div id="lot">
+    <div id="lotTip">点击展开二维码 · 手机扫码参与</div>
+    <div id="lotCard">
+      <div class="lh">扫码参与 30 秒小调研</div>
+      <div class="ls">填完即可转大转盘，<b>100% 中奖</b>，奖品现场领取</div>
+      <div class="lb">
+        <div class="lq"><canvas id="lotQr"></canvas></div>
+        <ol>
+          <li>免费 3 个 AP 来源订单</li>
+          <li>1v1 专家诊断</li>
+          <li>定制帆布袋</li>
+          <li>AP 定制扇子</li>
+        </ol>
+      </div>
+      <!-- 码不可用时的告警，由 app.js 点亮。见 E-后台 同名实现的注释：
+           双击 index.html（file://）会让二维码静默停在写死的兜底 IP 上。 -->
+      <div class="lwarn" id="lotWarn" hidden></div>
+      <!-- 地址不再显示在屏上：观众看不懂那串随机隧道域名，反而像出了故障。
+         操作员要核对地址有两个地方：① 服务窗口里打印的「隧道已就绪」那一行
+         ② 控制台 window.APDiag_qr.url。二维码画不出来时会走上面 lotWarn 那条告警。 -->
+    <div class="lf"><span>手机相机对准即可</span></div>
+    </div>
+    <button id="lotChip" type="button" aria-expanded="false">
+      <span class="qi"><i></i></span><b>扫码参与调研抽奖</b><s>100% 中奖</s>
+    </button>
+  </div>
+
+  <div id="legend">
+    <div><kbd>空格</kbd>暂停 / 继续</div>
+    <div><kbd>T</kbd><b style="color:var(--crawl)">切换主题色</b>（屏上不显示，仅操作员可用）</div>
+    <div><kbd>Q</kbd>展开 / 收起左下角的扫码抽奖卡（<kbd>Esc</kbd> 关闭）</div>
+    <div><kbd>B</kbd>人工触发一个大单</div>
+    <div><kbd>N</kbd>触发一个普通单</div>
+    <div><kbd>K</kbd>触发里程碑</div>
+    <div><kbd>M</kbd>静音　<kbd>A</kbd>环境音床　<kbd>H</kbd>展馆音频</div>
+    <div><kbd>1 / 2 / 3</kbd>速率 ×0.5 / ×1 / ×3</div>
+    <div><kbd>F</kbd>全屏　<kbd>R</kbd>重置　<kbd>?</kbd>关闭本页</div>
+  </div>
+
+  <div id="gate">
+    <h1>AP <em>·</em> 实时看板</h1>
+    <p>让 AI 把顾客带进你的店</p>
+    <button class="go" id="goBtn">点击进入</button>
+    <div class="keys">
+      <kbd>T</kbd>换主题　<kbd>空格</kbd>暂停　<kbd>B</kbd>大单　<kbd>N</kbd>普通单
+      <kbd>K</kbd>里程碑　<kbd>M</kbd>静音　<kbd>A</kbd>环境音　<kbd>H</kbd>展馆音频
+      <kbd>1/2/3</kbd>速率　<kbd>F</kbd>全屏　<kbd>R</kbd>重置　<kbd>?</kbd>图例
+    </div>
+  </div>
+
+</div>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="qr.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

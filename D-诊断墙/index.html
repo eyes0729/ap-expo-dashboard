@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP 诊断墙 · 展会大屏</title>
+<style>
+:root{
+  --bg:#04120C; --panel:#0A1B12; --hair:#17301F;
+  --text:#FFFFFF; --sub:#93A79C;
+  --accent:#00C46A; --high:#B8FFCE; --gold:#FFD166;
+  --font-display:'Bahnschrift','Segoe UI Variable Display','Segoe UI',Inter,system-ui,sans-serif;
+  --font-mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --font-cn:'Microsoft YaHei','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);
+  font-family:var(--font-cn);color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+  transform-origin:50% 50%;background:var(--bg)}
+
+/* ---- 巨型数字：tabular / 固定字宽槽 / 只动 transform / 无回弹 ---- */
+.odo{display:inline-flex;justify-content:flex-end;align-items:flex-start;
+  font-family:var(--font-display);font-weight:500;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+  contain:layout paint;white-space:nowrap}
+.od-slot{display:inline-block;position:relative;overflow:hidden;vertical-align:top;flex:none}
+.od-strip{position:absolute;left:0;top:0;width:100%;display:block}
+.od-d{display:block;text-align:center}
+.od-sep{display:inline-block;text-align:center;vertical-align:top;flex:none;opacity:.55}
+
+/* ---- 顶部 ---- */
+.hdr{position:absolute;left:116px;top:24px;width:1688px;height:44px;
+  display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline}
+.bname{font-family:var(--font-display);font-size:26px;font-weight:600;letter-spacing:.04em}
+.bclaim{font-size:15px;color:var(--sub);margin-left:16px;letter-spacing:.06em}
+.simbadge{font-family:var(--font-mono);font-size:24px;line-height:24px;color:var(--gold);
+  opacity:.72;border:1px solid rgba(255,209,102,.38);border-radius:3px;padding:6px 14px}
+
+/* ---- 行业参照横条：公开数据走浅底，与深底模拟数字分区 ---- */
+.refbar{position:absolute;left:116px;top:82px;width:1688px;height:68px;
+  background:rgba(184,255,206,.10);border:1px solid rgba(184,255,206,.26);
+  border-left:5px solid var(--high);border-radius:4px;
+  display:flex;align-items:center;padding:0 26px;gap:22px}
+.reflab{font-family:var(--font-mono);font-size:14px;color:var(--high);opacity:.7;
+  letter-spacing:.14em;flex:none}
+.refnum{font-family:var(--font-display);font-size:40px;line-height:40px;font-weight:600;
+  color:var(--high);font-variant-numeric:tabular-nums;flex:none}
+.refnum i{font-size:24px;font-style:normal;opacity:.8;margin-left:2px}
+.reftext{font-size:21px;color:var(--high);opacity:.92;flex:1}
+.refsrc{font-family:var(--font-mono);font-size:13px;opacity:.62;margin-left:14px}
+.refhint{font-size:17px;color:var(--high);opacity:.55;flex:none;letter-spacing:.08em}
+
+/* ---- 主区：左 864 / 沟槽 152 / 右 672 ---- */
+.main{position:absolute;left:116px;top:176px;width:1688px;height:838px;display:flex;gap:152px}
+.colL{width:864px;height:838px;flex:none;display:flex;flex-direction:column}
+.colR{width:672px;height:838px;flex:none;overflow:visible;display:flex;flex-direction:column}
+.lab{height:26px;display:flex;align-items:center;justify-content:space-between;flex:none}
+.labmain{font-family:var(--font-display);font-size:19px;letter-spacing:.14em;color:var(--sub)}
+.labmeta{font-family:var(--font-mono);font-size:14px;color:var(--sub);opacity:.62}
+
+/* ---- 体检卡 ---- */
+.card{margin-top:12px;height:638px;flex:none;background:var(--panel);
+  border:1px solid var(--hair);border-radius:6px;padding:22px;
+  display:flex;flex-direction:column;gap:8px;overflow:hidden;
+  opacity:1;transform:translate3d(0,0,0)}
+.card.enter{opacity:0;transform:translate3d(0,8px,0)}
+.card.in{opacity:1;transform:translate3d(0,0,0);
+  transition:opacity 480ms cubic-bezier(.16,1,.3,1),transform 480ms cubic-bezier(.16,1,.3,1)}
+.idrow{height:90px;flex:none;display:flex;justify-content:space-between;align-items:flex-start}
+.idl{min-width:0}
+.sname{font-family:var(--font-display);font-size:42px;line-height:46px;font-weight:600;
+  color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:470px}
+.sdom{font-family:var(--font-mono);font-size:20px;line-height:24px;color:var(--accent)}
+.smeta{font-family:var(--font-mono);font-size:13px;line-height:18px;color:var(--sub);opacity:.62}
+.idr{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.badge{font-family:var(--font-mono);font-size:14px;line-height:26px;height:26px;
+  padding:0 10px;border-radius:3px;letter-spacing:.1em}
+.badge.sample{color:var(--sub);border:1px solid var(--hair);background:transparent}
+.badge.live{color:var(--bg);background:var(--accent);font-weight:600}
+.prize{height:40px;display:flex;align-items:center;gap:10px;padding:0 14px;
+  border:1px solid rgba(255,209,102,.4);border-radius:3px;
+  background:rgba(255,209,102,.07);color:var(--gold);font-size:19px;white-space:nowrap}
+.prize u{font-family:var(--font-mono);font-size:12px;opacity:.6;text-decoration:none;
+  letter-spacing:.1em}
+
+/* ---- 主角：综合分 ---- */
+.scorerow{height:380px;flex:none;display:flex;align-items:flex-start}
+.scorewrap{flex:none}
+#scoreOdo{color:var(--high)}
+.scoreunit{flex:1;padding-left:22px;padding-top:92px}
+.su1{font-family:var(--font-display);font-size:44px;line-height:46px;color:var(--sub);opacity:.7}
+.su2{font-size:22px;line-height:30px;color:var(--sub);letter-spacing:.16em;margin-top:6px}
+.su3{font-family:var(--font-mono);font-size:15px;line-height:22px;color:var(--gold);
+  opacity:.85;margin-top:16px;max-width:152px}
+.concl{height:32px;flex:none;font-size:29px;line-height:32px;color:var(--high);
+  white-space:nowrap;overflow:hidden}
+
+/* ---- 三项体检 ---- */
+.checks{height:68px;flex:none;display:flex;gap:20px}
+.chk{width:260px;flex:none}
+.ck-l{font-size:15px;line-height:20px;color:var(--sub);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.ck-v{font-family:var(--font-display);font-size:26px;line-height:28px;color:var(--text);
+  font-variant-numeric:tabular-nums;margin-top:2px}
+.ck-v.bad{color:var(--gold)}
+.ck-bar{position:relative;height:6px;margin-top:4px;border-radius:1px;
+  background:rgba(0,196,106,.14);overflow:visible}
+.ck-bar i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--accent);
+  border-radius:1px;transition:width 620ms cubic-bezier(.22,1,.36,1)}
+.ck-bar b{position:absolute;top:-3px;width:2px;height:12px;background:var(--gold)}
+.ck-avg{font-family:var(--font-mono);font-size:11px;color:var(--gold);opacity:.75;
+  margin-top:3px;height:12px}
+
+/* ---- 已诊断列表（对象池 8，可见 3 行） ---- */
+.dlwrap{margin-top:20px;flex:none}
+.dlist{position:relative;height:106px;overflow:hidden;margin-top:8px}
+.drow{position:absolute;left:0;top:0;width:864px;height:34px;display:flex;
+  align-items:center;opacity:0;transform:translate3d(0,0,0)}
+.drow.anim{transition:transform 420ms cubic-bezier(.16,1,.3,1),opacity 420ms linear}
+.d-score{width:64px;flex:none;font-family:var(--font-display);font-size:27px;
+  font-variant-numeric:tabular-nums;color:var(--high);text-align:right;padding-right:14px}
+.d-name{width:236px;flex:none;font-size:19px;color:var(--text);opacity:.86;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-dom{width:312px;flex:none;font-family:var(--font-mono);font-size:15px;color:var(--sub);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-prize{flex:1;font-size:16px;color:var(--gold);opacity:.78;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- 右栏 ---- */
+.qrblock{height:162px;flex:none;display:flex;gap:22px;align-items:flex-start}
+#qr{width:162px;height:162px;flex:none;border-radius:3px;display:block;background:var(--high)}
+.qrtxt{flex:1;padding-top:2px}
+.qr1{font-size:27px;line-height:32px;color:var(--text)}
+.qr2{font-size:18px;line-height:24px;color:var(--accent);margin-top:4px}
+.qr3{margin-top:10px}
+.qr3 li{list-style:none;font-size:15px;line-height:21px;color:var(--sub)}
+.qr3 li b{color:var(--gold);opacity:.85;font-weight:400;margin-right:6px}
+.rblock{flex:none}
+.rlab{font-family:var(--font-display);font-size:19px;letter-spacing:.14em;color:var(--sub);
+  height:22px}
+.rsub{font-family:var(--font-mono);font-size:14px;color:var(--sub);opacity:.66;height:18px;
+  margin-top:4px;text-align:right}
+.crawlwrap{display:flex;justify-content:flex-end;margin-top:4px}
+.pagesrow{display:flex;justify-content:flex-end;margin-top:2px}
+#crawlOdo,#pagesOdo{color:var(--text)}
+.msbar{position:relative;height:6px;margin-top:8px;border-radius:1px;
+  background:rgba(0,196,106,.14);overflow:hidden}
+.msbar i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--accent)}
+.msbar.hit i{background:var(--high)}
+.mstext{font-family:var(--font-mono);font-size:14px;color:var(--sub);opacity:.7;
+  margin-top:6px;height:18px;text-align:right}
+
+/* ---- 订单播报（对象池 6） ---- */
+.ofeed{position:relative;height:236px;overflow:hidden;margin-top:8px;flex:none}
+.owait{position:absolute;left:0;top:0;height:36px;display:flex;align-items:center;
+  font-size:16px;color:var(--sub);opacity:.42}
+.orow{position:absolute;left:0;top:0;width:672px;height:36px;display:flex;align-items:center;
+  opacity:0;transform:translate3d(0,0,0);border-bottom:1px solid rgba(23,48,31,.75)}
+.orow.anim{transition:transform 420ms cubic-bezier(.16,1,.3,1),opacity 300ms linear}
+.o-amt{width:148px;flex:none;font-family:var(--font-display);font-size:25px;
+  font-variant-numeric:tabular-nums;color:var(--gold);text-align:right;padding-right:14px}
+.o-amt.big{font-weight:600}
+.o-name{width:222px;flex:none;font-size:18px;color:var(--text);opacity:.85;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o-city{width:138px;flex:none;font-size:15px;color:var(--sub);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o-ref{flex:1;font-family:var(--font-mono);font-size:14px;color:var(--accent);opacity:.8;
+  text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- 页脚 / 提示 ---- */
+.foot{position:absolute;left:116px;top:1026px;width:1688px;font-size:14px;line-height:20px;
+  color:var(--sub);opacity:.5}
+.hint{position:absolute;right:116px;top:1050px;font-family:var(--font-mono);font-size:13px;
+  color:var(--sub);opacity:.32}
+
+/* ---- 覆盖层 ---- */
+.gridov{position:fixed;inset:0;pointer-events:none;display:none;z-index:40}
+.gridov.on{display:block}
+.gridov .g12{position:absolute;left:6%;top:0;right:6%;bottom:0;
+  background-image:repeating-linear-gradient(to right,
+    rgba(125,211,252,.16) 0,rgba(125,211,252,.16) 111px,
+    transparent 111px,transparent 143px)}
+.gridov .base{position:absolute;inset:0;
+  background-image:repeating-linear-gradient(to bottom,
+    rgba(125,211,252,.06) 0,rgba(125,211,252,.06) 1px,transparent 1px,transparent 8px)}
+.gridov .safe{position:absolute;left:6%;top:5%;right:6%;bottom:5%;
+  border:1px dashed rgba(0,196,106,.5)}
+.gridov .vmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,209,102,.5)}
+.gridov .hmid{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,209,102,.5)}
+.gridov .tag{position:absolute;left:6%;top:5%;transform:translateY(-22px);
+  font-family:var(--font-mono);font-size:13px;color:rgba(0,196,106,.85)}
+.msov{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  flex-direction:column;background:var(--bg)}
+.msov.on{display:flex}
+.msglow{position:absolute;inset:0}
+.mslab{font-family:var(--font-display);font-size:26px;letter-spacing:.3em;color:var(--high);
+  opacity:.8;position:relative}
+.msnum{font-family:var(--font-display);font-size:250px;line-height:268px;font-weight:600;
+  color:var(--high);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;margin-top:14px;position:relative}
+.msunit{font-size:30px;color:var(--sub);letter-spacing:.2em;margin-top:4px;position:relative}
+.legend{position:fixed;right:60px;bottom:60px;z-index:60;display:none;background:var(--panel);
+  border:1px solid var(--hair);border-radius:6px;padding:22px 26px}
+.legend.on{display:block}
+.legend h4{font-family:var(--font-display);font-size:17px;letter-spacing:.14em;color:var(--sub);
+  font-weight:500;margin-bottom:12px}
+.legend div{font-size:15px;line-height:26px;color:var(--text);opacity:.86}
+.legend kbd,.mask kbd{font-family:var(--font-mono);font-size:13px;color:var(--accent);
+  border:1px solid var(--hair);border-radius:3px;padding:1px 7px;margin-right:10px;
+  display:inline-block;min-width:34px;text-align:center}
+.mask{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:pointer}
+.mask.off{display:none}
+.mask .m1{font-family:var(--font-display);font-size:74px;font-weight:600}
+.mask .m2{font-size:26px;color:var(--high);margin-top:14px}
+.mask .m3{font-size:19px;margin-top:44px;border:1px solid var(--accent);border-radius:4px;
+  padding:14px 40px;color:var(--accent)}
+.mask .mk{margin-top:34px;display:grid;grid-template-columns:repeat(4,auto);gap:10px 34px;
+  font-size:14px;color:var(--sub)}
+.mask .mk kbd{min-width:28px;margin-right:8px}
+.mask .m4{font-family:var(--font-mono);font-size:14px;color:var(--sub);opacity:.6;margin-top:30px}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div class="hdr">
+    <div class="brand">
+      <div class="bname">AP · Agent Page</div>
+      <div class="bclaim">让 AI 读懂你的商品页，并把买家带回你的店</div>
+    </div>
+    <div class="simbadge">模拟演示数据 · SIMULATED DEMO DATA</div>
+  </div>
+
+  <div class="refbar">
+    <div class="reflab">行业参照 · PUBLIC DATA</div>
+    <div class="refnum">66<i>%</i></div>
+    <div class="reftext">美国零售站的商品详情页，AI 可读性平均只有 66%<span class="refsrc">来源 Adobe · business.adobe.com</span></div>
+    <div class="refhint">你的分数在左边</div>
+  </div>
+
+  <div class="main">
+
+    <section class="colL">
+      <div class="lab">
+        <span class="labmain">现场体检 · LIVE DIAGNOSTICS</span>
+        <span class="labmeta" id="qmeta">审核队列 0 · 已拦截 0</span>
+      </div>
+
+      <div class="card" id="card">
+        <div class="idrow">
+          <div class="idl">
+            <div class="sname" id="sname">—</div>
+            <div class="sdom" id="sdom">—</div>
+            <div class="smeta" id="smeta">检测时间 — · 检测项：robots.txt 放行 / 商品页 JSON-LD 必填字段 / 已上线市场数</div>
+          </div>
+          <div class="idr">
+            <div class="badge sample" id="badge">SAMPLE · 示例</div>
+            <div class="prize"><u>PRIZE</u><span id="prizetxt">—</span></div>
+          </div>
+        </div>
+
+        <div class="scorerow">
+          <div class="scorewrap"><div class="odo" id="scoreOdo"></div></div>
+          <div class="scoreunit">
+            <div class="su1">/100</div>
+            <div class="su2">综合分</div>
+            <div class="su3" id="scoregap">&nbsp;</div>
+          </div>
+        </div>
+
+        <div class="concl" id="concl">—</div>
+
+        <div class="checks">
+          <div class="chk">
+            <div class="ck-l">robots.txt 放行 AI 爬虫</div>
+            <div class="ck-v" id="ck1v">—</div>
+            <div class="ck-bar"><i id="ck1b"></i></div>
+            <div class="ck-avg">&nbsp;</div>
+          </div>
+          <div class="chk">
+            <div class="ck-l">商品页结构化数据完整度</div>
+            <div class="ck-v" id="ck2v">—</div>
+            <div class="ck-bar"><i id="ck2b"></i><b style="left:66%"></b></div>
+            <div class="ck-avg">行业平均 66%</div>
+          </div>
+          <div class="chk">
+            <div class="ck-l">多语言覆盖（已上线市场）</div>
+            <div class="ck-v" id="ck3v">—</div>
+            <div class="ck-bar"><i id="ck3b"></i></div>
+            <div class="ck-avg">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dlwrap">
+        <div class="lab">
+          <span class="labmain">已诊断 · DIAGNOSED</span>
+          <span class="labmeta" id="dmeta">0 家 · 另有 0 位无独立站观众参与</span>
+        </div>
+        <div class="dlist" id="dlist"></div>
+      </div>
+    </section>
+
+    <section class="colR">
+      <div class="qrblock">
+        <canvas id="qr" width="216" height="216"></canvas>
+        <div class="qrtxt">
+          <div class="qr1">扫码参与 · 30 秒问卷</div>
+          <div class="qr2">100% 中奖</div>
+          <ul class="qr3">
+            <li><b>·</b>免费 3 个 AP 来源订单</li>
+            <li><b>·</b>1v1 专家诊断</li>
+            <li><b>·</b>定制帆布袋</li>
+            <li><b>·</b>AP 定制扇子</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rblock" style="margin-top:32px">
+        <div class="rlab">AI 爬虫累计访问 · CRAWLS</div>
+        <div class="crawlwrap"><div class="odo" id="crawlOdo"></div></div>
+        <div class="rsub" id="crawlrate">GPTBot / ClaudeBot / PerplexityBot / Google-Extended</div>
+      </div>
+
+      <div class="rblock" id="pagesblock" style="margin-top:32px">
+        <div class="rlab">AP 翻译页面总数 · PAGES</div>
+        <div class="pagesrow"><div class="odo" id="pagesOdo"></div></div>
+        <div class="msbar" id="msbar"><i id="msfill"></i></div>
+        <div class="mstext" id="mstext">距下一个里程碑 —</div>
+      </div>
+
+      <div class="rblock" style="margin-top:32px">
+        <div class="rlab">AI 引荐订单 · AI-REFERRED</div>
+        <div class="ofeed" id="ofeed"><div class="owait" id="owait">等待下一笔 AI 引荐订单…</div></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">本屏数据为产品能力演示，非真实交易记录。OpenAI、ChatGPT、Anthropic、Claude、Perplexity、Google 均为其各自所有者的商标；AP 与上述公司无隶属、赞助或合作关系。</div>
+  <div class="hint">? 快捷键</div>
+</div>
+
+<div class="gridov" id="gridov">
+  <div class="base"></div><div class="g12"></div><div class="safe"></div>
+  <div class="vmid"></div><div class="hmid"></div>
+  <div class="tag">DEBUG GRID · 12 col / margin 6% / baseline 8px / safe 90%</div>
+</div>
+
+<div class="msov" id="msov">
+  <div class="msglow" id="msglow"></div>
+  <div class="mslab" id="mslab">MILESTONE</div>
+  <div class="msnum" id="msnum">0</div>
+  <div class="msunit" id="msunit">—</div>
+</div>
+
+<div class="legend" id="legend">
+  <h4>快捷键 · SHORTCUTS</h4>
+  <div><kbd>S</kbd>模拟一次观众扫码进入</div>
+  <div><kbd>空格</kbd>暂停 / 继续</div>
+  <div><kbd>B</kbd>人工触发一个大单</div>
+  <div><kbd>N</kbd>触发一个普通单</div>
+  <div><kbd>K</kbd>触发里程碑庆祝</div>
+  <div><kbd>M</kbd>静音 / 取消静音</div>
+  <div><kbd>1 2 3</kbd>速率 ×0.5 / ×1 / ×3</div>
+  <div><kbd>G</kbd>调试网格</div>
+  <div><kbd>H</kbd>展馆音频模式</div>
+  <div><kbd>A</kbd>环境音床</div>
+  <div><kbd>F</kbd>全屏</div>
+  <div><kbd>R</kbd>重置</div>
+  <div><kbd>?</kbd>显示 / 隐藏本图例</div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="m1">AP · Agent Page</div>
+  <div class="m2">诊断墙 · 输入你的域名，看看 AI 现在读到了你店里的多少</div>
+  <div class="m3">点击进入</div>
+  <div class="mk">
+    <div><kbd>S</kbd>模拟扫码</div><div><kbd>B</kbd>大单</div>
+    <div><kbd>K</kbd>里程碑</div><div><kbd>空格</kbd>暂停</div>
+    <div><kbd>M</kbd>静音</div><div><kbd>G</kbd>网格</div>
+    <div><kbd>F</kbd>全屏</div><div><kbd>?</kbd>全部快捷键</div>
+  </div>
+  <div class="m4">本屏数据为模拟演示数据</div>
+</div>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

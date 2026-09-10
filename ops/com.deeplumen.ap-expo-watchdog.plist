@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.deeplumen.ap-expo-watchdog</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lumioi/work/ap-expo/ops/ap-expo-watchdog.sh</string>
+  </array>
+  <!-- 每 60 秒一次。StartInterval 型任务不要加 KeepAlive：
+       KeepAlive 会让 launchd 在脚本正常退出后立刻再拉起来，变成 busy loop。 -->
+  <key>StartInterval</key><integer>60</integer>
+  <key>RunAtLoad</key><true/>
+  <key>ProcessType</key><string>Background</string>
+  <key>WorkingDirectory</key><string>/Users/lumioi/work/ap-expo</string>
+  <!-- 脚本自己写 ~/Library/Logs/ap-expo-watchdog.log；
+       这两个只收脚本意外崩溃时的 stderr，正常情况下应该一直是空的。 -->
+  <key>StandardOutPath</key><string>/Users/lumioi/Library/Logs/ap-expo-watchdog.launchd.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/lumioi/Library/Logs/ap-expo-watchdog.launchd.err.log</string>
+</dict>
+</plist>

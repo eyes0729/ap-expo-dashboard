@@ -1,0 +1,2033 @@
+{
+ "_note": "由 render-lines.py 生成。整句预渲染，禁止回退到拼接。",
+ "engine": "edge",
+ "voice": "zh-CN-XiaoxiaoNeural",
+ "rate": "+8%",
+ "prefix": "Agentic Page 店铺到账，",
+ "sr": 24000,
+ "manualLadder": [
+  28,
+  46,
+  65,
+  88,
+  97,
+  128,
+  165,
+  210,
+  258,
+  288,
+  325,
+  430,
+  545,
+  680,
+  765,
+  1280,
+  1860,
+  2460,
+  3180,
+  3880,
+  4260
+ ],
+ "lines": [
+  {
+   "usd": 22,
+   "file": "line-22.wav",
+   "dur": 2.795
+  },
+  {
+   "usd": 23,
+   "file": "line-23.wav",
+   "dur": 2.846
+  },
+  {
+   "usd": 28,
+   "file": "line-28.wav",
+   "dur": 2.853
+  },
+  {
+   "usd": 35,
+   "file": "line-35.wav",
+   "dur": 2.836
+  },
+  {
+   "usd": 46,
+   "file": "line-46.wav",
+   "dur": 2.839
+  },
+  {
+   "usd": 49,
+   "file": "line-49.wav",
+   "dur": 2.883
+  },
+  {
+   "usd": 57,
+   "file": "line-57.wav",
+   "dur": 2.814
+  },
+  {
+   "usd": 65,
+   "file": "line-65.wav",
+   "dur": 2.796
+  },
+  {
+   "usd": 66,
+   "file": "line-66.wav",
+   "dur": 2.788
+  },
+  {
+   "usd": 82,
+   "file": "line-82.wav",
+   "dur": 2.778
+  },
+  {
+   "usd": 88,
+   "file": "line-88.wav",
+   "dur": 2.812
+  },
+  {
+   "usd": 89,
+   "file": "line-89.wav",
+   "dur": 2.846
+  },
+  {
+   "usd": 97,
+   "file": "line-97.wav",
+   "dur": 2.836
+  },
+  {
+   "usd": 110,
+   "file": "line-110.wav",
+   "dur": 2.995
+  },
+  {
+   "usd": 111,
+   "file": "line-111.wav",
+   "dur": 3.088
+  },
+  {
+   "usd": 112,
+   "file": "line-112.wav",
+   "dur": 3.038
+  },
+  {
+   "usd": 113,
+   "file": "line-113.wav",
+   "dur": 3.073
+  },
+  {
+   "usd": 114,
+   "file": "line-114.wav",
+   "dur": 3.101
+  },
+  {
+   "usd": 115,
+   "file": "line-115.wav",
+   "dur": 3.081
+  },
+  {
+   "usd": 116,
+   "file": "line-116.wav",
+   "dur": 3.102
+  },
+  {
+   "usd": 117,
+   "file": "line-117.wav",
+   "dur": 3.099
+  },
+  {
+   "usd": 118,
+   "file": "line-118.wav",
+   "dur": 3.118
+  },
+  {
+   "usd": 119,
+   "file": "line-119.wav",
+   "dur": 3.136
+  },
+  {
+   "usd": 120,
+   "file": "line-120.wav",
+   "dur": 2.929
+  },
+  {
+   "usd": 121,
+   "file": "line-121.wav",
+   "dur": 3.066
+  },
+  {
+   "usd": 122,
+   "file": "line-122.wav",
+   "dur": 3.039
+  },
+  {
+   "usd": 123,
+   "file": "line-123.wav",
+   "dur": 3.085
+  },
+  {
+   "usd": 124,
+   "file": "line-124.wav",
+   "dur": 3.077
+  },
+  {
+   "usd": 125,
+   "file": "line-125.wav",
+   "dur": 3.065
+  },
+  {
+   "usd": 126,
+   "file": "line-126.wav",
+   "dur": 3.071
+  },
+  {
+   "usd": 127,
+   "file": "line-127.wav",
+   "dur": 3.109
+  },
+  {
+   "usd": 128,
+   "file": "line-128.wav",
+   "dur": 3.108
+  },
+  {
+   "usd": 129,
+   "file": "line-129.wav",
+   "dur": 3.102
+  },
+  {
+   "usd": 130,
+   "file": "line-130.wav",
+   "dur": 3.011
+  },
+  {
+   "usd": 131,
+   "file": "line-131.wav",
+   "dur": 3.165
+  },
+  {
+   "usd": 132,
+   "file": "line-132.wav",
+   "dur": 3.109
+  },
+  {
+   "usd": 133,
+   "file": "line-133.wav",
+   "dur": 3.132
+  },
+  {
+   "usd": 134,
+   "file": "line-134.wav",
+   "dur": 3.168
+  },
+  {
+   "usd": 135,
+   "file": "line-135.wav",
+   "dur": 3.144
+  },
+  {
+   "usd": 136,
+   "file": "line-136.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 137,
+   "file": "line-137.wav",
+   "dur": 3.189
+  },
+  {
+   "usd": 138,
+   "file": "line-138.wav",
+   "dur": 3.153
+  },
+  {
+   "usd": 139,
+   "file": "line-139.wav",
+   "dur": 3.152
+  },
+  {
+   "usd": 140,
+   "file": "line-140.wav",
+   "dur": 2.986
+  },
+  {
+   "usd": 141,
+   "file": "line-141.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 142,
+   "file": "line-142.wav",
+   "dur": 3.077
+  },
+  {
+   "usd": 143,
+   "file": "line-143.wav",
+   "dur": 3.128
+  },
+  {
+   "usd": 144,
+   "file": "line-144.wav",
+   "dur": 3.19
+  },
+  {
+   "usd": 145,
+   "file": "line-145.wav",
+   "dur": 3.121
+  },
+  {
+   "usd": 146,
+   "file": "line-146.wav",
+   "dur": 3.137
+  },
+  {
+   "usd": 147,
+   "file": "line-147.wav",
+   "dur": 3.202
+  },
+  {
+   "usd": 148,
+   "file": "line-148.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 149,
+   "file": "line-149.wav",
+   "dur": 3.161
+  },
+  {
+   "usd": 151,
+   "file": "line-151.wav",
+   "dur": 3.07
+  },
+  {
+   "usd": 152,
+   "file": "line-152.wav",
+   "dur": 3.052
+  },
+  {
+   "usd": 153,
+   "file": "line-153.wav",
+   "dur": 3.092
+  },
+  {
+   "usd": 154,
+   "file": "line-154.wav",
+   "dur": 3.099
+  },
+  {
+   "usd": 155,
+   "file": "line-155.wav",
+   "dur": 3.095
+  },
+  {
+   "usd": 156,
+   "file": "line-156.wav",
+   "dur": 3.079
+  },
+  {
+   "usd": 157,
+   "file": "line-157.wav",
+   "dur": 3.112
+  },
+  {
+   "usd": 158,
+   "file": "line-158.wav",
+   "dur": 3.073
+  },
+  {
+   "usd": 159,
+   "file": "line-159.wav",
+   "dur": 3.098
+  },
+  {
+   "usd": 160,
+   "file": "line-160.wav",
+   "dur": 2.956
+  },
+  {
+   "usd": 161,
+   "file": "line-161.wav",
+   "dur": 3.083
+  },
+  {
+   "usd": 162,
+   "file": "line-162.wav",
+   "dur": 3.077
+  },
+  {
+   "usd": 163,
+   "file": "line-163.wav",
+   "dur": 3.107
+  },
+  {
+   "usd": 164,
+   "file": "line-164.wav",
+   "dur": 3.111
+  },
+  {
+   "usd": 165,
+   "file": "line-165.wav",
+   "dur": 3.096
+  },
+  {
+   "usd": 166,
+   "file": "line-166.wav",
+   "dur": 3.111
+  },
+  {
+   "usd": 167,
+   "file": "line-167.wav",
+   "dur": 3.137
+  },
+  {
+   "usd": 168,
+   "file": "line-168.wav",
+   "dur": 3.132
+  },
+  {
+   "usd": 169,
+   "file": "line-169.wav",
+   "dur": 3.104
+  },
+  {
+   "usd": 170,
+   "file": "line-170.wav",
+   "dur": 3.005
+  },
+  {
+   "usd": 171,
+   "file": "line-171.wav",
+   "dur": 3.115
+  },
+  {
+   "usd": 172,
+   "file": "line-172.wav",
+   "dur": 3.075
+  },
+  {
+   "usd": 173,
+   "file": "line-173.wav",
+   "dur": 3.15
+  },
+  {
+   "usd": 174,
+   "file": "line-174.wav",
+   "dur": 3.146
+  },
+  {
+   "usd": 175,
+   "file": "line-175.wav",
+   "dur": 3.111
+  },
+  {
+   "usd": 176,
+   "file": "line-176.wav",
+   "dur": 3.162
+  },
+  {
+   "usd": 177,
+   "file": "line-177.wav",
+   "dur": 3.16
+  },
+  {
+   "usd": 178,
+   "file": "line-178.wav",
+   "dur": 3.154
+  },
+  {
+   "usd": 179,
+   "file": "line-179.wav",
+   "dur": 3.169
+  },
+  {
+   "usd": 180,
+   "file": "line-180.wav",
+   "dur": 2.974
+  },
+  {
+   "usd": 181,
+   "file": "line-181.wav",
+   "dur": 3.105
+  },
+  {
+   "usd": 182,
+   "file": "line-182.wav",
+   "dur": 3.061
+  },
+  {
+   "usd": 183,
+   "file": "line-183.wav",
+   "dur": 3.128
+  },
+  {
+   "usd": 184,
+   "file": "line-184.wav",
+   "dur": 3.134
+  },
+  {
+   "usd": 185,
+   "file": "line-185.wav",
+   "dur": 3.087
+  },
+  {
+   "usd": 186,
+   "file": "line-186.wav",
+   "dur": 3.11
+  },
+  {
+   "usd": 187,
+   "file": "line-187.wav",
+   "dur": 3.157
+  },
+  {
+   "usd": 188,
+   "file": "line-188.wav",
+   "dur": 3.117
+  },
+  {
+   "usd": 189,
+   "file": "line-189.wav",
+   "dur": 3.134
+  },
+  {
+   "usd": 190,
+   "file": "line-190.wav",
+   "dur": 3.032
+  },
+  {
+   "usd": 191,
+   "file": "line-191.wav",
+   "dur": 3.122
+  },
+  {
+   "usd": 194,
+   "file": "line-194.wav",
+   "dur": 3.148
+  },
+  {
+   "usd": 195,
+   "file": "line-195.wav",
+   "dur": 3.144
+  },
+  {
+   "usd": 196,
+   "file": "line-196.wav",
+   "dur": 3.125
+  },
+  {
+   "usd": 197,
+   "file": "line-197.wav",
+   "dur": 3.158
+  },
+  {
+   "usd": 198,
+   "file": "line-198.wav",
+   "dur": 3.145
+  },
+  {
+   "usd": 199,
+   "file": "line-199.wav",
+   "dur": 3.154
+  },
+  {
+   "usd": 200,
+   "file": "line-200.wav",
+   "dur": 2.674
+  },
+  {
+   "usd": 201,
+   "file": "line-201.wav",
+   "dur": 2.993
+  },
+  {
+   "usd": 202,
+   "file": "line-202.wav",
+   "dur": 3.0
+  },
+  {
+   "usd": 203,
+   "file": "line-203.wav",
+   "dur": 3.045
+  },
+  {
+   "usd": 204,
+   "file": "line-204.wav",
+   "dur": 3.046
+  },
+  {
+   "usd": 205,
+   "file": "line-205.wav",
+   "dur": 3.013
+  },
+  {
+   "usd": 207,
+   "file": "line-207.wav",
+   "dur": 3.072
+  },
+  {
+   "usd": 208,
+   "file": "line-208.wav",
+   "dur": 3.034
+  },
+  {
+   "usd": 209,
+   "file": "line-209.wav",
+   "dur": 3.057
+  },
+  {
+   "usd": 210,
+   "file": "line-210.wav",
+   "dur": 3.026
+  },
+  {
+   "usd": 211,
+   "file": "line-211.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 212,
+   "file": "line-212.wav",
+   "dur": 3.107
+  },
+  {
+   "usd": 213,
+   "file": "line-213.wav",
+   "dur": 3.152
+  },
+  {
+   "usd": 214,
+   "file": "line-214.wav",
+   "dur": 3.164
+  },
+  {
+   "usd": 215,
+   "file": "line-215.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 216,
+   "file": "line-216.wav",
+   "dur": 3.135
+  },
+  {
+   "usd": 217,
+   "file": "line-217.wav",
+   "dur": 3.175
+  },
+  {
+   "usd": 218,
+   "file": "line-218.wav",
+   "dur": 3.176
+  },
+  {
+   "usd": 219,
+   "file": "line-219.wav",
+   "dur": 3.178
+  },
+  {
+   "usd": 221,
+   "file": "line-221.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 222,
+   "file": "line-222.wav",
+   "dur": 3.109
+  },
+  {
+   "usd": 224,
+   "file": "line-224.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 225,
+   "file": "line-225.wav",
+   "dur": 3.108
+  },
+  {
+   "usd": 226,
+   "file": "line-226.wav",
+   "dur": 3.123
+  },
+  {
+   "usd": 228,
+   "file": "line-228.wav",
+   "dur": 3.149
+  },
+  {
+   "usd": 230,
+   "file": "line-230.wav",
+   "dur": 3.059
+  },
+  {
+   "usd": 231,
+   "file": "line-231.wav",
+   "dur": 3.203
+  },
+  {
+   "usd": 232,
+   "file": "line-232.wav",
+   "dur": 3.178
+  },
+  {
+   "usd": 233,
+   "file": "line-233.wav",
+   "dur": 3.201
+  },
+  {
+   "usd": 234,
+   "file": "line-234.wav",
+   "dur": 3.219
+  },
+  {
+   "usd": 235,
+   "file": "line-235.wav",
+   "dur": 3.199
+  },
+  {
+   "usd": 237,
+   "file": "line-237.wav",
+   "dur": 3.244
+  },
+  {
+   "usd": 238,
+   "file": "line-238.wav",
+   "dur": 3.233
+  },
+  {
+   "usd": 239,
+   "file": "line-239.wav",
+   "dur": 3.18
+  },
+  {
+   "usd": 241,
+   "file": "line-241.wav",
+   "dur": 3.198
+  },
+  {
+   "usd": 242,
+   "file": "line-242.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 243,
+   "file": "line-243.wav",
+   "dur": 3.176
+  },
+  {
+   "usd": 244,
+   "file": "line-244.wav",
+   "dur": 3.222
+  },
+  {
+   "usd": 245,
+   "file": "line-245.wav",
+   "dur": 3.173
+  },
+  {
+   "usd": 246,
+   "file": "line-246.wav",
+   "dur": 3.157
+  },
+  {
+   "usd": 248,
+   "file": "line-248.wav",
+   "dur": 3.189
+  },
+  {
+   "usd": 249,
+   "file": "line-249.wav",
+   "dur": 3.204
+  },
+  {
+   "usd": 250,
+   "file": "line-250.wav",
+   "dur": 3.018
+  },
+  {
+   "usd": 251,
+   "file": "line-251.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 252,
+   "file": "line-252.wav",
+   "dur": 3.119
+  },
+  {
+   "usd": 253,
+   "file": "line-253.wav",
+   "dur": 3.164
+  },
+  {
+   "usd": 254,
+   "file": "line-254.wav",
+   "dur": 3.188
+  },
+  {
+   "usd": 256,
+   "file": "line-256.wav",
+   "dur": 3.148
+  },
+  {
+   "usd": 257,
+   "file": "line-257.wav",
+   "dur": 3.168
+  },
+  {
+   "usd": 258,
+   "file": "line-258.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 259,
+   "file": "line-259.wav",
+   "dur": 3.18
+  },
+  {
+   "usd": 260,
+   "file": "line-260.wav",
+   "dur": 2.988
+  },
+  {
+   "usd": 261,
+   "file": "line-261.wav",
+   "dur": 3.151
+  },
+  {
+   "usd": 262,
+   "file": "line-262.wav",
+   "dur": 3.143
+  },
+  {
+   "usd": 264,
+   "file": "line-264.wav",
+   "dur": 3.187
+  },
+  {
+   "usd": 265,
+   "file": "line-265.wav",
+   "dur": 3.128
+  },
+  {
+   "usd": 266,
+   "file": "line-266.wav",
+   "dur": 3.133
+  },
+  {
+   "usd": 267,
+   "file": "line-267.wav",
+   "dur": 3.186
+  },
+  {
+   "usd": 268,
+   "file": "line-268.wav",
+   "dur": 3.21
+  },
+  {
+   "usd": 269,
+   "file": "line-269.wav",
+   "dur": 3.13
+  },
+  {
+   "usd": 270,
+   "file": "line-270.wav",
+   "dur": 3.065
+  },
+  {
+   "usd": 271,
+   "file": "line-271.wav",
+   "dur": 3.147
+  },
+  {
+   "usd": 273,
+   "file": "line-273.wav",
+   "dur": 3.184
+  },
+  {
+   "usd": 274,
+   "file": "line-274.wav",
+   "dur": 3.187
+  },
+  {
+   "usd": 275,
+   "file": "line-275.wav",
+   "dur": 3.168
+  },
+  {
+   "usd": 276,
+   "file": "line-276.wav",
+   "dur": 3.155
+  },
+  {
+   "usd": 277,
+   "file": "line-277.wav",
+   "dur": 3.186
+  },
+  {
+   "usd": 278,
+   "file": "line-278.wav",
+   "dur": 3.2
+  },
+  {
+   "usd": 279,
+   "file": "line-279.wav",
+   "dur": 3.201
+  },
+  {
+   "usd": 280,
+   "file": "line-280.wav",
+   "dur": 3.014
+  },
+  {
+   "usd": 281,
+   "file": "line-281.wav",
+   "dur": 3.174
+  },
+  {
+   "usd": 283,
+   "file": "line-283.wav",
+   "dur": 3.188
+  },
+  {
+   "usd": 284,
+   "file": "line-284.wav",
+   "dur": 3.199
+  },
+  {
+   "usd": 285,
+   "file": "line-285.wav",
+   "dur": 3.163
+  },
+  {
+   "usd": 286,
+   "file": "line-286.wav",
+   "dur": 3.146
+  },
+  {
+   "usd": 287,
+   "file": "line-287.wav",
+   "dur": 3.186
+  },
+  {
+   "usd": 288,
+   "file": "line-288.wav",
+   "dur": 3.177
+  },
+  {
+   "usd": 289,
+   "file": "line-289.wav",
+   "dur": 3.164
+  },
+  {
+   "usd": 290,
+   "file": "line-290.wav",
+   "dur": 3.061
+  },
+  {
+   "usd": 292,
+   "file": "line-292.wav",
+   "dur": 3.155
+  },
+  {
+   "usd": 293,
+   "file": "line-293.wav",
+   "dur": 3.18
+  },
+  {
+   "usd": 294,
+   "file": "line-294.wav",
+   "dur": 3.18
+  },
+  {
+   "usd": 295,
+   "file": "line-295.wav",
+   "dur": 3.197
+  },
+  {
+   "usd": 296,
+   "file": "line-296.wav",
+   "dur": 3.17
+  },
+  {
+   "usd": 298,
+   "file": "line-298.wav",
+   "dur": 3.188
+  },
+  {
+   "usd": 299,
+   "file": "line-299.wav",
+   "dur": 3.193
+  },
+  {
+   "usd": 300,
+   "file": "line-300.wav",
+   "dur": 2.694
+  },
+  {
+   "usd": 302,
+   "file": "line-302.wav",
+   "dur": 3.026
+  },
+  {
+   "usd": 303,
+   "file": "line-303.wav",
+   "dur": 3.063
+  },
+  {
+   "usd": 304,
+   "file": "line-304.wav",
+   "dur": 3.06
+  },
+  {
+   "usd": 305,
+   "file": "line-305.wav",
+   "dur": 3.04
+  },
+  {
+   "usd": 306,
+   "file": "line-306.wav",
+   "dur": 3.05
+  },
+  {
+   "usd": 307,
+   "file": "line-307.wav",
+   "dur": 3.073
+  },
+  {
+   "usd": 308,
+   "file": "line-308.wav",
+   "dur": 3.047
+  },
+  {
+   "usd": 309,
+   "file": "line-309.wav",
+   "dur": 3.082
+  },
+  {
+   "usd": 310,
+   "file": "line-310.wav",
+   "dur": 3.045
+  },
+  {
+   "usd": 311,
+   "file": "line-311.wav",
+   "dur": 3.167
+  },
+  {
+   "usd": 312,
+   "file": "line-312.wav",
+   "dur": 3.136
+  },
+  {
+   "usd": 313,
+   "file": "line-313.wav",
+   "dur": 3.156
+  },
+  {
+   "usd": 314,
+   "file": "line-314.wav",
+   "dur": 3.168
+  },
+  {
+   "usd": 315,
+   "file": "line-315.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 320,
+   "file": "line-320.wav",
+   "dur": 3.02
+  },
+  {
+   "usd": 323,
+   "file": "line-323.wav",
+   "dur": 3.154
+  },
+  {
+   "usd": 324,
+   "file": "line-324.wav",
+   "dur": 3.148
+  },
+  {
+   "usd": 325,
+   "file": "line-325.wav",
+   "dur": 3.123
+  },
+  {
+   "usd": 327,
+   "file": "line-327.wav",
+   "dur": 3.169
+  },
+  {
+   "usd": 328,
+   "file": "line-328.wav",
+   "dur": 3.192
+  },
+  {
+   "usd": 330,
+   "file": "line-330.wav",
+   "dur": 3.075
+  },
+  {
+   "usd": 331,
+   "file": "line-331.wav",
+   "dur": 3.18
+  },
+  {
+   "usd": 333,
+   "file": "line-333.wav",
+   "dur": 3.223
+  },
+  {
+   "usd": 334,
+   "file": "line-334.wav",
+   "dur": 3.212
+  },
+  {
+   "usd": 335,
+   "file": "line-335.wav",
+   "dur": 3.203
+  },
+  {
+   "usd": 336,
+   "file": "line-336.wav",
+   "dur": 3.214
+  },
+  {
+   "usd": 339,
+   "file": "line-339.wav",
+   "dur": 3.211
+  },
+  {
+   "usd": 340,
+   "file": "line-340.wav",
+   "dur": 3.078
+  },
+  {
+   "usd": 342,
+   "file": "line-342.wav",
+   "dur": 3.111
+  },
+  {
+   "usd": 343,
+   "file": "line-343.wav",
+   "dur": 3.194
+  },
+  {
+   "usd": 344,
+   "file": "line-344.wav",
+   "dur": 3.179
+  },
+  {
+   "usd": 345,
+   "file": "line-345.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 347,
+   "file": "line-347.wav",
+   "dur": 3.216
+  },
+  {
+   "usd": 348,
+   "file": "line-348.wav",
+   "dur": 3.21
+  },
+  {
+   "usd": 349,
+   "file": "line-349.wav",
+   "dur": 3.201
+  },
+  {
+   "usd": 350,
+   "file": "line-350.wav",
+   "dur": 3.031
+  },
+  {
+   "usd": 351,
+   "file": "line-351.wav",
+   "dur": 3.159
+  },
+  {
+   "usd": 352,
+   "file": "line-352.wav",
+   "dur": 3.11
+  },
+  {
+   "usd": 353,
+   "file": "line-353.wav",
+   "dur": 3.15
+  },
+  {
+   "usd": 354,
+   "file": "line-354.wav",
+   "dur": 3.182
+  },
+  {
+   "usd": 356,
+   "file": "line-356.wav",
+   "dur": 3.135
+  },
+  {
+   "usd": 357,
+   "file": "line-357.wav",
+   "dur": 3.157
+  },
+  {
+   "usd": 359,
+   "file": "line-359.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 360,
+   "file": "line-360.wav",
+   "dur": 3.011
+  },
+  {
+   "usd": 361,
+   "file": "line-361.wav",
+   "dur": 3.155
+  },
+  {
+   "usd": 362,
+   "file": "line-362.wav",
+   "dur": 3.11
+  },
+  {
+   "usd": 363,
+   "file": "line-363.wav",
+   "dur": 3.156
+  },
+  {
+   "usd": 364,
+   "file": "line-364.wav",
+   "dur": 3.17
+  },
+  {
+   "usd": 365,
+   "file": "line-365.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 366,
+   "file": "line-366.wav",
+   "dur": 3.145
+  },
+  {
+   "usd": 367,
+   "file": "line-367.wav",
+   "dur": 3.17
+  },
+  {
+   "usd": 368,
+   "file": "line-368.wav",
+   "dur": 3.189
+  },
+  {
+   "usd": 369,
+   "file": "line-369.wav",
+   "dur": 3.161
+  },
+  {
+   "usd": 370,
+   "file": "line-370.wav",
+   "dur": 3.066
+  },
+  {
+   "usd": 371,
+   "file": "line-371.wav",
+   "dur": 3.16
+  },
+  {
+   "usd": 374,
+   "file": "line-374.wav",
+   "dur": 3.179
+  },
+  {
+   "usd": 375,
+   "file": "line-375.wav",
+   "dur": 3.168
+  },
+  {
+   "usd": 376,
+   "file": "line-376.wav",
+   "dur": 3.204
+  },
+  {
+   "usd": 377,
+   "file": "line-377.wav",
+   "dur": 3.207
+  },
+  {
+   "usd": 378,
+   "file": "line-378.wav",
+   "dur": 3.211
+  },
+  {
+   "usd": 379,
+   "file": "line-379.wav",
+   "dur": 3.221
+  },
+  {
+   "usd": 384,
+   "file": "line-384.wav",
+   "dur": 3.191
+  },
+  {
+   "usd": 385,
+   "file": "line-385.wav",
+   "dur": 3.147
+  },
+  {
+   "usd": 386,
+   "file": "line-386.wav",
+   "dur": 3.169
+  },
+  {
+   "usd": 387,
+   "file": "line-387.wav",
+   "dur": 3.197
+  },
+  {
+   "usd": 389,
+   "file": "line-389.wav",
+   "dur": 3.183
+  },
+  {
+   "usd": 390,
+   "file": "line-390.wav",
+   "dur": 3.081
+  },
+  {
+   "usd": 393,
+   "file": "line-393.wav",
+   "dur": 3.181
+  },
+  {
+   "usd": 396,
+   "file": "line-396.wav",
+   "dur": 3.193
+  },
+  {
+   "usd": 397,
+   "file": "line-397.wav",
+   "dur": 3.194
+  },
+  {
+   "usd": 398,
+   "file": "line-398.wav",
+   "dur": 3.22
+  },
+  {
+   "usd": 399,
+   "file": "line-399.wav",
+   "dur": 3.215
+  },
+  {
+   "usd": 400,
+   "file": "line-400.wav",
+   "dur": 2.693
+  },
+  {
+   "usd": 401,
+   "file": "line-401.wav",
+   "dur": 2.994
+  },
+  {
+   "usd": 402,
+   "file": "line-402.wav",
+   "dur": 3.015
+  },
+  {
+   "usd": 403,
+   "file": "line-403.wav",
+   "dur": 3.04
+  },
+  {
+   "usd": 404,
+   "file": "line-404.wav",
+   "dur": 3.071
+  },
+  {
+   "usd": 405,
+   "file": "line-405.wav",
+   "dur": 2.993
+  },
+  {
+   "usd": 406,
+   "file": "line-406.wav",
+   "dur": 3.021
+  },
+  {
+   "usd": 407,
+   "file": "line-407.wav",
+   "dur": 3.074
+  },
+  {
+   "usd": 408,
+   "file": "line-408.wav",
+   "dur": 3.037
+  },
+  {
+   "usd": 409,
+   "file": "line-409.wav",
+   "dur": 3.059
+  },
+  {
+   "usd": 411,
+   "file": "line-411.wav",
+   "dur": 3.133
+  },
+  {
+   "usd": 413,
+   "file": "line-413.wav",
+   "dur": 3.124
+  },
+  {
+   "usd": 414,
+   "file": "line-414.wav",
+   "dur": 3.134
+  },
+  {
+   "usd": 415,
+   "file": "line-415.wav",
+   "dur": 3.118
+  },
+  {
+   "usd": 417,
+   "file": "line-417.wav",
+   "dur": 3.145
+  },
+  {
+   "usd": 419,
+   "file": "line-419.wav",
+   "dur": 3.171
+  },
+  {
+   "usd": 421,
+   "file": "line-421.wav",
+   "dur": 3.112
+  },
+  {
+   "usd": 422,
+   "file": "line-422.wav",
+   "dur": 3.123
+  },
+  {
+   "usd": 423,
+   "file": "line-423.wav",
+   "dur": 3.134
+  },
+  {
+   "usd": 425,
+   "file": "line-425.wav",
+   "dur": 3.12
+  },
+  {
+   "usd": 426,
+   "file": "line-426.wav",
+   "dur": 3.121
+  },
+  {
+   "usd": 429,
+   "file": "line-429.wav",
+   "dur": 3.135
+  },
+  {
+   "usd": 430,
+   "file": "line-430.wav",
+   "dur": 3.053
+  },
+  {
+   "usd": 432,
+   "file": "line-432.wav",
+   "dur": 3.177
+  },
+  {
+   "usd": 438,
+   "file": "line-438.wav",
+   "dur": 3.212
+  },
+  {
+   "usd": 439,
+   "file": "line-439.wav",
+   "dur": 3.213
+  },
+  {
+   "usd": 440,
+   "file": "line-440.wav",
+   "dur": 3.044
+  },
+  {
+   "usd": 442,
+   "file": "line-442.wav",
+   "dur": 3.147
+  },
+  {
+   "usd": 445,
+   "file": "line-445.wav",
+   "dur": 3.165
+  },
+  {
+   "usd": 446,
+   "file": "line-446.wav",
+   "dur": 3.167
+  },
+  {
+   "usd": 447,
+   "file": "line-447.wav",
+   "dur": 3.224
+  },
+  {
+   "usd": 453,
+   "file": "line-453.wav",
+   "dur": 3.132
+  },
+  {
+   "usd": 454,
+   "file": "line-454.wav",
+   "dur": 3.167
+  },
+  {
+   "usd": 463,
+   "file": "line-463.wav",
+   "dur": 3.166
+  },
+  {
+   "usd": 465,
+   "file": "line-465.wav",
+   "dur": 3.144
+  },
+  {
+   "usd": 468,
+   "file": "line-468.wav",
+   "dur": 3.187
+  },
+  {
+   "usd": 472,
+   "file": "line-472.wav",
+   "dur": 3.123
+  },
+  {
+   "usd": 473,
+   "file": "line-473.wav",
+   "dur": 3.187
+  },
+  {
+   "usd": 476,
+   "file": "line-476.wav",
+   "dur": 3.177
+  },
+  {
+   "usd": 477,
+   "file": "line-477.wav",
+   "dur": 3.177
+  },
+  {
+   "usd": 484,
+   "file": "line-484.wav",
+   "dur": 3.201
+  },
+  {
+   "usd": 486,
+   "file": "line-486.wav",
+   "dur": 3.149
+  },
+  {
+   "usd": 487,
+   "file": "line-487.wav",
+   "dur": 3.199
+  },
+  {
+   "usd": 488,
+   "file": "line-488.wav",
+   "dur": 3.174
+  },
+  {
+   "usd": 490,
+   "file": "line-490.wav",
+   "dur": 3.099
+  },
+  {
+   "usd": 491,
+   "file": "line-491.wav",
+   "dur": 3.194
+  },
+  {
+   "usd": 494,
+   "file": "line-494.wav",
+   "dur": 3.214
+  },
+  {
+   "usd": 495,
+   "file": "line-495.wav",
+   "dur": 3.201
+  },
+  {
+   "usd": 497,
+   "file": "line-497.wav",
+   "dur": 3.202
+  },
+  {
+   "usd": 500,
+   "file": "line-500.wav",
+   "dur": 2.648
+  },
+  {
+   "usd": 504,
+   "file": "line-504.wav",
+   "dur": 3.017
+  },
+  {
+   "usd": 506,
+   "file": "line-506.wav",
+   "dur": 2.989
+  },
+  {
+   "usd": 508,
+   "file": "line-508.wav",
+   "dur": 3.013
+  },
+  {
+   "usd": 509,
+   "file": "line-509.wav",
+   "dur": 3.027
+  },
+  {
+   "usd": 511,
+   "file": "line-511.wav",
+   "dur": 3.107
+  },
+  {
+   "usd": 513,
+   "file": "line-513.wav",
+   "dur": 3.096
+  },
+  {
+   "usd": 518,
+   "file": "line-518.wav",
+   "dur": 3.118
+  },
+  {
+   "usd": 520,
+   "file": "line-520.wav",
+   "dur": 2.961
+  },
+  {
+   "usd": 527,
+   "file": "line-527.wav",
+   "dur": 3.096
+  },
+  {
+   "usd": 531,
+   "file": "line-531.wav",
+   "dur": 3.146
+  },
+  {
+   "usd": 533,
+   "file": "line-533.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 538,
+   "file": "line-538.wav",
+   "dur": 3.141
+  },
+  {
+   "usd": 545,
+   "file": "line-545.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 547,
+   "file": "line-547.wav",
+   "dur": 3.19
+  },
+  {
+   "usd": 559,
+   "file": "line-559.wav",
+   "dur": 3.095
+  },
+  {
+   "usd": 564,
+   "file": "line-564.wav",
+   "dur": 3.109
+  },
+  {
+   "usd": 566,
+   "file": "line-566.wav",
+   "dur": 3.074
+  },
+  {
+   "usd": 568,
+   "file": "line-568.wav",
+   "dur": 3.129
+  },
+  {
+   "usd": 569,
+   "file": "line-569.wav",
+   "dur": 3.113
+  },
+  {
+   "usd": 572,
+   "file": "line-572.wav",
+   "dur": 3.105
+  },
+  {
+   "usd": 574,
+   "file": "line-574.wav",
+   "dur": 3.142
+  },
+  {
+   "usd": 575,
+   "file": "line-575.wav",
+   "dur": 3.135
+  },
+  {
+   "usd": 576,
+   "file": "line-576.wav",
+   "dur": 3.157
+  },
+  {
+   "usd": 581,
+   "file": "line-581.wav",
+   "dur": 3.109
+  },
+  {
+   "usd": 584,
+   "file": "line-584.wav",
+   "dur": 3.154
+  },
+  {
+   "usd": 586,
+   "file": "line-586.wav",
+   "dur": 3.133
+  },
+  {
+   "usd": 588,
+   "file": "line-588.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 592,
+   "file": "line-592.wav",
+   "dur": 3.094
+  },
+  {
+   "usd": 596,
+   "file": "line-596.wav",
+   "dur": 3.123
+  },
+  {
+   "usd": 600,
+   "file": "line-600.wav",
+   "dur": 2.633
+  },
+  {
+   "usd": 604,
+   "file": "line-604.wav",
+   "dur": 3.026
+  },
+  {
+   "usd": 606,
+   "file": "line-606.wav",
+   "dur": 3.009
+  },
+  {
+   "usd": 608,
+   "file": "line-608.wav",
+   "dur": 3.002
+  },
+  {
+   "usd": 609,
+   "file": "line-609.wav",
+   "dur": 3.02
+  },
+  {
+   "usd": 611,
+   "file": "line-611.wav",
+   "dur": 3.11
+  },
+  {
+   "usd": 613,
+   "file": "line-613.wav",
+   "dur": 3.111
+  },
+  {
+   "usd": 614,
+   "file": "line-614.wav",
+   "dur": 3.114
+  },
+  {
+   "usd": 632,
+   "file": "line-632.wav",
+   "dur": 3.144
+  },
+  {
+   "usd": 638,
+   "file": "line-638.wav",
+   "dur": 3.211
+  },
+  {
+   "usd": 642,
+   "file": "line-642.wav",
+   "dur": 3.119
+  },
+  {
+   "usd": 645,
+   "file": "line-645.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 650,
+   "file": "line-650.wav",
+   "dur": 2.986
+  },
+  {
+   "usd": 658,
+   "file": "line-658.wav",
+   "dur": 3.135
+  },
+  {
+   "usd": 666,
+   "file": "line-666.wav",
+   "dur": 3.126
+  },
+  {
+   "usd": 673,
+   "file": "line-673.wav",
+   "dur": 3.184
+  },
+  {
+   "usd": 676,
+   "file": "line-676.wav",
+   "dur": 3.157
+  },
+  {
+   "usd": 679,
+   "file": "line-679.wav",
+   "dur": 3.172
+  },
+  {
+   "usd": 680,
+   "file": "line-680.wav",
+   "dur": 2.984
+  },
+  {
+   "usd": 689,
+   "file": "line-689.wav",
+   "dur": 3.152
+  },
+  {
+   "usd": 690,
+   "file": "line-690.wav",
+   "dur": 3.054
+  },
+  {
+   "usd": 698,
+   "file": "line-698.wav",
+   "dur": 3.182
+  },
+  {
+   "usd": 700,
+   "file": "line-700.wav",
+   "dur": 2.662
+  },
+  {
+   "usd": 704,
+   "file": "line-704.wav",
+   "dur": 3.025
+  },
+  {
+   "usd": 721,
+   "file": "line-721.wav",
+   "dur": 3.086
+  },
+  {
+   "usd": 723,
+   "file": "line-723.wav",
+   "dur": 3.104
+  },
+  {
+   "usd": 746,
+   "file": "line-746.wav",
+   "dur": 3.136
+  },
+  {
+   "usd": 750,
+   "file": "line-750.wav",
+   "dur": 2.983
+  },
+  {
+   "usd": 765,
+   "file": "line-765.wav",
+   "dur": 3.107
+  },
+  {
+   "usd": 790,
+   "file": "line-790.wav",
+   "dur": 3.062
+  },
+  {
+   "usd": 801,
+   "file": "line-801.wav",
+   "dur": 2.954
+  },
+  {
+   "usd": 807,
+   "file": "line-807.wav",
+   "dur": 3.026
+  },
+  {
+   "usd": 812,
+   "file": "line-812.wav",
+   "dur": 3.04
+  },
+  {
+   "usd": 817,
+   "file": "line-817.wav",
+   "dur": 3.131
+  },
+  {
+   "usd": 838,
+   "file": "line-838.wav",
+   "dur": 3.175
+  },
+  {
+   "usd": 839,
+   "file": "line-839.wav",
+   "dur": 3.158
+  },
+  {
+   "usd": 848,
+   "file": "line-848.wav",
+   "dur": 3.162
+  },
+  {
+   "usd": 850,
+   "file": "line-850.wav",
+   "dur": 2.986
+  },
+  {
+   "usd": 872,
+   "file": "line-872.wav",
+   "dur": 3.084
+  },
+  {
+   "usd": 886,
+   "file": "line-886.wav",
+   "dur": 3.099
+  },
+  {
+   "usd": 892,
+   "file": "line-892.wav",
+   "dur": 3.11
+  },
+  {
+   "usd": 927,
+   "file": "line-927.wav",
+   "dur": 3.14
+  },
+  {
+   "usd": 953,
+   "file": "line-953.wav",
+   "dur": 3.129
+  },
+  {
+   "usd": 986,
+   "file": "line-986.wav",
+   "dur": 3.132
+  },
+  {
+   "usd": 1024,
+   "file": "line-1024.wav",
+   "dur": 3.332
+  },
+  {
+   "usd": 1060,
+   "file": "line-1060.wav",
+   "dur": 3.221
+  },
+  {
+   "usd": 1065,
+   "file": "line-1065.wav",
+   "dur": 3.333
+  },
+  {
+   "usd": 1066,
+   "file": "line-1066.wav",
+   "dur": 3.379
+  },
+  {
+   "usd": 1097,
+   "file": "line-1097.wav",
+   "dur": 3.401
+  },
+  {
+   "usd": 1178,
+   "file": "line-1178.wav",
+   "dur": 3.501
+  },
+  {
+   "usd": 1280,
+   "file": "line-1280.wav",
+   "dur": 3.32
+  },
+  {
+   "usd": 1478,
+   "file": "line-1478.wav",
+   "dur": 3.534
+  },
+  {
+   "usd": 1780,
+   "file": "line-1780.wav",
+   "dur": 3.366
+  },
+  {
+   "usd": 1813,
+   "file": "line-1813.wav",
+   "dur": 3.462
+  },
+  {
+   "usd": 1815,
+   "file": "line-1815.wav",
+   "dur": 3.448
+  },
+  {
+   "usd": 1860,
+   "file": "line-1860.wav",
+   "dur": 3.357
+  },
+  {
+   "usd": 1981,
+   "file": "line-1981.wav",
+   "dur": 3.495
+  },
+  {
+   "usd": 2112,
+   "file": "line-2112.wav",
+   "dur": 3.436
+  },
+  {
+   "usd": 2460,
+   "file": "line-2460.wav",
+   "dur": 3.447
+  },
+  {
+   "usd": 3180,
+   "file": "line-3180.wav",
+   "dur": 3.367
+  },
+  {
+   "usd": 3880,
+   "file": "line-3880.wav",
+   "dur": 3.434
+  },
+  {
+   "usd": 4260,
+   "file": "line-4260.wav",
+   "dur": 3.354
+  }
+ ]
+}

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AP · Agent Page — 任务控制台</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ===========================================================================
+ * 方案 A「任务控制台」 —— NOC 墙 / 发射直播叠加层 / 终端机
+ * 色板 P1 深空石墨，以 --crawl 青绿为主导色。
+ * 全部系统字体，零网络依赖，classic script。
+ * ======================================================================== */
+:root{
+  --bg:#08090B;      --panel:#101216;   --hair:#1C1F25;
+  --text:#F7F8F8;    --sub:#9CA3AF;     --mute:#4B5563;
+  --crawl:#00D3A7;   --order:#FFB86B;   --grid:#7DD3FC;
+
+  /* 公开数据卡专用浅底（规格 7.4 要求真数据与模拟数字视觉分区） */
+  --lightcard:#E9EBEE; --lightink:#15171B; --lightsub:#535964;
+
+  --font-display:'Bahnschrift','Segoe UI Variable Display','Segoe UI',Inter,system-ui,sans-serif;
+  --font-num:'Bahnschrift SemiCondensed','Bahnschrift Condensed','Bahnschrift','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;
+  /* 主角数字专用：9 位数 + 2 个千分位逗号要塞进 62% 栏宽，
+     窄体能换来更大的 cap height；字号由 JS 实测后写入 --hero */
+  --font-hero:'Bahnschrift SemiCondensed','Bahnschrift Condensed','Bahnschrift','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;
+  --font-mono:Consolas,'Cascadia Mono',ui-monospace,monospace;
+  --font-cn:'Microsoft YaHei','Segoe UI',sans-serif;
+
+  --hero:276px;          /* 由 JS 按可用宽度实测后写入 */
+  --mid:46px;
+  --log-fs:12px;
+  --log-rh:27px;
+  --stage-w:1920px;
+  --pad:80px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+body{font-family:var(--font-cn);color:var(--text);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+#stage{position:absolute;left:50%;top:50%;width:var(--stage-w);height:1080px;
+  transform-origin:50% 50%;background:var(--bg);overflow:hidden;
+  display:flex;flex-direction:column}
+
+/* ---------------------------------------------------------------- 顶栏 */
+#hdr{flex:0 0 76px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--pad);border-bottom:1px solid var(--hair)}
+.brand{display:flex;align-items:baseline;gap:12px}
+.bmark{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.06em;
+  color:var(--crawl)}
+.bname{font-family:var(--font-display);font-weight:600;font-size:22px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text)}
+.bsep{width:1px;height:20px;background:var(--hair);align-self:center}
+.btag{font-size:16px;color:var(--sub);letter-spacing:.02em}
+.hdr-right{display:flex;align-items:center;gap:22px}
+#clock{font-family:var(--font-mono);font-size:17px;font-variant-numeric:tabular-nums;
+  color:var(--mute);letter-spacing:.04em}
+.simbadge{font-family:var(--font-mono);font-size:24px;line-height:26px;letter-spacing:.02em;
+  color:var(--sub);opacity:.62;border:1px solid var(--hair);padding:2px 12px}
+
+/* ---------------------------------------------------------------- 主区 */
+#main{flex:1 1 auto;display:flex;gap:40px;padding:0 var(--pad);min-height:0}
+#left{position:relative;flex:1 1 auto;min-width:0}
+#map{position:absolute;left:0;top:0;pointer-events:none}
+#leftInner{position:relative;height:100%;display:flex;flex-direction:column;
+  padding-top:22px}
+
+/* --- 主角 ------------------------------------------------------------- */
+.eyebrow{display:flex;align-items:center;gap:12px;height:26px;margin-bottom:4px}
+.eyebrow .sq{width:8px;height:8px;background:var(--crawl)}
+.eyebrow .cn{font-size:17px;color:var(--sub);letter-spacing:.02em}
+.eyebrow .en{font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;
+  color:var(--mute);text-transform:uppercase}
+
+.hero-row{display:flex;align-items:flex-start}
+.odo{display:inline-flex;justify-content:flex-end;align-items:flex-start;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+  contain:layout paint;user-select:none}
+.odo .slot{position:relative;display:inline-block;width:1ch;height:1em;overflow:hidden}
+.odo .strip{position:absolute;left:0;top:0;width:100%}
+.odo .strip i{display:block;height:1em;line-height:1em;text-align:center;font-style:normal}
+.odo .sep{display:inline-block;height:1em;line-height:1em}
+
+.hero-odo{font-family:var(--font-hero);font-weight:600;font-size:var(--hero);
+  line-height:var(--hero);color:var(--crawl);width:100%}
+
+.hero-meta{display:flex;align-items:center;gap:20px;height:34px;margin-top:6px}
+.hero-meta .big{font-family:var(--font-num);font-weight:600;font-size:28px;
+  font-variant-numeric:tabular-nums;color:var(--text);
+  display:inline-block;min-width:4.2ch;text-align:right}
+.hero-meta .unit{font-family:var(--font-mono);font-size:13px;color:var(--mute);
+  letter-spacing:.06em;margin-left:6px;font-style:normal}
+.hero-meta .kv{font-size:14px;color:var(--mute)}
+.hero-meta .kv b{font-family:var(--font-num);font-weight:600;font-size:18px;
+  font-variant-numeric:tabular-nums;color:var(--sub);margin-left:5px}
+.hero-meta .live{color:var(--crawl);letter-spacing:.12em;font-family:var(--font-mono);
+  font-size:13px}
+.hero-meta .live.paused{color:var(--order)}
+.vsep{width:1px;height:18px;background:var(--hair)}
+
+.convert{display:flex;align-items:center;gap:16px;margin-top:14px;height:28px;
+  border-top:1px solid var(--hair);padding-top:14px}
+.convert span{font-size:16px;color:var(--sub);letter-spacing:.01em}
+.convert b{font-family:var(--font-num);font-weight:600;font-size:19px;
+  font-variant-numeric:tabular-nums;color:var(--text);padding:0 3px}
+.convert .cvsep{color:var(--mute);font-size:14px}
+
+/* --- 两个配角 --------------------------------------------------------- */
+.row2{display:flex;gap:24px;margin-top:22px;flex:0 0 auto}
+.card{background:rgba(16,18,22,.72);border:1px solid var(--hair);padding:16px 18px 18px}
+.card.pages{flex:1 1 58%;min-width:0}
+.card.plat{flex:1 1 42%;min-width:0}
+.c-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.c-head .cn{font-size:15px;color:var(--sub)}
+.c-head .en{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;
+  color:var(--mute);text-transform:uppercase}
+.mid-odo{font-family:var(--font-num);font-weight:600;font-size:var(--mid);
+  line-height:var(--mid);color:var(--text)}
+.bar{position:relative;height:6px;background:#191C22;margin-top:14px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--crawl);
+  display:block}
+.ms-txt{margin-top:9px;font-size:14px;color:var(--mute)}
+.ms-txt b{font-family:var(--font-num);font-weight:600;font-size:16px;
+  font-variant-numeric:tabular-nums;color:var(--sub);padding:0 2px}
+
+.plat-bar{display:flex;height:12px;margin-top:8px;background:#191C22;overflow:hidden}
+.plat-bar i{display:block;height:100%}
+.plat-leg{display:flex;flex-wrap:wrap;gap:7px 16px;margin-top:12px;
+  font-family:var(--font-mono);font-size:11.5px;color:var(--mute)}
+.plat-leg span{display:inline-flex;align-items:center;gap:6px}
+.plat-leg em{width:7px;height:7px;display:inline-block;font-style:normal}
+.plat-leg i{font-style:normal}
+.plat-leg b{color:var(--sub);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* --- 订单事件区 ------------------------------------------------------- */
+.orders{flex:0 0 auto;margin-top:20px}
+.ord-head{display:flex;align-items:baseline;gap:12px;height:26px;
+  border-bottom:1px solid var(--hair);padding-bottom:8px}
+.ord-head .cn{font-size:15px;color:var(--order)}
+.ord-head .en{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;
+  color:var(--mute);text-transform:uppercase}
+.ord-head .m{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--mute)}
+.ord-head .m b{color:var(--sub);font-variant-numeric:tabular-nums}
+/* 「最新一笔」大卡：把订单从日志行升级成事件。
+   原实现所有单都是 36px 细行，$266 和 $3 看起来一样重，拿不到「到账」的情绪。
+   这里让最新一笔占住视觉重量，稀有度靠体量分级，顺带用掉订单区下方的死空间。 */
+.ohero{position:relative;margin-top:10px;height:140px;padding:14px 20px 0 18px;
+  background:rgba(16,18,22,.86);border:1px solid var(--hair);
+  border-left:2px solid var(--hair);opacity:0;overflow:hidden}
+.ohero .hRow1{display:flex;align-items:baseline;gap:18px;min-width:0}
+.ohero .hAmt{font-family:var(--font-num);font-weight:600;font-size:64px;line-height:64px;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+  color:var(--text);letter-spacing:-.01em;flex:0 0 auto}
+.ohero .hStore{font-size:19px;color:var(--text);flex:1 1 auto;min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ohero .hMeta{display:flex;gap:18px;margin-top:14px;font-family:var(--font-mono);
+  font-size:12px;color:var(--mute);min-width:0}
+.ohero .hProd{font-family:var(--font-cn);font-size:13px;color:var(--sub);
+  flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ohero .hRule{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--order)}
+.ohero.t-rare .hAmt{color:var(--order)}
+.ohero.t-epic{border-left-color:var(--order)}
+.ohero.t-epic .hAmt{color:var(--order);font-size:76px;line-height:76px}
+.ohero.t-legendary{border-left-color:var(--order);border-color:#3A2E1F;
+  background:rgba(34,26,17,.92)}
+.ohero.t-legendary .hAmt{color:var(--order);font-size:84px;line-height:84px}
+.ohero.t-legendary .hStore{color:#FFD9AC}
+
+.ord-pool{position:relative;height:120px;overflow:hidden;margin-top:10px}
+.ocard{position:absolute;left:0;top:0;width:100%;height:36px;display:flex;
+  align-items:center;gap:14px;padding:0 12px 0 10px;opacity:0;
+  background:rgba(16,18,22,.86);border:1px solid var(--hair);border-left:2px solid var(--hair);
+  transition:opacity 480ms cubic-bezier(.16,1,.3,1)}
+.ocard.out{transition:opacity 240ms cubic-bezier(.4,0,1,1)}
+.ocard .amt{font-family:var(--font-num);font-weight:600;font-size:22px;
+  font-variant-numeric:tabular-nums;color:var(--text);flex:0 0 auto;min-width:116px}
+.ocard .store{font-size:15px;color:var(--text);flex:0 0 auto;max-width:196px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ocard .geo{font-family:var(--font-mono);font-size:11.5px;color:var(--mute);flex:0 0 auto}
+.ocard .prod{font-size:13.5px;color:var(--sub);flex:1 1 auto;min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ocard .ref{font-family:var(--font-mono);font-size:11.5px;color:var(--mute);flex:0 0 auto}
+.ocard.t-rare  .amt{color:var(--order)}
+.ocard.t-epic  {border-left-color:var(--order);background:rgba(24,20,16,.9)}
+.ocard.t-epic  .amt{color:var(--order);font-size:24px}
+.ocard.t-legendary{border-left-color:var(--order);border-color:#3A2E1F;
+  background:rgba(34,26,17,.94)}
+.ocard.t-legendary .amt{color:var(--order);font-size:26px}
+.ocard.t-legendary .store{color:#FFD9AC}
+
+/* ---------------------------------------------------------------- 日志栏 */
+#logPanel{flex:0 0 730px;min-width:0;display:flex;flex-direction:column;
+  border-left:1px solid var(--hair);padding-left:22px}
+.lp-head{display:flex;align-items:baseline;gap:12px;height:22px;flex:0 0 auto}
+.lp-head .en{font-family:var(--font-mono);font-size:13px;letter-spacing:.2em;
+  color:var(--crawl);text-transform:uppercase}
+.lp-head .cn{font-size:13px;color:var(--mute)}
+.lp-head .r{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--mute)}
+.lp-cols{display:flex;height:22px;align-items:center;margin-top:10px;
+  border-bottom:1px solid var(--hair);padding-bottom:6px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  color:#3D454F;text-transform:uppercase;white-space:pre}
+.lp-cols>span{flex:0 0 auto;overflow:hidden}
+.lp-body{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;margin-top:4px;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 100%)}
+.lrow{position:absolute;left:0;top:0;width:100%;height:var(--log-rh);display:flex;
+  align-items:center;white-space:pre;font-family:var(--font-mono);
+  font-size:var(--log-fs);line-height:var(--log-rh);color:var(--sub)}
+.lrow>span{flex:0 0 auto;overflow:hidden}
+.lrow .c-time{color:var(--mute)}
+.lrow .c-bot{font-weight:600}
+.lrow .c-ip{color:#8A939C}
+.lrow .c-asn{color:var(--mute)}
+.lrow .c-path,.lp-cols .c-path{flex:1 1 auto;min-width:0;text-overflow:ellipsis}
+.lrow .c-path{color:#AEB5BE}
+.lrow .c-st{color:#6B7480}
+.lrow .c-by{color:var(--mute)}
+.lrow .c-ms{color:var(--mute)}
+.lrow.s304 .c-st,.lrow.s304 .c-by,.lrow.s304 .c-ms{color:#3F4854}
+.lrow.s304 .c-path{color:#7C848E}
+/* 平台色差：全部落在 --crawl 青绿家族里，只给 bot 名上色 */
+.pf-ChatGPT{color:#00D3A7}
+.pf-Claude{color:#4FC9C4}
+.pf-Google{color:#2FBE8C}
+.pf-Perplexity{color:#5CCFDE}
+.pf-Others{color:#6E7C82}
+
+/* ---------------------------------------------------------------- 页脚 */
+#ftr{flex:0 0 132px;display:flex;align-items:center;gap:32px;
+  padding:0 var(--pad);border-top:1px solid var(--hair)}
+.pub-deck{position:relative;flex:0 0 600px;height:86px}
+.pub{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;
+  background:var(--lightcard);color:var(--lightink);padding:12px 18px;
+  display:flex;flex-direction:column;justify-content:center;gap:6px;
+  transition:opacity 600ms linear}
+.pub.on{opacity:1}
+.pub .k{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;
+  color:var(--lightsub);text-transform:uppercase}
+.pub .t{font-size:17px;line-height:1.34;color:var(--lightink)}
+.pub .t b{font-family:var(--font-num);font-weight:700;font-size:21px;
+  font-variant-numeric:tabular-nums;padding:0 2px}
+.pub .s{font-family:var(--font-mono);font-size:11px;color:var(--lightsub)}
+.legal{flex:1 1 auto;font-size:12.5px;line-height:1.72;color:var(--mute);max-width:1010px}
+
+/* ---------------------------------------------------------------- 覆盖层 */
+.hint{position:absolute;right:14px;bottom:8px;font-family:var(--font-mono);
+  font-size:11px;color:#2E353F;letter-spacing:.1em}
+
+.legend{position:absolute;right:var(--pad);bottom:150px;width:330px;display:none;
+  background:rgba(10,12,15,.96);border:1px solid var(--hair);padding:18px 20px;z-index:70}
+.legend.on{display:block}
+.legend h4{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;
+  color:var(--crawl);text-transform:uppercase;font-weight:600;margin-bottom:12px}
+.legend table{width:100%;border-collapse:collapse}
+.legend td{font-size:13px;color:var(--sub);padding:3px 0}
+.legend td.k{font-family:var(--font-mono);font-size:12px;color:var(--text);
+  width:74px;letter-spacing:.04em}
+
+.ms{position:absolute;left:0;top:0;width:100%;height:100%;display:none;
+  background:rgba(8,9,11,.94);flex-direction:column;align-items:center;
+  justify-content:center;opacity:0;z-index:80}
+.ms.on{display:flex}
+.ms .k{font-family:var(--font-mono);font-size:15px;letter-spacing:.42em;
+  color:var(--crawl);text-transform:uppercase}
+.ms .v{font-family:var(--font-num);font-weight:600;font-size:190px;line-height:200px;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+  color:var(--crawl);margin:16px 0 8px}
+.ms .rule{width:300px;height:1px;background:#25303A}
+.ms .t{font-size:20px;color:var(--sub);margin-top:18px}
+.ms .en{font-family:var(--font-mono);font-size:12px;letter-spacing:.24em;
+  color:var(--mute);text-transform:uppercase;margin-top:8px}
+
+.dbg{position:absolute;left:0;top:0;width:100%;height:100%;display:none;
+  pointer-events:none;z-index:60}
+.dbg.on{display:block}
+.dbg .col{position:absolute;top:0;height:100%;background:rgba(125,211,252,.07)}
+.dbg .base{position:absolute;left:0;top:0;width:100%;height:100%;
+  background-image:repeating-linear-gradient(180deg,rgba(125,211,252,.05) 0 1px,transparent 1px 8px)}
+.dbg .safe{position:absolute;border:1px dashed rgba(0,211,167,.5)}
+.dbg .frame{position:absolute;border:1px solid rgba(255,184,107,.4)}
+.dbg .mv{position:absolute;left:50%;top:0;width:1px;height:100%;
+  background:rgba(255,255,255,.26)}
+.dbg .mh{position:absolute;left:0;top:50%;width:100%;height:1px;
+  background:rgba(255,255,255,.26)}
+.dbg .tag{position:absolute;font-family:var(--font-mono);font-size:11px;
+  color:#7DD3FC;background:rgba(8,9,11,.86);padding:2px 6px;letter-spacing:.06em}
+
+.mask{position:fixed;left:0;top:0;width:100%;height:100%;z-index:100;background:#06070A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:opacity 520ms linear}
+.mask.gone{opacity:0;pointer-events:none}
+.mask .m-mark{font-family:var(--font-display);font-weight:700;font-size:34px;
+  letter-spacing:.08em;color:var(--crawl)}
+.mask .m-name{font-family:var(--font-display);font-weight:600;font-size:44px;
+  letter-spacing:.2em;text-transform:uppercase;margin-top:8px}
+.mask .m-tag{font-size:20px;color:var(--sub);margin-top:18px;letter-spacing:.02em}
+.mask .m-go{margin-top:44px;font-family:var(--font-mono);font-size:14px;
+  letter-spacing:.32em;color:var(--crawl);text-transform:uppercase;
+  border:1px solid #16443B;padding:14px 34px}
+.mask .m-keys{display:grid;grid-template-columns:repeat(4,auto);gap:10px 30px;
+  margin-top:52px}
+.mask .m-keys div{font-family:var(--font-mono);font-size:12px;color:var(--mute)}
+.mask .m-keys b{color:var(--sub);font-weight:600;margin-right:8px}
+.mask .m-sim{margin-top:46px;font-family:var(--font-mono);font-size:13px;
+  color:var(--mute);letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <header id="hdr">
+    <div class="brand">
+      <span class="bmark">AP</span>
+      <span class="bname">Agent Page</span>
+      <span class="bsep"></span>
+      <span class="btag">让 AI 读懂每一个商品页</span>
+    </div>
+    <div class="hdr-right">
+      <div id="clock">--:--:--</div>
+      <div class="simbadge">模拟演示数据 · SIMULATED DEMO DATA</div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section id="left">
+      <canvas id="map"></canvas>
+      <div id="leftInner">
+
+        <div class="eyebrow">
+          <span class="sq"></span>
+          <span class="cn">AI 爬虫累计访问次数</span>
+          <span class="en">Total AI Visits</span>
+        </div>
+
+        <div class="hero-row" id="heroRow">
+          <div id="odoCrawls" class="odo hero-odo"></div>
+        </div>
+
+        <div class="hero-meta">
+          <span><b id="rateVal" class="big">0.0</b><i class="unit">次 / 秒</i></span>
+          <span class="vsep"></span>
+          <span class="kv">接入店铺<b id="storeVal">0</b></span>
+          <span class="vsep"></span>
+          <span class="live" id="liveTag">LIVE</span>
+        </div>
+
+        <div class="convert">
+          <span id="cv1">&nbsp;</span>
+          <span class="cvsep">/</span>
+          <span id="cv2">&nbsp;</span>
+        </div>
+
+        <div class="row2">
+          <div class="card pages">
+            <div class="c-head">
+              <span class="cn">AP 翻译页面总数</span>
+              <span class="en">AP Pages Live</span>
+            </div>
+            <div id="odoPages" class="odo mid-odo"></div>
+            <div class="bar"><i id="msBar"></i></div>
+            <div class="ms-txt">距 <b id="msTarget">—</b> 还差 <b id="msRemain">—</b></div>
+          </div>
+          <div class="card plat">
+            <div class="c-head">
+              <span class="cn">平台占比</span>
+              <span class="en">Platform Mix</span>
+            </div>
+            <div id="platBar" class="plat-bar"></div>
+            <div id="platLeg" class="plat-leg"></div>
+          </div>
+        </div>
+
+        <div class="orders">
+          <div class="ord-head">
+            <span class="cn">AI 引荐订单</span>
+            <span class="en">AI-referred Orders</span>
+            <span class="m">开幕以来 <b id="ordCount">0</b> 单 &nbsp;·&nbsp; <b id="ordGmv">$0</b></span>
+          </div>
+          <div id="ordHero" class="ohero">
+            <div class="hRow1">
+              <span class="hAmt" id="hAmt">&nbsp;</span>
+              <span class="hStore" id="hStore"></span>
+            </div>
+            <div class="hMeta">
+              <span id="hGeo"></span>
+              <span class="hProd" id="hProd"></span>
+              <span id="hRef"></span>
+            </div>
+            <div class="hRule" id="hRule"></div>
+          </div>
+          <div id="ordPool" class="ord-pool"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <aside id="logPanel">
+      <div class="lp-head">
+        <span class="en">Edge Access Log</span>
+        <span class="cn">AI 爬虫抓取日志</span>
+        <span class="r"><b id="logRate">8</b>/s sampled</span>
+      </div>
+      <div id="logCols" class="lp-cols"></div>
+      <div id="logBody" class="lp-body"></div>
+    </aside>
+
+  </main>
+
+  <footer id="ftr">
+    <div id="pubDeck" class="pub-deck"></div>
+    <div class="legal">
+      本屏数据为产品能力演示，非真实交易记录。OpenAI、ChatGPT、Anthropic、Claude、Perplexity、Google
+      均为其各自所有者的商标；AP 与上述公司无隶属、赞助或合作关系。
+    </div>
+  </footer>
+
+  <div class="hint">? 快捷键</div>
+
+  <div id="legend" class="legend">
+    <h4>Shortcuts · 快捷键</h4>
+    <table>
+      <tr><td class="k">空格</td><td>暂停 / 继续</td></tr>
+      <tr><td class="k">B</td><td>人工触发一个大单</td></tr>
+      <tr><td class="k">N</td><td>触发一个普通单</td></tr>
+      <tr><td class="k">K</td><td>触发里程碑庆祝</td></tr>
+      <tr><td class="k">M</td><td>静音 / 取消静音</td></tr>
+      <tr><td class="k">1 2 3</td><td>速率 ×0.5 / ×1 / ×3</td></tr>
+      <tr><td class="k">G</td><td>调试网格</td></tr>
+      <tr><td class="k">H</td><td>展馆音频模式</td></tr>
+      <tr><td class="k">A</td><td>环境音床</td></tr>
+      <tr><td class="k">F</td><td>全屏</td></tr>
+      <tr><td class="k">R</td><td>重置</td></tr>
+      <tr><td class="k">?</td><td>显示 / 隐藏本图例</td></tr>
+    </table>
+  </div>
+
+  <div id="ms" class="ms">
+    <div class="k">Milestone</div>
+    <div class="v" id="msVal">0</div>
+    <div class="rule"></div>
+    <div class="t" id="msName">里程碑</div>
+    <div class="en" id="msEn">milestone</div>
+  </div>
+
+  <div id="dbg" class="dbg"></div>
+</div>
+
+<div id="mask" class="mask">
+  <div class="m-mark">AP</div>
+  <div class="m-name">Agent Page</div>
+  <div class="m-tag">AI 时代电商的任务控制台 —— 让 AI 读懂每一个商品页</div>
+  <div class="m-go">点击进入 · Click to start</div>
+  <div class="m-keys">
+    <div><b>空格</b>暂停</div><div><b>B</b>大单</div><div><b>N</b>普通单</div><div><b>K</b>里程碑</div>
+    <div><b>M</b>静音</div><div><b>1 2 3</b>速率</div><div><b>G</b>网格</div><div><b>H</b>展馆音频</div>
+    <div><b>A</b>环境音</div><div><b>F</b>全屏</div><div><b>R</b>重置</div><div><b>?</b>图例</div>
+  </div>
+  <div class="m-sim">本屏数据为模拟演示数据 · SIMULATED DEMO DATA</div>
+</div>
+
+<script src="../_shared/cities.js"></script>
+<script src="../_shared/engine.js"></script>
+<script src="../_shared/voice-pack.js"></script>
+  <script src="../_shared/audio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
